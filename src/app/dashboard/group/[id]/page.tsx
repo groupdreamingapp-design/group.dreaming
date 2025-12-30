@@ -1,7 +1,7 @@
 'use client';
 import { useParams } from 'next/navigation';
 import { groups, user as currentUser } from '@/lib/data';
-import type { Group, Installment } from '@/lib/types';
+import type { Award, Installment } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
@@ -14,19 +14,28 @@ import { ArrowLeft, Users, Clock, Users2, Calendar, Gavel, HandCoins, Ticket, In
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 
-const installments: Installment[] = Array.from({ length: 60 }, (_, i) => ({
-  id: `cuota-${i + 1}`,
-  number: i + 1,
-  dueDate: `2024-${((i + 7) % 12) + 1}-10`,
-  status: i < 5 ? 'Pagado' : i === 5 ? 'Pendiente' : 'Futuro',
-  total: 380,
-  breakdown: {
-    alicuotaPura: 333.33,
-    gastosAdm: 33.33,
-    seguroVida: 13.34
-  },
-  award: i === 2 ? { type: 'sorteo', orderNumber: 25 } : i === 4 ? { type: 'licitacion', orderNumber: 11 } : undefined,
-}));
+const installments: Installment[] = Array.from({ length: 60 }, (_, i) => {
+    let awards: Award[] = [];
+    if (i < 5) { // Solo para cuotas pasadas, para el ejemplo
+        awards = [
+            { type: 'sorteo', orderNumber: Math.floor(Math.random() * 60) + 1 },
+            { type: 'licitacion', orderNumber: Math.floor(Math.random() * 60) + 1 }
+        ];
+    }
+    return {
+        id: `cuota-${i + 1}`,
+        number: i + 1,
+        dueDate: `2024-${((i + 7) % 12) + 1}-10`,
+        status: i < 5 ? 'Pagado' : i === 5 ? 'Pendiente' : 'Futuro',
+        total: 380,
+        breakdown: {
+            alicuotaPura: 333.33,
+            gastosAdm: 33.33,
+            seguroVida: 13.34
+        },
+        awards: awards.length > 0 ? awards : undefined,
+    }
+});
 
 export default function GroupDetailPage() {
   const params = useParams();
@@ -123,9 +132,14 @@ export default function GroupDetailPage() {
                           )}
                         >{inst.status}</Badge>
                       </TableCell>
-                       <TableCell className="flex items-center gap-4">
-                        {inst.award?.type === 'sorteo' && <span className="flex items-center gap-1 text-xs"><Ticket className="h-4 w-4 text-blue-500" /> #{inst.award.orderNumber}</span>}
-                        {inst.award?.type === 'licitacion' && <span className="flex items-center gap-1 text-xs"><HandCoins className="h-4 w-4 text-orange-500" /> #{inst.award.orderNumber}</span>}
+                       <TableCell className="flex items-center gap-2">
+                        {inst.awards?.map(award => (
+                          <span key={award.type} className="flex items-center gap-1 text-xs">
+                            {award.type === 'sorteo' && <Ticket className="h-4 w-4 text-blue-500" />}
+                            {award.type === 'licitacion' && <HandCoins className="h-4 w-4 text-orange-500" />}
+                            #{award.orderNumber}
+                          </span>
+                        ))}
                       </TableCell>
                       <TableCell className="text-right font-mono">{formatCurrency(inst.total)}</TableCell>
                       <TableCell className="text-center">

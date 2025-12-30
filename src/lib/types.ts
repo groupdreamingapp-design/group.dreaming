@@ -54,6 +54,11 @@ export type InstallmentStatus = "Pagado" | "Pendiente" | "Vencido" | "Futuro";
 
 export type AwardType = "sorteo" | "licitacion";
 
+export type Award = {
+  type: AwardType;
+  orderNumber: number;
+};
+
 export type Installment = {
   id: string;
   number: number;
@@ -65,8 +70,5 @@ export type Installment = {
     gastosAdm: number;
     seguroVida: number;
   };
-  award?: {
-    type: AwardType;
-    orderNumber: number;
-  };
+  awards?: Award[];
 };
