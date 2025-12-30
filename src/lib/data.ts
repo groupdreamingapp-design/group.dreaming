@@ -1,4 +1,4 @@
-import type { Group, User, Transaction, Auction, SavingsGoal } from './types';
+import type { Group, User, Transaction, Auction, SavingsGoal, Installment, Award } from './types';
 import { PlaceHolderImages } from './placeholder-images';
 
 export const user: User = {
@@ -96,3 +96,31 @@ export const auctions: Auction[] = [
     { id: "auc-1", groupId: "GR-007", capital: 30000, plazo: 60, cuotasPagadas: 15, precioMinimo: 7000, highestBid: 7250, endDate: "2024-07-28" },
     { id: "auc-2", groupId: "GR-008", capital: 12000, plazo: 36, cuotasPagadas: 20, precioMinimo: 6500, highestBid: 6500, endDate: "2024-07-29" },
 ]
+
+export const installments: Installment[] = Array.from({ length: 60 }, (_, i) => {
+    let awards: Award[] = [];
+    // Pre-generate awards for the first 5 installments to have stable data
+    const pregeneratedAwards = [
+        [{ type: 'sorteo', orderNumber: 18 }, { type: 'licitacion', orderNumber: 42 }],
+        [{ type: 'sorteo', orderNumber: 5 }, { type: 'licitacion', orderNumber: 29 }],
+        [{ type: 'sorteo', orderNumber: 51 }, { type: 'licitacion', orderNumber: 11 }],
+        [{ type: 'sorteo', orderNumber: 23 }, { type: 'licitacion', orderNumber: 38 }],
+        [{ type: 'sorteo', orderNumber: 45 }, { type: 'licitacion', orderNumber: 9 }],
+    ]
+    if (i < 5) {
+        awards = pregeneratedAwards[i];
+    }
+    return {
+        id: `cuota-${i + 1}`,
+        number: i + 1,
+        dueDate: `2024-${((i + 7) % 12) + 1}-10`,
+        status: i < 5 ? 'Pagado' : i === 5 ? 'Pendiente' : 'Futuro',
+        total: 380,
+        breakdown: {
+            alicuotaPura: 333.33,
+            gastosAdm: 33.33,
+            seguroVida: 13.34
+        },
+        awards: awards.length > 0 ? awards : undefined,
+    }
+});

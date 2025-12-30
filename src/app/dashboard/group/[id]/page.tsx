@@ -1,6 +1,6 @@
 'use client';
 import { useParams } from 'next/navigation';
-import { groups, user as currentUser } from '@/lib/data';
+import { groups, user as currentUser, installments } from '@/lib/data';
 import type { Award, Installment } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -13,29 +13,6 @@ import { Switch } from '@/components/ui/switch';
 import { ArrowLeft, Users, Clock, Users2, Calendar, Gavel, HandCoins, Ticket, Info, Trophy, FileX2, TrendingUp, Hand, Scale } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
-
-const installments: Installment[] = Array.from({ length: 60 }, (_, i) => {
-    let awards: Award[] = [];
-    if (i < 5) { // Solo para cuotas pasadas, para el ejemplo
-        awards = [
-            { type: 'sorteo', orderNumber: Math.floor(Math.random() * 60) + 1 },
-            { type: 'licitacion', orderNumber: Math.floor(Math.random() * 60) + 1 }
-        ];
-    }
-    return {
-        id: `cuota-${i + 1}`,
-        number: i + 1,
-        dueDate: `2024-${((i + 7) % 12) + 1}-10`,
-        status: i < 5 ? 'Pagado' : i === 5 ? 'Pendiente' : 'Futuro',
-        total: 380,
-        breakdown: {
-            alicuotaPura: 333.33,
-            gastosAdm: 33.33,
-            seguroVida: 13.34
-        },
-        awards: awards.length > 0 ? awards : undefined,
-    }
-});
 
 export default function GroupDetailPage() {
   const params = useParams();
