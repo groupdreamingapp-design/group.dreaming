@@ -1,3 +1,5 @@
+'use client';
+
 import Link from "next/link";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
@@ -6,10 +8,17 @@ import { ArrowRight, CheckCircle, Users, HandCoins, PiggyBank } from "lucide-rea
 import Image from 'next/image';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Logo } from '@/components/icons';
+import { useEffect, useState } from "react";
 
 const heroImage = PlaceHolderImages.find((img) => img.id === 'hero-family');
 
 export default function LandingPage() {
+  const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
+
+  useEffect(() => {
+    setCurrentYear(new Date().getFullYear());
+  }, []);
+
   const definitions = [
     { title: "ADMINISTRADORA", content: "Refiere a Group Dreaming S.A.S., sociedad que gestiona y administra la PLATAFORMA." },
     { title: "USUARIO", content: "La persona humana o jurídica que se registra en la PLATAFORMA." },
@@ -162,7 +171,7 @@ export default function LandingPage() {
 
       <footer className="bg-secondary">
         <div className="container mx-auto px-4 py-8 text-center text-muted-foreground">
-          <p>&copy; {new Date().getFullYear()} Dream Pool (Group Dreaming S.A.S.). Todos los derechos reservados.</p>
+          <p>&copy; {currentYear} Dream Pool (Group Dreaming S.A.S.). Todos los derechos reservados.</p>
           <p className="text-sm mt-2">Hecho con ❤️ para cumplir sueños.</p>
         </div>
       </footer>
