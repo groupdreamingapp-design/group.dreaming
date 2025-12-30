@@ -45,7 +45,7 @@ const prompt = ai.definePrompt({
   prompt: `You are a motivational coach. Generate a short, encouraging message to motivate the user to continue saving towards their goal.
 
 Savings Goal: {{{savingsGoal}}}
-Current Savings: ${{{currentSavings}}}
+Current Savings: \${{{currentSavings}}}
 
 Encouragement Message:`,
 });
