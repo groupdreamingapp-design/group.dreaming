@@ -1,8 +1,7 @@
 
 'use client';
 
-import { groups, user as currentUser, installments as allInstallments } from '@/lib/data';
-import type { Group, Award, Installment } from '@/lib/types';
+import type { Group, Installment } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
@@ -37,7 +36,7 @@ export function GroupDetailClient({ group, installments }: GroupDetailClientProp
   const formatCurrency = (amount: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
   const isMember = group.userIsMember;
   const cuotasPagadas = 5;
-  const capitalAportado = cuotasPagadas * installments[0].breakdown.alicuotaPura;
+  const capitalAportado = cuotasPagadas * (installments.length > 0 ? installments[0].breakdown.alicuotaPura : 0);
 
   return (
     <>
@@ -252,3 +251,5 @@ export function GroupDetailClient({ group, installments }: GroupDetailClientProp
     </>
   );
 }
+
+    
