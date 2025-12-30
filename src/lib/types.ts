@@ -49,3 +49,24 @@ export type SavingsGoal = {
   imageUrl: string;
   imageHint: string;
 }
+
+export type InstallmentStatus = "Pagado" | "Pendiente" | "Vencido" | "Futuro";
+
+export type AwardType = "sorteo" | "licitacion";
+
+export type Installment = {
+  id: string;
+  number: number;
+  dueDate: string;
+  status: InstallmentStatus;
+  total: number;
+  breakdown: {
+    alicuotaPura: number;
+    gastosAdm: number;
+    seguroVida: number;
+  };
+  award?: {
+    type: AwardType;
+    orderNumber: number;
+  };
+};
