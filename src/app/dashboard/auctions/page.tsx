@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { auctions } from "@/lib/data";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -14,8 +14,47 @@ import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
-import { formatDistanceToNow } from 'date-fns';
-import { es } from 'date-fns/locale';
+
+const Countdown = ({ endDate, isUrgent }: { endDate: string, isUrgent?: boolean }) => {
+  const [timeLeft, setTimeLeft] = useState<string>('');
+
+  useEffect(() => {
+    const calculateTimeLeft = () => {
+      const end = new Date(endDate);
+      const now = new Date();
+      const difference = end.getTime() - now.getTime();
+
+      if (difference <= 0) {
+        setTimeLeft("Finalizada");
+        return;
+      }
+
+      const hours = Math.floor((difference / (1000 * 60 * 60)) % 24).toString().padStart(2, '0');
+      const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+      const totalHours = days * 24 + parseInt(hours, 10);
+      const minutes = Math.floor((difference / 1000 / 60) % 60).toString().padStart(2, '0');
+      const seconds = Math.floor((difference / 1000) % 60).toString().padStart(2, '0');
+
+      setTimeLeft(`${totalHours.toString().padStart(2, '0')}:${minutes}:${seconds}`);
+    };
+
+    calculateTimeLeft();
+    const timer = setInterval(calculateTimeLeft, 1000);
+
+    return () => clearInterval(timer);
+  }, [endDate]);
+
+  return (
+    <div className={cn(
+       "flex items-center gap-2",
+       isUrgent && "text-orange-600 font-semibold"
+     )}>
+      {isUrgent ? <AlertTriangle className="h-4 w-4" /> : <Clock className="h-4 w-4 text-muted-foreground" />}
+      <span>{isUrgent ? 'Cierre Urgente' : 'Termina en'} {timeLeft}</span>
+    </div>
+  );
+};
+
 
 export default function AuctionsPage() {
   const [offerAmount, setOfferAmount] = useState('');
@@ -134,20 +173,6 @@ export default function AuctionsPage() {
     }
   }
 
-  const getTimeRemaining = (endDate: string) => {
-    try {
-      const end = new Date(endDate);
-      const now = new Date();
-      if (end < now) {
-        return "Finalizada";
-      }
-      return formatDistanceToNow(end, { locale: es, addSuffix: true });
-    } catch (e) {
-      return "Fecha inválida";
-    }
-  };
-
-
   return (
     <>
       <div className="flex justify-between items-center">
@@ -170,8 +195,6 @@ export default function AuctionsPage() {
           const isManualOfferInvalid = !autoBidEnabled && (!offerAmount || Number(offerAmount) < nextMinBid);
           const isMaxBidInvalid = autoBidEnabled && (!maxBid || Number(maxBid) <= auction.highestBid);
           const isAutoIncrementInvalid = autoBidEnabled && (!autoIncrement || Number(autoIncrement) < minBidIncrement);
-          const timeRemaining = getTimeRemaining(auction.endDate);
-          const isUrgent = auction.isPostAdjudicacion;
           
           return (
             <Card key={auction.id} className="flex flex-col">
@@ -209,13 +232,7 @@ export default function AuctionsPage() {
                     <Gavel className="h-4 w-4 text-muted-foreground" />
                     <span>{auction.numberOfBids} oferta{auction.numberOfBids !== 1 && 's'}</span>
                   </div>
-                   <div className={cn(
-                       "flex items-center gap-2",
-                       isUrgent && "text-orange-600 font-semibold"
-                       )}>
-                    {isUrgent ? <AlertTriangle className="h-4 w-4" /> : <Clock className="h-4 w-4 text-muted-foreground" />}
-                    <span>{isUrgent ? 'Cierre Urgente' : 'Termina'} {timeRemaining}</span>
-                  </div>
+                  <Countdown endDate={auction.endDate} isUrgent={auction.isPostAdjudicacion} />
                 </div>
               </CardContent>
               <CardFooter className="flex-col items-stretch gap-2 pt-4">
@@ -325,3 +342,5 @@ export default function AuctionsPage() {
     </>
   );
 }
+
+    
