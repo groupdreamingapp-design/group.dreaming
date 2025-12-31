@@ -25,79 +25,45 @@ const generateStaticAwards = (totalMembers: number, totalMonths: number, isAward
     const memberOrderNumbers = Array.from({ length: totalMembers }, (_, i) => i + 1);
     const userOrderNumber = 42;
 
-    // Pseudo-random shuffle function for consistency
     const shuffle = (array: number[], seed: number) => {
         let currentIndex = array.length, randomIndex;
-        while (currentIndex !== 0) {
-            seed = (seed * 9301 + 49297) % 233280;
-            randomIndex = Math.floor(seed / 233280 * currentIndex);
-            currentIndex--;
-            [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+        let m = array.length, t, i;
+        while (m) {
+            i = Math.floor(Math.random() * m--);
+            t = array[m];
+            array[m] = array[i];
+            array[i] = t;
         }
         return array;
     };
     
     let potentialWinners = [...memberOrderNumbers];
     if (isAwarded) {
-        // Ensure user is in the list, if not, something is wrong with the data but we proceed
         const userIndex = potentialWinners.indexOf(userOrderNumber);
         if (userIndex > -1) {
             potentialWinners.splice(userIndex, 1);
         }
     }
     
-    // Shuffle the rest of the winners
     potentialWinners = shuffle(potentialWinners, 12345);
-
-    const awards: Award[][] = [];
-    let winners = [...potentialWinners];
-
-    // If the user is awarded, make them the winner of the 5th month's sorteo
+    
     if (isAwarded) {
-        const awardsPerMonth = 2;
-        const userWinMonthIndex = 4; // 5th month
-        const userWinIndexInMonth = 0; // Sorteo
-
-        // Ensure there are enough months to place the user
-        if (totalMonths > userWinMonthIndex) {
-            // Pre-fill months before user's win
-            for (let i = 0; i < userWinMonthIndex; i++) {
-                awards[i] = [
-                    { type: 'sorteo', orderNumber: winners.shift()! },
-                    { type: 'licitacion', orderNumber: winners.shift()! }
-                ];
-            }
-
-            // Place the user's win
-            const licitacionWinnerForUserMonth = winners.shift()!;
-            awards[userWinMonthIndex] = [
-                { type: 'sorteo', orderNumber: userOrderNumber },
-                { type: 'licitacion', orderNumber: licitacionWinnerForUserMonth }
-            ];
-            
-            // Fill remaining months
-            for (let i = userWinMonthIndex + 1; i < totalMonths; i++) {
-                 if (winners.length < 2) break;
-                 awards[i] = [
-                    { type: 'sorteo', orderNumber: winners.shift()! },
-                    { type: 'licitacion', orderNumber: winners.shift()! }
-                ];
-            }
-
-        }
-    } else {
-        // If user is not awarded, just fill as before
-        for (let i = 0; i < totalMonths; i++) {
-            if (winners.length < 2) break;
-            awards.push([
-                { type: 'sorteo', orderNumber: winners.shift()! },
-                { type: 'licitacion', orderNumber: winners.shift()! }
-            ]);
-        }
+        const userWinMonthIndex = 4;
+        potentialWinners.splice(userWinMonthIndex * 2, 0, userOrderNumber);
+    }
+    
+    const awards: Award[][] = [];
+    for (let i = 0; i < totalMonths; i++) {
+        if (potentialWinners.length < 2) break;
+        awards.push([
+            { type: 'sorteo', orderNumber: potentialWinners.shift()! },
+            { type: 'licitacion', orderNumber: potentialWinners.shift()! }
+        ]);
     }
 
     return awards;
 };
+
 
 export default function GroupDetailClient({ groupId }: GroupDetailClientProps) {
   const { groups } = useGroups();
@@ -108,7 +74,6 @@ export default function GroupDetailClient({ groupId }: GroupDetailClientProps) {
   
   const groupAwards = useMemo(() => {
     if (!group) return [];
-    // Pass userIsAwarded status to ensure the user appears as a winner if they are awarded
     return generateStaticAwards(group.totalMembers, group.plazo, group.userIsAwarded);
   }, [group]);
 
@@ -155,12 +120,12 @@ export default function GroupDetailClient({ groupId }: GroupDetailClientProps) {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-3 flex flex-col md:flex-row gap-4">
           {isMember && (
-            <Card className="flex-1">
+            <Card className="flex-1 flex flex-col">
               <CardHeader>
                 <CardTitle>Mi Plan</CardTitle>
                 <CardDescription>Tu estado personal dentro del grupo.</CardDescription>
               </CardHeader>
-              <CardContent className="grid grid-cols-2 gap-4 text-sm">
+              <CardContent className="grid grid-cols-2 gap-4 text-sm flex-grow">
                 <div className="flex items-center gap-2"><Info className="h-4 w-4 text-primary" /><span>N° de Orden: <strong>42</strong></span></div>
                 <div className="flex items-center gap-2"><TrendingUp className="h-4 w-4 text-primary" /><span>Cuotas Pagadas: <strong>{cuotasPagadas}/{group.plazo}</strong></span></div>
                 <div className="flex items-center gap-2"><HandCoins className="h-4 w-4 text-primary" /><span>Capital Aportado (Puro): <strong>{formatCurrency(capitalAportadoPuro)}</strong></span></div>
@@ -169,6 +134,93 @@ export default function GroupDetailClient({ groupId }: GroupDetailClientProps) {
                     <span>Adjudicación: {group.userIsAwarded ? <strong className="text-green-600">Adjudicado</strong> : <strong>Pendiente</strong>}</span>
                 </div>
               </CardContent>
+              {isMember && !group.userIsAwarded && group.status === 'Activo' && (
+                <CardFooter className="flex-wrap gap-2">
+                  {/* Licitar */}
+                  <Dialog>
+                    <DialogTrigger asChild><Button size="sm"><Gavel className="mr-2 h-4 w-4" /> Licitar</Button></DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader><DialogTitle>Licitar por Adjudicación</DialogTitle><DialogDescription>Ofrece adelantar cuotas para obtener el capital. Quien más ofrezca, gana.</DialogDescription></DialogHeader>
+                      <div className="space-y-4">
+                          <p className="text-sm text-muted-foreground">Tu oferta competirá con otros miembros. Si ganas, el monto se usa para cancelar las últimas cuotas de tu plan.</p>
+                          <div className="grid w-full max-w-sm items-center gap-1.5">
+                              <Label htmlFor="cuotas-licitar">Cuotas a licitar (adelantar)</Label>
+                              <Input type="number" id="cuotas-licitar" placeholder="Ej: 10" />
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Switch id="licitacion-automatica" />
+                            <Label htmlFor="licitacion-automatica">Activar Licitación Automática</Label>
+                          </div>
+                          <p className="text-xs text-muted-foreground">Recuerda que si ganas y no integras el capital, se aplicará una multa del 2% (+IVA) sobre tu oferta.</p>
+                      </div>
+                      <DialogFooter>
+                          <Button type="submit">Confirmar Licitación</Button>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
+                  {/* Adelantar Cuotas */}
+                  <Dialog>
+                    <DialogTrigger asChild><Button size="sm" variant="secondary"><TrendingUp className="mr-2 h-4 w-4" /> Adelantar</Button></DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader><DialogTitle>Adelantar Cuotas</DialogTitle><DialogDescription>Paga cuotas futuras para acortar tu plan y obtén una bonificación.</DialogDescription></DialogHeader>
+                      <div className="space-y-4">
+                          <p className="text-sm text-muted-foreground">No compite por adjudicación, pero reduce el costo final de tu plan.</p>
+                          <div className="grid w-full max-w-sm items-center gap-1.5">
+                              <Label htmlFor="cuotas-adelantar">Cantidad de cuotas a adelantar</Label>
+                              <Input type="number" id="cuotas-adelantar" placeholder="Ej: 5" />
+                          </div>
+                          <Card className="bg-muted/50">
+                              <CardContent className="p-4 text-sm">
+                                  <p>Pagarías: <strong>{formatCurrency(1850)}</strong> en lugar de {formatCurrency(1900)}.</p>
+                                  <p className="text-green-600">¡Ahorras {formatCurrency(50)} en gastos y seguros!</p>
+                              </CardContent>
+                          </Card>
+                      </div>
+                      <DialogFooter>
+                          <Button type="submit">Adelantar Cuotas</Button>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
+                  {/* Subastar Plan */}
+                  <Dialog>
+                    <DialogTrigger asChild><Button size="sm" variant="secondary"><Hand className="mr-2 h-4 w-4" /> Subastar</Button></DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader><DialogTitle>Subastar Plan (Vender)</DialogTitle><DialogDescription>Ofrece tu plan en el mercado secundario a otros inversores.</DialogDescription></DialogHeader>
+                       <div className="space-y-4 text-sm">
+                          <p>Esta es tu vía de salida flexible. A continuación un ejemplo del cálculo del precio base y lo que recibirías.</p>
+                          <Card className="bg-muted/50 p-4 space-y-2">
+                             <div className="flex justify-between"><span>Capital Aportado (Puro):</span><strong>{formatCurrency(capitalAportadoPuro)}</strong></div>
+                             <div className="flex justify-between text-red-600"><span>Comisión por Venta (2% + IVA):</span><strong>-{formatCurrency(comisionVenta)}</strong></div>
+                             <div className="flex justify-between font-bold border-t pt-2"><span>Liquidación Estimada (Precio Base):</span><strong>{formatCurrency(liquidacionMinima)}</strong></div>
+                             <p className="text-xs text-muted-foreground">El valor final dependerá del precio de venta en la subasta.</p>
+                          </Card>
+                      </div>
+                      <DialogFooter>
+                          <Button type="submit">Poner en Subasta</Button>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
+                  {/* Dar de Baja */}
+                  <Dialog>
+                    <DialogTrigger asChild><Button size="sm" variant="destructive"><FileX2 className="mr-2 h-4 w-4" /> Dar de Baja</Button></DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader><DialogTitle>Dar de Baja el Plan</DialogTitle><DialogDescription>Rescinde tu contrato. Aplica solo para planes no adjudicados.</DialogDescription></DialogHeader>
+                      <div className="space-y-4 text-sm">
+                          <p>Se te devolverá el capital puro aportado al finalizar el grupo, menos una penalidad. Ejemplo del cálculo:</p>
+                          <Card className="bg-muted/50 p-4 space-y-2">
+                             <div className="flex justify-between"><span>Capital Aportado (Puro):</span><strong>{formatCurrency(capitalAportadoPuro)}</strong></div>
+                             <div className="flex justify-between text-red-600"><span>Penalidad (5% + IVA):</span><strong>-{formatCurrency(penalidadBaja)}</strong></div>
+                             <div className="flex justify-between font-bold border-t pt-2"><span>Monto a Devolver (al final):</span><strong>{formatCurrency(capitalAportadoPuro - penalidadBaja)}</strong></div>
+                          </Card>
+                           <p className="text-xs text-muted-foreground">La devolución se efectuará una vez finalizado el plazo original del grupo para no afectar al resto de los miembros.</p>
+                      </div>
+                      <DialogFooter>
+                          <Button type="submit" variant="destructive">Confirmar Baja</Button>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
+                </CardFooter>
+              )}
             </Card>
           )}
           <Card className="flex-1">
@@ -267,102 +319,6 @@ export default function GroupDetailClient({ groupId }: GroupDetailClientProps) {
           </Card>
         </div>
 
-        {isMember && !group.userIsAwarded && (
-          <div className="lg:col-span-3">
-            <Card>
-              <CardHeader>
-                <CardTitle>Acciones del Plan</CardTitle>
-                <CardDescription>Gestiona tu inversión y toma control de tu plan.</CardDescription>
-              </CardHeader>
-              <CardFooter className="flex-wrap gap-4">
-                {/* Licitar */}
-                <Dialog>
-                  <DialogTrigger asChild><Button><Gavel className="mr-2" /> Licitar</Button></DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader><DialogTitle>Licitar por Adjudicación</DialogTitle><DialogDescription>Ofrece adelantar cuotas para obtener el capital. Quien más ofrezca, gana.</DialogDescription></DialogHeader>
-                    <div className="space-y-4">
-                        <p className="text-sm text-muted-foreground">Tu oferta competirá con otros miembros. Si ganas, el monto se usa para cancelar las últimas cuotas de tu plan.</p>
-                        <div className="grid w-full max-w-sm items-center gap-1.5">
-                            <Label htmlFor="cuotas-licitar">Cuotas a licitar (adelantar)</Label>
-                            <Input type="number" id="cuotas-licitar" placeholder="Ej: 10" />
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <Switch id="licitacion-automatica" />
-                          <Label htmlFor="licitacion-automatica">Activar Licitación Automática</Label>
-                        </div>
-                        <p className="text-xs text-muted-foreground">Recuerda que si ganas y no integras el capital, se aplicará una multa del 2% (+IVA) sobre tu oferta.</p>
-                    </div>
-                    <DialogFooter>
-                        <Button type="submit">Confirmar Licitación</Button>
-                    </DialogFooter>
-                  </DialogContent>
-                </Dialog>
-                {/* Adelantar Cuotas */}
-                <Dialog>
-                  <DialogTrigger asChild><Button variant="secondary"><TrendingUp className="mr-2" /> Adelantar Cuotas</Button></DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader><DialogTitle>Adelantar Cuotas</DialogTitle><DialogDescription>Paga cuotas futuras para acortar tu plan y obtén una bonificación.</DialogDescription></DialogHeader>
-                    <div className="space-y-4">
-                        <p className="text-sm text-muted-foreground">No compite por adjudicación, pero reduce el costo final de tu plan.</p>
-                        <div className="grid w-full max-w-sm items-center gap-1.5">
-                            <Label htmlFor="cuotas-adelantar">Cantidad de cuotas a adelantar</Label>
-                            <Input type="number" id="cuotas-adelantar" placeholder="Ej: 5" />
-                        </div>
-                        <Card className="bg-muted/50">
-                            <CardContent className="p-4 text-sm">
-                                <p>Pagarías: <strong>{formatCurrency(1850)}</strong> en lugar de {formatCurrency(1900)}.</p>
-                                <p className="text-green-600">¡Ahorras {formatCurrency(50)} en gastos y seguros!</p>
-                            </CardContent>
-                        </Card>
-                    </div>
-                    <DialogFooter>
-                        <Button type="submit">Adelantar Cuotas</Button>
-                    </DialogFooter>
-                  </DialogContent>
-                </Dialog>
-                {/* Subastar Plan */}
-                <Dialog>
-                  <DialogTrigger asChild><Button variant="secondary"><Hand className="mr-2" /> Subastar Plan</Button></DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader><DialogTitle>Subastar Plan (Vender)</DialogTitle><DialogDescription>Ofrece tu plan en el mercado secundario a otros inversores.</DialogDescription></DialogHeader>
-                     <div className="space-y-4 text-sm">
-                        <p>Esta es tu vía de salida flexible. A continuación un ejemplo del cálculo del precio base y lo que recibirías.</p>
-                        <Card className="bg-muted/50 p-4 space-y-2">
-                           <div className="flex justify-between"><span>Capital Aportado (Puro):</span><strong>{formatCurrency(capitalAportadoPuro)}</strong></div>
-                           <div className="flex justify-between text-red-600"><span>Comisión por Venta (2% + IVA):</span><strong>-{formatCurrency(comisionVenta)}</strong></div>
-                           <div className="flex justify-between font-bold border-t pt-2"><span>Liquidación Estimada (Precio Base):</span><strong>{formatCurrency(liquidacionMinima)}</strong></div>
-                           <p className="text-xs text-muted-foreground">El valor final dependerá del precio de venta en la subasta.</p>
-                        </Card>
-                    </div>
-                    <DialogFooter>
-                        <Button type="submit">Poner en Subasta</Button>
-                    </DialogFooter>
-                  </DialogContent>
-                </Dialog>
-                {/* Dar de Baja */}
-                <Dialog>
-                  <DialogTrigger asChild><Button variant="destructive"><FileX2 className="mr-2" /> Dar de Baja</Button></DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader><DialogTitle>Dar de Baja el Plan</DialogTitle><DialogDescription>Rescinde tu contrato. Aplica solo para planes no adjudicados.</DialogDescription></DialogHeader>
-                    <div className="space-y-4 text-sm">
-                        <p>Se te devolverá el capital puro aportado al finalizar el grupo, menos una penalidad. Ejemplo del cálculo:</p>
-                        <Card className="bg-muted/50 p-4 space-y-2">
-                           <div className="flex justify-between"><span>Capital Aportado (Puro):</span><strong>{formatCurrency(capitalAportadoPuro)}</strong></div>
-                           <div className="flex justify-between text-red-600"><span>Penalidad (5% + IVA):</span><strong>-{formatCurrency(penalidadBaja)}</strong></div>
-                           <div className="flex justify-between font-bold border-t pt-2"><span>Monto a Devolver (al final):</span><strong>{formatCurrency(capitalAportadoPuro - penalidadBaja)}</strong></div>
-                        </Card>
-                         <p className="text-xs text-muted-foreground">La devolución se efectuará una vez finalizado el plazo original del grupo para no afectar al resto de los miembros.</p>
-                    </div>
-                    <DialogFooter>
-                        <Button type="submit" variant="destructive">Confirmar Baja</Button>
-                    </DialogFooter>
-                  </DialogContent>
-                </Dialog>
-              </CardFooter>
-            </Card>
-          </div>
-        )}
-        
         {isMember && group.status === 'Cerrado' && (
           <div className="lg:col-span-3">
             <Card>
