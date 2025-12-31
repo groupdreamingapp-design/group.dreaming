@@ -15,7 +15,7 @@ export const groups: Group[] = [
     plazo: 60,
     cuotaPromedio: 380,
     membersCount: 55,
-    totalMembers: 60,
+    totalMembers: 120, // 60 * 2
     status: "Abierto",
     userIsMember: true,
     userIsAwarded: false,
@@ -25,8 +25,8 @@ export const groups: Group[] = [
     capital: 10000,
     plazo: 48,
     cuotaPromedio: 235,
-    membersCount: 48,
-    totalMembers: 48,
+    membersCount: 90, // Adjusted to be closer to total
+    totalMembers: 96, // 48 * 2
     status: "Activo",
     monthsCompleted: 12,
     userIsMember: true,
@@ -38,7 +38,7 @@ export const groups: Group[] = [
     plazo: 120,
     cuotaPromedio: 460,
     membersCount: 112,
-    totalMembers: 120,
+    totalMembers: 240, // 120 * 2
     status: "Abierto",
     userIsMember: false,
   },
@@ -47,8 +47,8 @@ export const groups: Group[] = [
     capital: 5000,
     plazo: 24,
     cuotaPromedio: 230,
-    membersCount: 24,
-    totalMembers: 24,
+    membersCount: 48,
+    totalMembers: 48, // 24 * 2
     status: "Activo",
     monthsCompleted: 22,
     userIsMember: false,
@@ -58,8 +58,8 @@ export const groups: Group[] = [
     capital: 15000,
     plazo: 36,
     cuotaPromedio: 455,
-    membersCount: 36,
-    totalMembers: 36,
+    membersCount: 72,
+    totalMembers: 72, // 36 * 2
     status: "Cerrado",
     monthsCompleted: 36,
     userIsMember: true,
@@ -70,7 +70,7 @@ export const groups: Group[] = [
     plazo: 72,
     cuotaPromedio: 385,
     membersCount: 68,
-    totalMembers: 72,
+    totalMembers: 144, // 72 * 2
     status: "Abierto",
     userIsMember: false,
   },
