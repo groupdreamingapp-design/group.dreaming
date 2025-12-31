@@ -21,18 +21,26 @@ type GroupDetailClientProps = {
     groupId: string;
 };
 
-const generateStaticAwards = (totalMembers: number, totalMonths: number, isAwarded: boolean = false): Award[][] => {
+const generateStaticAwards = (groupId: string, totalMembers: number, totalMonths: number, isAwarded: boolean = false): Award[][] => {
+    // Simple pseudo-random number generator to ensure consistency between server and client
+    let seed = 0;
+    for (let i = 0; i < groupId.length; i++) {
+        seed = (seed + groupId.charCodeAt(i)) % 1000000;
+    }
+    const random = () => {
+        const x = Math.sin(seed++) * 10000;
+        return x - Math.floor(x);
+    };
+
     const memberOrderNumbers = Array.from({ length: totalMembers }, (_, i) => i + 1);
     const userOrderNumber = 42;
 
-    const shuffle = (array: number[], seed: number) => {
+    const shuffle = (array: number[]) => {
         let currentIndex = array.length, randomIndex;
-        let m = array.length, t, i;
-        while (m) {
-            i = Math.floor(Math.random() * m--);
-            t = array[m];
-            array[m] = array[i];
-            array[i] = t;
+        while (currentIndex !== 0) {
+            randomIndex = Math.floor(random() * currentIndex);
+            currentIndex--;
+            [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
         }
         return array;
     };
@@ -45,10 +53,11 @@ const generateStaticAwards = (totalMembers: number, totalMonths: number, isAward
         }
     }
     
-    potentialWinners = shuffle(potentialWinners, 12345);
+    potentialWinners = shuffle(potentialWinners);
     
     if (isAwarded) {
-        const userWinMonthIndex = 4;
+        // Ensure user is awarded in one of the first few months for visibility
+        const userWinMonthIndex = 4; // 5th month
         potentialWinners.splice(userWinMonthIndex * 2, 0, userOrderNumber);
     }
     
@@ -74,8 +83,9 @@ export default function GroupDetailClient({ groupId }: GroupDetailClientProps) {
   
   const groupAwards = useMemo(() => {
     if (!group) return [];
-    return generateStaticAwards(group.totalMembers, group.plazo, group.userIsAwarded);
-  }, [group]);
+    return generateStaticAwards(group.id, group.totalMembers, group.plazo, group.userIsAwarded);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [group?.id, group?.totalMembers, group?.plazo, group?.userIsAwarded]);
 
 
   if (!group) {
@@ -281,7 +291,7 @@ export default function GroupDetailClient({ groupId }: GroupDetailClientProps) {
                         </TableCell>
                          <TableCell className="flex items-center gap-2">
                           {currentAwards?.map(award => (
-                            <span key={award.orderNumber} className="flex items-center gap-1 text-xs">
+                            <span key={`${award.type}-${award.orderNumber}`} className="flex items-center gap-1 text-xs">
                               {award.type === 'sorteo' && <Ticket className="h-4 w-4 text-blue-500" />}
                               {award.type === 'licitacion' && <HandCoins className="h-4 w-4 text-orange-500" />}
                               #{award.orderNumber}
@@ -333,7 +343,3 @@ export default function GroupDetailClient({ groupId }: GroupDetailClientProps) {
     </>
   );
 }
-
-    
-
-    
