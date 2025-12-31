@@ -1,6 +1,11 @@
-import { user, savingsGoal, transactions } from "@/lib/data"
+
+'use client';
+
+import { useState } from "react";
+import { user, savingsGoal as initialSavingsGoal, transactions } from "@/lib/data"
+import type { SavingsGoal } from "@/lib/types";
 import { StatCard } from "@/components/app/stat-card"
-import { DollarSign, Repeat, Users, Wallet } from "lucide-react"
+import { DollarSign, Edit, Repeat, Users, Wallet } from "lucide-react"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
@@ -8,11 +13,67 @@ import { Progress } from "@/components/ui/progress"
 import Image from "next/image"
 import { DailyEncouragement } from "@/components/app/daily-encouragement"
 import { cn } from "@/lib/utils"
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { PlaceHolderImages } from "@/lib/placeholder-images";
+import { toast } from "@/hooks/use-toast";
+
+
+const goalFormSchema = z.object({
+  name: z.string().min(3, { message: "El nombre debe tener al menos 3 caracteres." }),
+  targetAmount: z.coerce.number().positive({ message: "El monto debe ser mayor a 0." }),
+  imageId: z.string(),
+});
+
+type GoalFormValues = z.infer<typeof goalFormSchema>;
 
 export default function DashboardPage() {
+  const [savingsGoal, setSavingsGoal] = useState<SavingsGoal>(initialSavingsGoal);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
   const formatCurrency = (amount: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
 
   const progress = (savingsGoal.currentAmount / savingsGoal.targetAmount) * 100;
+  
+  const form = useForm<GoalFormValues>({
+    resolver: zodResolver(goalFormSchema),
+    defaultValues: {
+      name: savingsGoal.name,
+      targetAmount: savingsGoal.targetAmount,
+      imageId: PlaceHolderImages.find(img => img.imageUrl === savingsGoal.imageUrl)?.id || 'goal-car',
+    },
+  });
+
+  const onSubmit = (data: GoalFormValues) => {
+    const selectedImage = PlaceHolderImages.find(img => img.id === data.imageId);
+    if (selectedImage) {
+      setSavingsGoal(prev => ({
+        ...prev,
+        name: data.name,
+        targetAmount: data.targetAmount,
+        imageUrl: selectedImage.imageUrl,
+        imageHint: selectedImage.imageHint,
+      }));
+    }
+    toast({
+      title: "¡Meta actualizada!",
+      description: "Tu meta principal ha sido modificada con éxito.",
+    });
+    setIsDialogOpen(false);
+    form.reset({
+      name: data.name,
+      targetAmount: data.targetAmount,
+      imageId: data.imageId,
+    });
+  };
+
+  const goalImages = PlaceHolderImages.filter(img => img.id.startsWith('goal-'));
 
   return (
     <>
@@ -71,6 +132,76 @@ export default function DashboardPage() {
                         data-ai-hint={savingsGoal.imageHint}
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
+                    <div className="absolute top-2 right-2">
+                        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                          <DialogTrigger asChild>
+                            <Button variant="secondary" size="icon" className="h-8 w-8">
+                                <Edit className="h-4 w-4" />
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent>
+                            <DialogHeader>
+                              <DialogTitle>Editar Meta Principal</DialogTitle>
+                              <DialogDescription>
+                                Actualiza tu objetivo de ahorro para que se ajuste a tus nuevos sueños.
+                              </DialogDescription>
+                            </DialogHeader>
+                            <Form {...form}>
+                              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                                <FormField
+                                  control={form.control}
+                                  name="name"
+                                  render={({ field }) => (
+                                    <FormItem>
+                                      <FormLabel>Nombre de la meta</FormLabel>
+                                      <FormControl>
+                                        <Input placeholder="Ej: Viaje a Europa" {...field} />
+                                      </FormControl>
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
+                                />
+                                <FormField
+                                  control={form.control}
+                                  name="targetAmount"
+                                  render={({ field }) => (
+                                    <FormItem>
+                                      <FormLabel>Monto Objetivo (USD)</FormLabel>
+                                      <FormControl>
+                                        <Input type="number" placeholder="Ej: 15000" {...field} />
+                                      </FormControl>
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
+                                />
+                                <FormField
+                                  control={form.control}
+                                  name="imageId"
+                                  render={({ field }) => (
+                                    <FormItem>
+                                      <FormLabel>Imagen representativa</FormLabel>
+                                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                        <FormControl>
+                                          <SelectTrigger>
+                                            <SelectValue placeholder="Selecciona una imagen" />
+                                          </SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent>
+                                          {goalImages.map(img => (
+                                            <SelectItem key={img.id} value={img.id}>{img.description}</SelectItem>
+                                          ))}
+                                        </SelectContent>
+                                      </Select>
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
+                                />
+                                <Button type="submit">Guardar Cambios</Button>
+                              </form>
+                            </Form>
+                          </DialogContent>
+                        </Dialog>
+                    </div>
                     <div className="absolute bottom-0 left-0 p-4">
                         <CardTitle className="text-2xl font-bold text-white">{savingsGoal.name}</CardTitle>
                         <CardDescription className="text-sm text-white/90">Tu Meta Principal</CardDescription>

@@ -66,8 +66,7 @@ export default function LandingPage() {
             <Image
               src={heroImage.imageUrl}
               alt={heroImage.description}
-              width={heroImage.width}
-              height={heroImage.height}
+              fill
               className="absolute inset-0 -z-10 h-full w-full object-cover object-center"
               data-ai-hint={heroImage.imageHint}
               priority
@@ -214,4 +213,3 @@ export default function LandingPage() {
       </footer>
     </div>
   );
-}
