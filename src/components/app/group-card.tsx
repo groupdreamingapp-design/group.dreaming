@@ -8,7 +8,6 @@ import { Users, Clock, CheckCircle2, Lock, Hourglass, ArrowRight, Trophy } from 
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { useRouter } from 'next/navigation';
-import { useGroups } from "@/hooks/use-groups";
 
 type GroupCardProps = {
   group: Group;
@@ -33,6 +32,8 @@ export function GroupCard({ group, isPublic = false }: GroupCardProps) {
     ? ((group.monthsCompleted || 0) / group.plazo) * 100
     : group.status === 'Cerrado'
     ? 100 : 0;
+  
+  const membersMissing = group.totalMembers - group.membersCount;
 
   const progressText = group.status === 'Abierto'
     ? `${group.membersCount} de ${group.totalMembers} miembros`
@@ -45,7 +46,7 @@ export function GroupCard({ group, isPublic = false }: GroupCardProps) {
   const renderAction = () => {
     if (isPublic) {
       return (
-        <Button asChild size="sm">
+        <Button asChild>
           <Link href="/register">Registrarse</Link>
         </Button>
       );
@@ -97,7 +98,14 @@ export function GroupCard({ group, isPublic = false }: GroupCardProps) {
                 <span>Progreso</span>
                 <span>{progressText}</span>
               </div>
-              <Progress value={progressValue} aria-label={`Progreso del grupo ${progressValue.toFixed(0)}%`} />
+              <div className="relative">
+                <Progress value={progressValue} aria-label={`Progreso del grupo ${progressValue.toFixed(0)}%`} />
+                {group.status === 'Abierto' && membersMissing > 0 && (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <span className="text-xs font-bold text-primary-foreground">Faltan {membersMissing}</span>
+                  </div>
+                )}
+              </div>
             </div>
             <div className="grid grid-cols-2 gap-4 text-xs">
               <div className="flex items-center gap-2">
