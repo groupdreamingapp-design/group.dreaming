@@ -9,9 +9,6 @@ export const user: User = {
   avatarUrl: PlaceHolderImages.find(img => img.id === 'user-avatar-1')?.imageUrl || '',
 };
 
-const capitalOptions = [5000, 10000, 15000, 20000, 25000];
-const plazoOptions = [12, 24, 36, 48, 60, 72, 84];
-
 const IVA = 1.21;
 
 const generateId = () => {
@@ -25,75 +22,14 @@ const generateId = () => {
 };
 
 const generateInitialGroups = (): Group[] => {
-  const groups: Group[] = [];
-  const existingIds = new Set<string>();
-
-  const addGroup = (group: Group) => {
-    let newId = generateId();
-    while (existingIds.has(newId)) {
-        newId = generateId();
-    }
-    group.id = newId;
-    groups.push(group);
-    existingIds.add(newId);
-  }
-
-  for (const capital of capitalOptions) {
-    for (const plazo of plazoOptions) {
-      const alicuotaPura = capital / plazo;
-      const gastosAdm = (alicuotaPura * 0.10) * IVA;
-      const seguroVidaPromedio = (capital * 0.0009) / 2; // Approximation of average insurance cost
-      const cuotaPromedio = alicuotaPura + gastosAdm + seguroVidaPromedio;
-
-      if (cuotaPromedio <= 1000) {
-        const totalMembers = plazo * 2;
-        const membersCount = (capital + plazo) % Math.max(1, Math.floor(totalMembers * 0.5));
-        
-        addGroup({
-          id: '', // Will be generated
-          capital,
-          plazo,
-          cuotaPromedio,
-          membersCount: membersCount,
-          totalMembers,
-          status: "Abierto",
-          userIsMember: false,
-          userIsAwarded: false,
-        });
-      }
-    }
-  }
-
-  // Add a couple of non-open groups for the user's dashboard
-  groups.push({
-    id: "ID-20240115-9998",
-    capital: 15000,
-    plazo: 48,
-    cuotaPromedio: 345,
-    membersCount: 96,
-    totalMembers: 96,
-    status: "Activo",
-    monthsCompleted: 12,
-    userIsMember: true,
-    userIsAwarded: true,
-  });
-  existingIds.add("ID-20240115-9998");
-
-
-   groups.push({
-    id: "ID-20230720-9999",
-    capital: 15000,
-    plazo: 36,
-    cuotaPromedio: 455,
-    membersCount: 72,
-    totalMembers: 72,
-    status: "Cerrado",
-    monthsCompleted: 36,
-    userIsMember: true,
-    userIsAwarded: false,
-  });
-  existingIds.add("ID-20230720-9999");
-
+  const groups: Group[] = [
+    { id: "ID-20240729-1001", capital: 5000, plazo: 12, cuotaPromedio: 458, membersCount: 10, totalMembers: 24, status: "Abierto", userIsMember: false, userIsAwarded: false, },
+    { id: "ID-20240729-1002", capital: 10000, plazo: 24, cuotaPromedio: 458, membersCount: 20, totalMembers: 48, status: "Abierto", userIsMember: false, userIsAwarded: false, },
+    { id: "ID-20240729-1003", capital: 15000, plazo: 36, cuotaPromedio: 458, membersCount: 30, totalMembers: 72, status: "Abierto", userIsMember: false, userIsAwarded: false, },
+    { id: "ID-20240729-1004", capital: 20000, plazo: 48, cuotaPromedio: 458, membersCount: 40, totalMembers: 96, status: "Abierto", userIsMember: false, userIsAwarded: false, },
+    { id: "ID-20240115-9998", capital: 15000, plazo: 48, cuotaPromedio: 345, membersCount: 96, totalMembers: 96, status: "Activo", monthsCompleted: 12, userIsMember: true, userIsAwarded: true, },
+    { id: "ID-20230720-9999", capital: 15000, plazo: 36, cuotaPromedio: 455, membersCount: 72, totalMembers: 72, status: "Cerrado", monthsCompleted: 36, userIsMember: true, userIsAwarded: false, }
+  ];
   return groups;
 };
 
