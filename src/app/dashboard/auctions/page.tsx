@@ -20,7 +20,7 @@ export default function AuctionsPage() {
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [autoBidEnabled, setAutoBidEnabled] = useState(false);
   const [maxBid, setMaxBid] = useState('');
-  const [autoIncrement, setAutoIncrement]_useState('');
+  const [autoIncrement, setAutoIncrement] = useState('');
   const { toast } = useToast();
 
   const formatCurrency = (amount: number) => new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'USD' }).format(amount);
@@ -270,5 +270,3 @@ export default function AuctionsPage() {
     </>
   );
 }
-
-    
