@@ -111,7 +111,7 @@ export function GroupCard({ group, isPublic = false }: GroupCardProps) {
                 <Progress value={progressValue} aria-label={`Progreso del grupo ${progressValue.toFixed(0)}%`} className={cn(group.status === 'Abierto' && membersMissing > 0 && "bg-primary/20")} />
                 {group.status === 'Abierto' && membersMissing > 0 && (
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <span className="text-xs font-bold text-destructive">Faltan {membersMissing}</span>
+                    <span className="text-xs font-bold text-neutral-800">Faltan {membersMissing}</span>
                   </div>
                 )}
               </div>
