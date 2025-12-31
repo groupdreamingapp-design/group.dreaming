@@ -199,7 +199,7 @@ export default function AuctionsPage() {
           return (
             <Card key={auction.id} className="flex flex-col">
               <CardHeader>
-                <CardDescription>Plan del {auction.groupId}</CardDescription>
+                <CardDescription>Subasta del plan {auction.groupId}</CardDescription>
                 <CardTitle className="text-2xl">{formatCurrencyNoDecimals(auction.capital)} en {auction.plazo} meses</CardTitle>
               </CardHeader>
               <CardContent className="flex-grow space-y-4">
@@ -342,5 +342,3 @@ export default function AuctionsPage() {
     </>
   );
 }
-
-    
