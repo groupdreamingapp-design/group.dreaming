@@ -74,10 +74,8 @@ export default function GroupPublicDetailPage() {
                       <Users2 className="h-4 w-4 text-primary" />
                       <span>Adjudicaciones:</span>
                       <strong className="flex items-center gap-1.5">
-                        1<Ticket className="h-4 w-4 text-blue-500" />
-                        <span className="sr-only">Sorteo</span>
-                        + 1<HandCoins className="h-4 w-4 text-orange-500" />
-                        <span className="sr-only">Licitación</span>
+                        <span>1</span><Ticket className="h-4 w-4 text-blue-500" title="Sorteo" />
+                        <span>+ 1</span><HandCoins className="h-4 w-4 text-orange-500" title="Licitación" />
                       </strong>
                     </div>
                 </CardContent>

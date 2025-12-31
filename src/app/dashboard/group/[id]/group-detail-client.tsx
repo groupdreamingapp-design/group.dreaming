@@ -44,7 +44,10 @@ export default function GroupDetailClient({ groupId }: GroupDetailClientProps) {
   const isMember = group.userIsMember;
   const cuotasPagadas = 5;
   const capitalAportado = cuotasPagadas * (installments.length > 0 ? installments[0].breakdown.alicuotaPura : 0);
-  const penalidadBaja = capitalAportado * 0.05 * 1.21; // 5% de penalidad + 21% IVA sobre la penalidad
+  const IVA = 1.21;
+  const penalidadBaja = capitalAportado * 0.05 * IVA; // 5% de penalidad + 21% IVA sobre la penalidad
+  const comisionVenta = capitalAportado * 0.02 * IVA; // 2% de comisión + 21% IVA
+  const liquidacionMinima = capitalAportado - comisionVenta;
 
   return (
     <>
@@ -181,7 +184,7 @@ export default function GroupDetailClient({ groupId }: GroupDetailClientProps) {
                           <Switch id="licitacion-automatica" />
                           <Label htmlFor="licitacion-automatica">Activar Licitación Automática</Label>
                         </div>
-                        <p className="text-xs text-muted-foreground">El sistema pujará por ti hasta un máximo que definas.</p>
+                        <p className="text-xs text-muted-foreground">El sistema pujará por ti hasta un máximo que definas. Recuerda que si ganas y no integras el capital, se aplicará una multa del 2% (+IVA) sobre tu oferta.</p>
                     </div>
                     <DialogFooter>
                         <Button type="submit">Confirmar Licitación</Button>
@@ -220,11 +223,9 @@ export default function GroupDetailClient({ groupId }: GroupDetailClientProps) {
                         <p>Esta es tu vía de salida flexible. A continuación un ejemplo del cálculo del precio base y lo que recibirías.</p>
                         <Card className="bg-muted/50 p-4 space-y-2">
                            <div className="flex justify-between"><span>Capital Aportado:</span><strong>{formatCurrency(capitalAportado)}</strong></div>
-                           <div className="flex justify-between"><span>Deuda Pendiente (si aplica):</span><strong>{formatCurrency(0)}</strong></div>
-                           <div className="flex justify-between font-bold border-t pt-2"><span>Precio Base Sugerido:</span><strong>{formatCurrency(capitalAportado)}</strong></div>
-                           <hr/>
-                           <div className="flex justify-between text-green-700"><span>Liquidación Mínima a Recibir:</span><strong>{formatCurrency(capitalAportado * 0.98)}</strong></div>
-                           <p className="text-xs text-muted-foreground">(Se descuenta una comisión del 2% + IVA sobre la operación)</p>
+                           <div className="flex justify-between text-red-600"><span>Comisión por Venta (2% + IVA):</span><strong>-{formatCurrency(comisionVenta)}</strong></div>
+                           <div className="flex justify-between font-bold border-t pt-2"><span>Liquidación Estimada:</span><strong>{formatCurrency(liquidacionMinima)}</strong></div>
+                           <p className="text-xs text-muted-foreground">El valor final dependerá del precio de venta en la subasta.</p>
                         </Card>
                     </div>
                     <DialogFooter>

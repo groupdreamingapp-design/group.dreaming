@@ -26,16 +26,16 @@ export default function AuctionsPage() {
                 <div className="p-3 rounded-lg bg-muted/50 space-y-2">
                     <div className="flex items-baseline justify-between gap-2">
                         <div>
-                            <p className="text-sm text-muted-foreground">Puja Actual</p>
+                            <p className="text-sm text-muted-foreground">Mejor Oferta</p>
                             <p className="text-2xl font-bold text-primary">{formatCurrency(auction.highestBid)}</p>
                         </div>
                         <div className="text-right">
-                             <p className="text-sm text-muted-foreground">Base</p>
+                             <p className="text-sm text-muted-foreground">Precio Base</p>
                              <p className="text-base font-semibold">{formatCurrency(auction.precioMinimo)}</p>
                         </div>
                     </div>
                      <div className="text-sm text-center border-t border-dashed pt-2">
-                        <span className="text-muted-foreground">Puja mínima requerida: </span>
+                        <span className="text-muted-foreground">Puja mínima: </span>
                         <span className="font-semibold flex items-center justify-center gap-1"><ArrowUp className="h-4 w-4 text-green-500" />{formatCurrency(minBidIncrement)}</span>
                     </div>
                 </div>
