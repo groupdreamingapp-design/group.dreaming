@@ -117,9 +117,9 @@ export default function GroupPublicDetailPage() {
                             </DialogHeader>
                             <div className="grid gap-2 text-sm">
                                 <div className="flex justify-between"><span>Alícuota Pura:</span><strong>{formatCurrency(inst.breakdown.alicuotaPura)}</strong></div>
-                                <div className="flex justify-between"><span>Gastos Adm:</span><strong>{formatCurrency(inst.breakdown.gastosAdm)}</strong></div>
+                                <div className="flex justify-between"><span>Gastos Adm (IVA incl.):</span><strong>{formatCurrency(inst.breakdown.gastosAdm)}</strong></div>
                                 {inst.breakdown.derechoSuscripcion && inst.breakdown.derechoSuscripcion > 0 ? (
-                                  <div className="flex justify-between"><span>Derecho Suscripción (Financiado):</span><strong>{formatCurrency(inst.breakdown.derechoSuscripcion)}</strong></div>
+                                  <div className="flex justify-between"><span>Derecho Suscripción (IVA incl.):</span><strong>{formatCurrency(inst.breakdown.derechoSuscripcion)}</strong></div>
                                 ) : (
                                     <div className="flex justify-between text-muted-foreground"><span>Derecho Suscripción:</span><strong>-</strong></div>
                                 )}

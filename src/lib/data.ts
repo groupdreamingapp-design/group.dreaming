@@ -12,6 +12,8 @@ export const user: User = {
 const capitalOptions = [5000, 10000, 15000, 20000, 25000, 30000, 35000, 40000, 45000, 50000];
 const plazoOptions = [12, 24, 36, 48, 60, 72, 84, 96, 108, 120];
 
+const IVA = 1.21;
+
 const generateInitialGroups = (): Group[] => {
   const groups: Group[] = [];
   let idCounter = 1;
@@ -20,7 +22,7 @@ const generateInitialGroups = (): Group[] => {
     for (const plazo of plazoOptions) {
       // Approximate formula for cuotaPromedio based on previous data
       const alicuotaPura = capital / plazo;
-      const gastosAdm = alicuotaPura * 0.10;
+      const gastosAdm = (alicuotaPura * 0.10) * IVA;
       const seguroVida = 13; // Approximation
       const cuotaPromedio = alicuotaPura + gastosAdm + seguroVida;
 
@@ -94,10 +96,10 @@ const capital = 20000;
 const plazo = 60;
 
 const alicuotaPura = capital / plazo;
-const gastosAdm = alicuotaPura * 0.10; // 10%
+const gastosAdm = (alicuotaPura * 0.10) * IVA; // 10% + IVA
 const seguroVida = 13.34; // Placeholder fixed value for simplicity
-const totalSuscripcion = capital * 0.03;
-const mesesFinanciacionSuscripcion = Math.floor(plazo * 0.20); // UPDATED to 20%
+const totalSuscripcion = (capital * 0.03) * IVA; // 3% + IVA
+const mesesFinanciacionSuscripcion = Math.floor(plazo * 0.20);
 const cuotaSuscripcion = mesesFinanciacionSuscripcion > 0 ? totalSuscripcion / mesesFinanciacionSuscripcion : 0;
 
 const staticAwards: Award[][] = [
@@ -130,9 +132,9 @@ export const installments: Installment[] = Array.from({ length: 60 }, (_, i) => 
 
 export const generateExampleInstallments = (capital: number, plazo: number): Installment[] => {
     const alicuotaPura = capital / plazo;
-    const gastosAdm = alicuotaPura * 0.10; // 10%
+    const gastosAdm = (alicuotaPura * 0.10) * IVA; // 10% + IVA
     const seguroVida = 13.34; // Placeholder fixed value
-    const totalSuscripcion = capital * 0.03;
+    const totalSuscripcion = (capital * 0.03) * IVA; // 3% + IVA
     const mesesFinanciacionSuscripcion = Math.floor(plazo * 0.20);
     const cuotaSuscripcion = mesesFinanciacionSuscripcion > 0 ? totalSuscripcion / mesesFinanciacionSuscripcion : 0;
 

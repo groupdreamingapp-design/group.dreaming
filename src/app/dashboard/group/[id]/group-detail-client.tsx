@@ -1,3 +1,4 @@
+
 'use client';
 
 import type { Group, Installment } from '@/lib/types';
@@ -14,12 +15,11 @@ import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import { useGroups } from '@/hooks/use-groups';
 import { installments as allInstallments } from '@/lib/data';
+import { useParams } from 'next/navigation';
 
-type GroupDetailClientProps = {
-  groupId: string;
-};
-
-export default function GroupDetailClient({ groupId }: GroupDetailClientProps) {
+export default function GroupDetailClient() {
+  const params = useParams();
+  const groupId = typeof params.id === 'string' ? params.id : '';
   const { groups } = useGroups();
   const group = groups.find(g => g.id === groupId);
 
@@ -43,6 +43,7 @@ export default function GroupDetailClient({ groupId }: GroupDetailClientProps) {
   const isMember = group.userIsMember;
   const cuotasPagadas = 5;
   const capitalAportado = cuotasPagadas * (installments.length > 0 ? installments[0].breakdown.alicuotaPura : 0);
+  const penalidadBaja = capitalAportado * 0.05 * 1.21; // 5% de penalidad + 21% IVA sobre la penalidad
 
   return (
     <>
@@ -138,9 +139,9 @@ export default function GroupDetailClient({ groupId }: GroupDetailClientProps) {
                             </DialogHeader>
                             <div className="grid gap-2 text-sm">
                                 <div className="flex justify-between"><span>Alícuota Pura:</span><strong>{formatCurrency(inst.breakdown.alicuotaPura)}</strong></div>
-                                <div className="flex justify-between"><span>Gastos Adm:</span><strong>{formatCurrency(inst.breakdown.gastosAdm)}</strong></div>
+                                <div className="flex justify-between"><span>Gastos Adm (IVA incl.):</span><strong>{formatCurrency(inst.breakdown.gastosAdm)}</strong></div>
                                 {inst.breakdown.derechoSuscripcion && (
-                                  <div className="flex justify-between"><span>Derecho Suscripción:</span><strong>{formatCurrency(inst.breakdown.derechoSuscripcion)}</strong></div>
+                                  <div className="flex justify-between"><span>Derecho Suscripción (IVA incl.):</span><strong>{formatCurrency(inst.breakdown.derechoSuscripcion)}</strong></div>
                                 )}
                                 <div className="flex justify-between"><span>Seguro de Vida:</span><strong>{formatCurrency(inst.breakdown.seguroVida)}</strong></div>
                                 <div className="flex justify-between font-bold text-base border-t pt-2 mt-2"><span>Total:</span><span>{formatCurrency(inst.total)}</span></div>
@@ -239,8 +240,8 @@ export default function GroupDetailClient({ groupId }: GroupDetailClientProps) {
                         <p>Se te devolverá el capital aportado al finalizar el grupo, menos una penalidad. Ejemplo del cálculo:</p>
                         <Card className="bg-muted/50 p-4 space-y-2">
                            <div className="flex justify-between"><span>Capital Aportado:</span><strong>{formatCurrency(capitalAportado)}</strong></div>
-                           <div className="flex justify-between text-red-600"><span>Penalidad (5% + IVA):</span><strong>-{formatCurrency(capitalAportado * 0.0605)}</strong></div>
-                           <div className="flex justify-between font-bold border-t pt-2"><span>Monto a Devolver (al final):</span><strong>{formatCurrency(capitalAportado * (1 - 0.0605))}</strong></div>
+                           <div className="flex justify-between text-red-600"><span>Penalidad (5% + IVA):</span><strong>-{formatCurrency(penalidadBaja)}</strong></div>
+                           <div className="flex justify-between font-bold border-t pt-2"><span>Monto a Devolver (al final):</span><strong>{formatCurrency(capitalAportado - penalidadBaja)}</strong></div>
                         </Card>
                          <p className="text-xs text-muted-foreground">La devolución se efectuará una vez finalizado el plazo original del grupo para no afectar al resto de los miembros.</p>
                     </div>
@@ -257,5 +258,3 @@ export default function GroupDetailClient({ groupId }: GroupDetailClientProps) {
     </>
   );
 }
-
-    
