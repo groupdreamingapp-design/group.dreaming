@@ -34,8 +34,8 @@ const rulesConfig = [
         title: "Para el Comprador",
         icon: Users,
         points: [
-            "La comisión de compra (2% + IVA) se abona junto con el monto ofertado para concretar la adquisición del plan.",
-            "Al resultar adjudicado en el futuro, el comprador recibirá el capital completo del plan, ya que las comisiones fueron saldadas previamente."
+            "Al ganar la subasta, el comprador debe abonar únicamente el monto ofertado para concretar la adquisición del plan.",
+            "La comisión de compra (2% + IVA) será descontada del capital que reciba al momento de resultar adjudicado en el futuro."
         ]
     }
 ];
