@@ -85,7 +85,6 @@ export default function AuctionsPage() {
       }
     }
 
-    // Si todas las validaciones pasan, se muestra el toast y se cierra el diálogo.
     if (autoBidEnabled) {
         toast({
             title: "¡Oferta automática configurada!",
@@ -98,7 +97,7 @@ export default function AuctionsPage() {
         });
     }
 
-    const closeButton = document.querySelector('[data-radix-dialog-close]') as HTMLElement;
+    const closeButton = document.querySelector('[data-radix-dialog-close-button="true"]') as HTMLElement;
     closeButton?.click();
     resetDialog();
   };
@@ -252,15 +251,17 @@ export default function AuctionsPage() {
                     </div>
                     <DialogFooter>
                       <DialogClose asChild>
-                        <Button type="button" variant="secondary">Cancelar</Button>
+                        <Button type="button" variant="secondary" data-radix-dialog-close-button="true">Cancelar</Button>
                       </DialogClose>
-                      <Button 
-                        type="button" 
-                        onClick={() => handleConfirmOffer(auction)}
-                      >
-                        Confirmar Oferta
-                      </Button>
                     </DialogFooter>
+                     <div className="flex justify-end pt-4">
+                        <Button 
+                          type="button" 
+                          onClick={() => handleConfirmOffer(auction)}
+                        >
+                          Confirmar Oferta
+                        </Button>
+                      </div>
                   </DialogContent>
                 </Dialog>
               </CardFooter>
@@ -270,4 +271,5 @@ export default function AuctionsPage() {
       </div>
     </>
   );
-}
+
+    
