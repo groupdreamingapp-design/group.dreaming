@@ -23,8 +23,6 @@ type GroupDetailClientProps = {
 };
 
 const generateStaticAwards = (groupId: string, totalMembers: number, totalMonths: number, isAwarded: boolean = false): Award[][] => {
-    // Simple pseudo-random number generator to ensure consistency between server and client
-    // Using the groupId as a seed
     let seed = 0;
     for (let i = 0; i < groupId.length; i++) {
         seed = (seed + groupId.charCodeAt(i)) % 1000000;
@@ -59,26 +57,18 @@ const generateStaticAwards = (groupId: string, totalMembers: number, totalMonths
     potentialWinners = shuffle(potentialWinners);
     
     if (isAwarded) {
-        // Ensure user is awarded in one of the first few months for visibility
-        const userWinMonthIndex = 4; // 5th month
+        const userWinMonthIndex = 4;
         potentialWinners.splice(userWinMonthIndex * 2, 0, userOrderNumber);
     }
     
     const awards: Award[][] = [];
     for (let i = 0; i < totalMonths; i++) {
         if (potentialWinners.length < 2) {
-             // To avoid infinite loops if we run out of winners, we'll just stop pushing.
-             // Or reset potentialWinners if we want awards every month regardless of member count
              break;
         };
 
         const sorteoWinner = potentialWinners.shift()!;
         let licitacionWinner = potentialWinners.shift()!;
-
-        // Ensure we don't accidentally assign the same winner if list gets small
-        if (licitacionWinner === undefined && potentialWinners.length > 0) {
-             licitacionWinner = potentialWinners.shift()!;
-        }
        
         if(licitacionWinner) {
             awards.push([
@@ -98,15 +88,13 @@ const generateStaticAwards = (groupId: string, totalMembers: number, totalMonths
 
 export default function GroupDetailClient({ groupId }: GroupDetailClientProps) {
   const { groups } = useGroups();
-  // Find group from initialGroups to get template info, then merge with dynamic state
   const groupTemplate = initialGroups.find(g => g.id === groupId);
   const dynamicGroupState = groups.find(g => g.id === groupId);
-  const group = dynamicGroupState ? { ...groupTemplate, ...dynamicGroupState } : undefined;
+  const group = dynamicGroupState ? { ...groupTemplate, ...dynamicGroupState } : groupTemplate;
   
   const groupAwards = useMemo(() => {
     if (!group) return [];
     return generateStaticAwards(group.id, group.totalMembers, group.plazo, group.userIsAwarded);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [group?.id, group?.totalMembers, group?.plazo, group?.userIsAwarded]);
 
 
@@ -123,7 +111,6 @@ export default function GroupDetailClient({ groupId }: GroupDetailClientProps) {
     );
   }
 
-  // Filter installments to only show the ones relevant for this group's term
   const installments = allInstallments.slice(0, group.plazo);
   const cuotasPagadas = group.monthsCompleted || 0;
 
@@ -135,15 +122,15 @@ export default function GroupDetailClient({ groupId }: GroupDetailClientProps) {
   const capitalAportadoPuro = cuotasPagadas * alicuotaPuraTotal;
 
   const IVA = 1.21;
-  const penalidadBaja = capitalAportadoPuro * 0.05 * IVA; // 5% de penalidad + 21% IVA sobre la penalidad
-  const comisionVenta = capitalAportadoPuro * 0.02 * IVA; // 2% de comisión + 21% IVA
+  const penalidadBaja = capitalAportadoPuro * 0.05 * IVA;
+  const comisionVenta = capitalAportadoPuro * 0.02 * IVA;
   const liquidacionMinima = capitalAportadoPuro - comisionVenta;
 
   return (
     <>
       <div className="mb-4">
-        <Link href="/dashboard" className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary mb-2">
-          <ArrowLeft className="h-4 w-4" /> Volver a Mi Panel
+        <Link href="/dashboard/my-groups" className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary mb-2">
+          <ArrowLeft className="h-4 w-4" /> Volver a Mis Grupos
         </Link>
         <h1 className="text-3xl font-bold font-headline">{formatCurrencyNoDecimals(group.capital)}</h1>
         <p className="text-muted-foreground">en {group.plazo} meses (Grupo {group.id})</p>
@@ -183,7 +170,7 @@ export default function GroupDetailClient({ groupId }: GroupDetailClientProps) {
         </div>
 
         {isMember && !group.userIsAwarded && group.status === 'Activo' && (
-          <div className="lg:col-span-1">
+          <div className="lg:col-span-3">
             <Card>
               <CardHeader>
                 <CardTitle>Acciones del Plan</CardTitle>
@@ -374,5 +361,3 @@ export default function GroupDetailClient({ groupId }: GroupDetailClientProps) {
     </>
   );
 }
-
-    
