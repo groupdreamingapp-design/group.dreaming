@@ -1,3 +1,4 @@
+
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import type { Group } from "@/lib/types";
 import { Badge } from "@/components/ui/badge";
@@ -6,11 +7,13 @@ import { Progress } from "@/components/ui/progress";
 import { Users, Clock, CheckCircle2, Lock, Hourglass, ArrowRight, Trophy } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
+import { useRouter } from 'next/navigation';
 
 type GroupCardProps = {
   group: Group;
   showJoinButton?: boolean;
   onJoin?: () => void;
+  isPublic?: boolean;
 };
 
 const statusConfig = {
@@ -20,9 +23,10 @@ const statusConfig = {
   Cerrado: { icon: Lock, color: "bg-gray-500", text: "text-gray-500" },
 };
 
-export function GroupCard({ group, showJoinButton = false, onJoin }: GroupCardProps) {
+export function GroupCard({ group, showJoinButton = false, onJoin, isPublic = false }: GroupCardProps) {
   const { icon: StatusIcon } = statusConfig[group.status];
   const formatCurrency = (amount: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
+  const router = useRouter();
 
   const progressValue = group.status === 'Abierto'
     ? (group.membersCount / group.totalMembers) * 100
@@ -38,14 +42,18 @@ export function GroupCard({ group, showJoinButton = false, onJoin }: GroupCardPr
     : 'Grupo finalizado';
     
   const handleJoinClick = () => {
-    if (onJoin) {
+    if (isPublic) {
+        router.push('/register');
+    } else if (onJoin) {
       onJoin();
     }
   };
 
+  const cardLink = isPublic ? '/register' : `/dashboard/group/${group.id}`;
+
   return (
     <Card className="flex flex-col">
-      <Link href={`/dashboard/group/${group.id}`} className="flex flex-col flex-grow">
+      <Link href={cardLink} className="flex flex-col flex-grow">
         <CardHeader>
           <div className="flex justify-between items-start">
             <div>
@@ -57,7 +65,7 @@ export function GroupCard({ group, showJoinButton = false, onJoin }: GroupCardPr
                   <StatusIcon className="mr-1 h-3 w-3" />
                   {group.status}
               </Badge>
-              {group.userIsAwarded && (
+              {group.userIsAwarded && !isPublic && (
                   <div className="absolute -top-3 -right-3 animate-bounce">
                       <Trophy className="h-6 w-6 text-yellow-500 fill-yellow-400" />
                   </div>
@@ -93,10 +101,12 @@ export function GroupCard({ group, showJoinButton = false, onJoin }: GroupCardPr
             <p className="font-bold text-lg">{formatCurrency(group.cuotaPromedio)}</p>
         </div>
         {showJoinButton ? (
-          <Button disabled={group.status !== 'Abierto'} onClick={handleJoinClick}>Unirse</Button>
+          <Button disabled={group.status !== 'Abierto'} onClick={handleJoinClick}>
+            {isPublic ? 'Registrarse para Unirse' : 'Unirse'}
+          </Button>
         ) : (
           <Button asChild variant="secondary" size="sm">
-            <Link href={`/dashboard/group/${group.id}`}>
+            <Link href={cardLink}>
               Ver Detalles <ArrowRight className="ml-2 h-4 w-4" />
             </Link>
           </Button>
@@ -105,3 +115,5 @@ export function GroupCard({ group, showJoinButton = false, onJoin }: GroupCardPr
     </Card>
   );
 }
+
+    

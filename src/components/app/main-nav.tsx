@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from "next/link"
@@ -20,7 +21,7 @@ export function MainNav({ isMobile = false }: MainNavProps) {
       icon: LayoutDashboard,
     },
     {
-      href: "/dashboard/explore-groups",
+      href: "/explore",
       label: "Explorar Grupos",
       icon: Search,
     },
@@ -63,3 +64,5 @@ export function MainNav({ isMobile = false }: MainNavProps) {
     </>
   )
 }
+
+    

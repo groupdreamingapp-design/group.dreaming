@@ -49,12 +49,23 @@ export default function LandingPage() {
           <Logo className="h-8 w-8 text-primary" />
           <span className="text-xl font-bold text-foreground">Group Dreaming</span>
         </Link>
-        <nav className="flex items-center gap-4">
+        <nav className="hidden md:flex items-center gap-4">
+          <Button variant="ghost" asChild>
+            <Link href="/explore">Explorar Grupos</Link>
+          </Button>
           <Button variant="ghost" asChild>
             <Link href="/login">Ingresar</Link>
           </Button>
           <Button asChild>
             <Link href="/register">Comenzar Ahora</Link>
+          </Button>
+        </nav>
+         <nav className="md:hidden flex items-center gap-2">
+          <Button variant="ghost" size="sm" asChild>
+            <Link href="/explore">Explorar</Link>
+          </Button>
+          <Button variant="outline" size="sm" asChild>
+            <Link href="/login">Ingresar</Link>
           </Button>
         </nav>
       </header>
@@ -213,3 +224,5 @@ export default function LandingPage() {
       </footer>
     </div>
   );
+
+    
