@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState } from "react";
+import { useState, useRef, ChangeEvent } from "react";
 import { user, savingsGoal as initialSavingsGoal, transactions } from "@/lib/data"
 import type { SavingsGoal } from "@/lib/types";
 import { StatCard } from "@/components/app/stat-card"
@@ -23,12 +23,14 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { toast } from "@/hooks/use-toast";
+import { Separator } from "@/components/ui/separator";
 
 
 const goalFormSchema = z.object({
   name: z.string().min(3, { message: "El nombre debe tener al menos 3 caracteres." }),
   targetAmount: z.coerce.number().positive({ message: "El monto debe ser mayor a 0." }),
-  imageId: z.string(),
+  imageId: z.string().optional(),
+  customImage: z.any().optional(),
 });
 
 type GoalFormValues = z.infer<typeof goalFormSchema>;
@@ -36,6 +38,8 @@ type GoalFormValues = z.infer<typeof goalFormSchema>;
 export default function DashboardPage() {
   const [savingsGoal, setSavingsGoal] = useState<SavingsGoal>(initialSavingsGoal);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const formatCurrency = (amount: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
 
@@ -49,23 +53,48 @@ export default function DashboardPage() {
       imageId: PlaceHolderImages.find(img => img.imageUrl === savingsGoal.imageUrl)?.id || 'goal-car',
     },
   });
+  
+  const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+        form.setValue('imageId', undefined); // Deselect dropdown
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const onSubmit = (data: GoalFormValues) => {
-    const selectedImage = PlaceHolderImages.find(img => img.id === data.imageId);
-    if (selectedImage) {
-      setSavingsGoal(prev => ({
-        ...prev,
-        name: data.name,
-        targetAmount: data.targetAmount,
-        imageUrl: selectedImage.imageUrl,
-        imageHint: selectedImage.imageHint,
-      }));
+    let newImageUrl = savingsGoal.imageUrl;
+    let newImageHint = savingsGoal.imageHint;
+
+    if (imagePreview) {
+      newImageUrl = imagePreview;
+      newImageHint = "custom goal image";
+    } else if (data.imageId) {
+      const selectedImage = PlaceHolderImages.find(img => img.id === data.imageId);
+      if (selectedImage) {
+        newImageUrl = selectedImage.imageUrl;
+        newImageHint = selectedImage.imageHint;
+      }
     }
+    
+    setSavingsGoal(prev => ({
+      ...prev,
+      name: data.name,
+      targetAmount: data.targetAmount,
+      imageUrl: newImageUrl,
+      imageHint: newImageHint,
+    }));
+    
     toast({
       title: "¡Meta actualizada!",
       description: "Tu meta principal ha sido modificada con éxito.",
     });
     setIsDialogOpen(false);
+    setImagePreview(null);
     form.reset({
       name: data.name,
       targetAmount: data.targetAmount,
@@ -133,7 +162,13 @@ export default function DashboardPage() {
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
                     <div className="absolute top-2 right-2">
-                        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                        <Dialog open={isDialogOpen} onOpenChange={(isOpen) => {
+                          setIsDialogOpen(isOpen);
+                          if (!isOpen) {
+                            setImagePreview(null);
+                            form.reset();
+                          }
+                        }}>
                           <DialogTrigger asChild>
                             <Button variant="secondary" size="icon" className="h-8 w-8">
                                 <Edit className="h-4 w-4" />
@@ -174,16 +209,24 @@ export default function DashboardPage() {
                                     </FormItem>
                                   )}
                                 />
+                                
+                                <FormLabel>Imagen representativa</FormLabel>
+                                
                                 <FormField
                                   control={form.control}
                                   name="imageId"
                                   render={({ field }) => (
                                     <FormItem>
-                                      <FormLabel>Imagen representativa</FormLabel>
-                                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                      <Select onValueChange={(value) => {
+                                        field.onChange(value);
+                                        setImagePreview(null);
+                                        if (fileInputRef.current) {
+                                          fileInputRef.current.value = "";
+                                        }
+                                      }} defaultValue={field.value}>
                                         <FormControl>
                                           <SelectTrigger>
-                                            <SelectValue placeholder="Selecciona una imagen" />
+                                            <SelectValue placeholder="Selecciona una imagen predefinida" />
                                           </SelectTrigger>
                                         </FormControl>
                                         <SelectContent>
@@ -196,6 +239,33 @@ export default function DashboardPage() {
                                     </FormItem>
                                   )}
                                 />
+
+                                <div className="flex items-center justify-center">
+                                  <Separator className="flex-1" />
+                                  <span className="px-4 text-sm text-muted-foreground">O</span>
+                                  <Separator className="flex-1" />
+                                </div>
+                                
+                                <FormField
+                                  control={form.control}
+                                  name="customImage"
+                                  render={() => (
+                                    <FormItem>
+                                      <FormLabel>Sube tu propia imagen</FormLabel>
+                                      <FormControl>
+                                        <Input type="file" accept="image/*" onChange={handleImageChange} ref={fileInputRef} />
+                                      </FormControl>
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
+                                />
+
+                                {imagePreview && (
+                                  <div className="relative w-full h-40 rounded-md overflow-hidden border">
+                                    <Image src={imagePreview} alt="Vista previa de la meta" layout="fill" objectFit="cover" />
+                                  </div>
+                                )}
+
                                 <Button type="submit">Guardar Cambios</Button>
                               </form>
                             </Form>
@@ -223,5 +293,5 @@ export default function DashboardPage() {
         </div>
       </div>
     </>
-  )
-}
+  
+    
