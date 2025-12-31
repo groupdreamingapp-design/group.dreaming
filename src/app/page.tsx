@@ -39,29 +39,33 @@ export default function LandingPage() {
   ];
 
   const rules = [
-    { 
-      title: "Costos de Ingreso y Mantenimiento", 
-      content: "Derecho de Suscripción: 3% + IVA sobre el capital, financiado en el primer 20% de las cuotas. Gastos Administrativos Mensuales: 10% + IVA sobre la alícuota pura. Seguro de Vida Mensual: 0.09% sobre el saldo de capital pendiente." 
+    {
+      title: "Costos de Ingreso y Mantenimiento",
+      content: "Derecho de Suscripción: 3% + IVA sobre el capital, financiado en el primer 20% de las cuotas. Gastos Administrativos Mensuales: 10% + IVA sobre la alícuota pura. Seguro de Vida Mensual: 0.09% sobre el saldo de capital pendiente."
     },
-    { 
-      title: "Adjudicación y Presentación de Garantías", 
-      content: "Tras ser adjudicado, tienes 48hs para aceptar, 72hs hábiles para presentar garantías y 24hs para integrar el capital (si licitaste). El incumplimiento de plazos puede resultar en la pérdida del derecho de adjudicación del mes." 
+    {
+      title: "Adjudicación y Presentación de Garantías",
+      content: "Tras resultar adjudicado (por sorteo o licitación), el miembro tiene 48hs corridas para aceptar, 72hs hábiles para presentar garantías y 24hs para integrar el capital si licitó. El incumplimiento de plazos puede resultar en la pérdida del derecho de adjudicación del mes."
     },
     {
       title: "Incumplimiento de Licitación Ganadora",
-      content: "Si ganas una licitación y no integras el monto, se aplica una multa del 2% + IVA sobre la oferta y quedas inhabilitado para licitar por 5 meses. La multa se descontará de tu futura adjudicación o liquidación final."
+      content: "Si un miembro gana una licitación pero no integra el monto ofertado, se aplicará una multa del 2% + IVA sobre el valor de la oferta y quedará inhabilitado para licitar por 5 meses. La multa se descontará de su futura adjudicación o liquidación final."
     },
-    { 
-      title: "Gestión de Mora y Consecuencias", 
-      content: "A los 15 días de mora, se suspenden tus derechos de participación. Con 3 cuotas impagas, tu plan será subastado forzosamente para cubrir la deuda." 
+    {
+      title: "Gestión de Mora y Consecuencias",
+      content: "A los 15 días de mora, se suspenden los derechos del miembro a participar en sorteos y licitaciones. Con 3 cuotas impagas, su plan será subastado forzosamente para cubrir la deuda."
     },
-    { 
-      title: "Subasta de Planes (Mercado Secundario)", 
-      content: "Puedes vender tu plan. La plataforma garantiza la compra al precio mínimo si no hay ofertas. El comprador adquiere el plan libre de deudas y asume una comisión del 2% + IVA que se descontará de su futura adjudicación." 
+    {
+      title: "Subasta de Planes (Mercado Secundario)",
+      content: "El vendedor puede publicar su plan estableciendo un precio mínimo para cubrir deudas. La comisión del 2% + IVA se descuenta de la venta. Si no hay ofertas, la plataforma garantiza la compra al precio mínimo, usando un fondo de reserva para asegurar la integridad del grupo. El comprador asume una comisión del 2% + IVA sobre su futura adjudicación. Un plan comprado en subasta no puede revenderse, solo darse de baja."
     },
     {
       title: "Política de Baja de Plan",
-      content: "Puedes solicitar la baja de un plan no adjudicado. Se te devolverá el capital aportado al finalizar el plazo original del grupo, descontando una penalidad por rescisión."
+      content: "Solo para planes no adjudicados. El capital aportado (alícuotas puras) se devuelve al final del plazo del grupo, con un descuento del 5% + IVA por rescisión. Los planes ya adjudicados no pueden darse de baja."
+    },
+    {
+      title: "Política de Privacidad y Uso de Datos",
+      content: "Group Dreaming se compromete a proteger tu privacidad. Tus datos se usan exclusivamente para gestionar la plataforma y no se comparten con terceros para fines comerciales. Consulta nuestra política de privacidad completa para más detalles."
     }
   ];
 
@@ -249,5 +253,3 @@ export default function LandingPage() {
   );
 
 }
-
-    
