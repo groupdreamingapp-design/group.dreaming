@@ -23,47 +23,77 @@ type GroupDetailClientProps = {
 
 const generateStaticAwards = (totalMembers: number, totalMonths: number, isAwarded: boolean = false): Award[][] => {
     const memberOrderNumbers = Array.from({ length: totalMembers }, (_, i) => i + 1);
+    const userOrderNumber = 42;
 
-    // If the user is awarded, ensure their order number (42) is among the winners.
+    // Pseudo-random shuffle function for consistency
+    const shuffle = (array: number[], seed: number) => {
+        let currentIndex = array.length, randomIndex;
+        while (currentIndex !== 0) {
+            seed = (seed * 9301 + 49297) % 233280;
+            randomIndex = Math.floor(seed / 233280 * currentIndex);
+            currentIndex--;
+            [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+        }
+        return array;
+    };
+    
+    let potentialWinners = [...memberOrderNumbers];
     if (isAwarded) {
-        const userOrderNumber = 42;
-        const userIndex = memberOrderNumbers.indexOf(userOrderNumber);
+        // Ensure user is in the list, if not, something is wrong with the data but we proceed
+        const userIndex = potentialWinners.indexOf(userOrderNumber);
         if (userIndex > -1) {
-            // Swap user's number with the one at a winning position (e.g., the 5th winner)
-            const winningPosition = 4; // 5th winner (index 4)
-            [memberOrderNumbers[userIndex], memberOrderNumbers[winningPosition]] = [memberOrderNumbers[winningPosition], memberOrderNumbers[userIndex]];
+            potentialWinners.splice(userIndex, 1);
         }
     }
     
-    // Simple pseudo-random shuffle to ensure consistency between server and client
-    let currentIndex = memberOrderNumbers.length;
-    let seed = 12345; // A fixed seed for the pseudo-random number generator
-    
-    // While there remain elements to shuffle.
-    while (currentIndex !== 0) {
-        seed = (seed * 9301 + 49297) % 233280;
-        const randomIndex = Math.floor(seed / 233280 * currentIndex);
-        currentIndex--;
-
-        // And swap it with the current element.
-        [memberOrderNumbers[currentIndex], memberOrderNumbers[randomIndex]] = [
-        memberOrderNumbers[randomIndex], memberOrderNumbers[currentIndex]];
-    }
+    // Shuffle the rest of the winners
+    potentialWinners = shuffle(potentialWinners, 12345);
 
     const awards: Award[][] = [];
-    let memberIndex = 0;
+    let winners = [...potentialWinners];
 
-    for (let i = 0; i < totalMonths; i++) {
-        // Ensure we don't go out of bounds and have at least two members left to award
-        if (memberIndex >= totalMembers - 1) break;
+    // If the user is awarded, make them the winner of the 5th month's sorteo
+    if (isAwarded) {
+        const awardsPerMonth = 2;
+        const userWinMonthIndex = 4; // 5th month
+        const userWinIndexInMonth = 0; // Sorteo
 
-        const sorteoWinner = memberOrderNumbers[memberIndex++];
-        const licitacionWinner = memberOrderNumbers[memberIndex++];
-        
-        awards.push([
-            { type: 'sorteo', orderNumber: sorteoWinner },
-            { type: 'licitacion', orderNumber: licitacionWinner }
-        ]);
+        // Ensure there are enough months to place the user
+        if (totalMonths > userWinMonthIndex) {
+            // Pre-fill months before user's win
+            for (let i = 0; i < userWinMonthIndex; i++) {
+                awards[i] = [
+                    { type: 'sorteo', orderNumber: winners.shift()! },
+                    { type: 'licitacion', orderNumber: winners.shift()! }
+                ];
+            }
+
+            // Place the user's win
+            const licitacionWinnerForUserMonth = winners.shift()!;
+            awards[userWinMonthIndex] = [
+                { type: 'sorteo', orderNumber: userOrderNumber },
+                { type: 'licitacion', orderNumber: licitacionWinnerForUserMonth }
+            ];
+            
+            // Fill remaining months
+            for (let i = userWinMonthIndex + 1; i < totalMonths; i++) {
+                 if (winners.length < 2) break;
+                 awards[i] = [
+                    { type: 'sorteo', orderNumber: winners.shift()! },
+                    { type: 'licitacion', orderNumber: winners.shift()! }
+                ];
+            }
+
+        }
+    } else {
+        // If user is not awarded, just fill as before
+        for (let i = 0; i < totalMonths; i++) {
+            if (winners.length < 2) break;
+            awards.push([
+                { type: 'sorteo', orderNumber: winners.shift()! },
+                { type: 'licitacion', orderNumber: winners.shift()! }
+            ]);
+        }
     }
 
     return awards;
@@ -347,5 +377,7 @@ export default function GroupDetailClient({ groupId }: GroupDetailClientProps) {
     </>
   );
 }
+
+    
 
     
