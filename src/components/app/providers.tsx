@@ -38,6 +38,34 @@ export function GroupsProvider({ children }: { children: ReactNode }) {
     myGroupsCountRef.current = currentMyGroups.length;
   }, [groups]);
 
+  // Effect to simulate group activation
+  useEffect(() => {
+    const pendingGroups = groups.filter(g => g.status === 'Pendiente');
+
+    pendingGroups.forEach(pendingGroup => {
+        // Find if this group was just made pending
+        if(pendingGroup.membersCount === pendingGroup.totalMembers) {
+             const timer = setTimeout(() => {
+                setGroups(currentGroups => {
+                    const newGroups = currentGroups.map(g => {
+                        if (g.id === pendingGroup.id) {
+                            return { ...g, status: 'Activo' };
+                        }
+                        return g;
+                    });
+                    return newGroups;
+                });
+                toast({
+                    title: "¡Grupo Activado!",
+                    description: `El grupo ${pendingGroup.id} ha completado sus validaciones y ya está activo.`,
+                });
+            }, 5000); // Simulate 5 second processing time
+
+            return () => clearTimeout(timer);
+        }
+    });
+  }, [groups]);
+
   const joinGroup = useCallback((groupId: string) => {
     let joinedGroup: Group | null = null;
     setGroups(currentGroups => {

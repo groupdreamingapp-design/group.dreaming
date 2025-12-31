@@ -16,8 +16,8 @@ type GroupCardProps = {
 
 const statusConfig = {
   Abierto: { icon: Users, color: "bg-blue-500", text: "text-blue-500" },
-  Pendiente: { icon: Hourglass, color: "bg-yellow-500", text: "text-yellow-500" },
-  Activo: { icon: CheckCircle2, color: "bg-green-500", text: "text-green-500" },
+  Pendiente: { icon: Hourglass, color: "bg-yellow-500", text: "text-yellow-700" },
+  Activo: { icon: CheckCircle2, color: "bg-green-500", text: "text-green-700" },
   Cerrado: { icon: Lock, color: "bg-gray-500", text: "text-gray-500" },
 };
 
@@ -31,7 +31,7 @@ export function GroupCard({ group, isPublic = false }: GroupCardProps) {
     : group.status === 'Activo'
     ? ((group.monthsCompleted || 0) / group.plazo) * 100
     : group.status === 'Cerrado'
-    ? 100 : 0;
+    ? 100 : (group.status === 'Pendiente' ? 100 : 0);
   
   const membersMissing = group.totalMembers - group.membersCount;
 
@@ -39,6 +39,8 @@ export function GroupCard({ group, isPublic = false }: GroupCardProps) {
     ? `${group.membersCount} de ${group.totalMembers} miembros`
     : group.status === 'Activo'
     ? `${group.monthsCompleted} de ${group.plazo} meses`
+    : group.status === 'Pendiente'
+    ? `Validando (${group.totalMembers}/${group.totalMembers})`
     : 'Grupo finalizado';
     
   const cardLink = group.userIsMember ? `/dashboard/group/${group.id}` : `/dashboard/group-public/${group.id}`;
@@ -69,6 +71,13 @@ export function GroupCard({ group, isPublic = false }: GroupCardProps) {
     );
   }
 
+  const badgeClassName = cn(
+    "border-current",
+    group.status === 'Pendiente' && 'bg-yellow-500/20 text-yellow-700 border-yellow-500/30',
+    group.status === 'Activo' && 'bg-green-500/20 text-green-700 border-green-500/30',
+    group.status === 'Abierto' && 'bg-blue-500/20 text-blue-700 border-blue-500/30'
+  );
+
   return (
     <Card className="flex flex-col">
       <Link href={cardLink} className="flex flex-col flex-grow">
@@ -79,7 +88,7 @@ export function GroupCard({ group, isPublic = false }: GroupCardProps) {
               <CardTitle className="text-xl">{formatCurrency(group.capital)}</CardTitle>
             </div>
             <div className="relative">
-              <Badge className={cn(statusConfig[group.status].text, "border-current")} variant="outline">
+              <Badge className={badgeClassName} variant="outline">
                   <StatusIcon className="mr-1 h-3 w-3" />
                   {group.status}
               </Badge>
