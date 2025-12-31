@@ -24,25 +24,55 @@ export default function AuctionsPage() {
 
   const formatCurrency = (amount: number) => new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'USD' }).format(amount);
   
-  const handleConfirmOffer = (auctionTitle: string) => {
+  const handleConfirmOffer = (auction: (typeof auctions)[0]) => {
+    const minBidIncrement = auction.precioMinimo * 0.03;
+    const nextMinBid = auction.highestBid + minBidIncrement;
+
     if (autoBidEnabled) {
-        if (!maxBid || !autoIncrement) {
-            toast({
-                variant: "destructive",
-                title: "Error en la oferta automática",
-                description: "Debes completar la oferta máxima y el monto de incremento.",
-            });
-            return;
-        }
+      const maxBidNum = Number(maxBid);
+      const autoIncrementNum = Number(autoIncrement);
+      if (!maxBid || !autoIncrement) {
+          toast({
+              variant: "destructive",
+              title: "Error en la oferta automática",
+              description: "Debes completar la oferta máxima y el monto de incremento.",
+          });
+          return;
+      }
+      if (autoIncrementNum < minBidIncrement) {
+        toast({
+            variant: "destructive",
+            title: "Incremento inválido",
+            description: `El incremento por puja debe ser de al menos ${formatCurrency(minBidIncrement)}.`,
+        });
+        return;
+      }
+      if (maxBidNum <= auction.highestBid) {
+         toast({
+            variant: "destructive",
+            title: "Oferta máxima inválida",
+            description: `Tu oferta máxima debe superar la mejor oferta actual de ${formatCurrency(auction.highestBid)}.`,
+        });
+        return;
+      }
     } else {
-        if (!offerAmount) {
-            toast({
-                variant: "destructive",
-                title: "Error en la oferta",
-                description: "Por favor, ingresa un monto para tu oferta.",
-            });
-            return;
-        }
+      const offerAmountNum = Number(offerAmount);
+      if (!offerAmount) {
+          toast({
+              variant: "destructive",
+              title: "Error en la oferta",
+              description: "Por favor, ingresa un monto para tu oferta.",
+          });
+          return;
+      }
+      if (offerAmountNum < nextMinBid) {
+        toast({
+            variant: "destructive",
+            title: "Oferta muy baja",
+            description: `Tu oferta debe ser igual o mayor a la próxima puja mínima de ${formatCurrency(nextMinBid)}.`,
+        });
+        return;
+      }
     }
 
     if (!termsAccepted) {
@@ -57,15 +87,19 @@ export default function AuctionsPage() {
     if (autoBidEnabled) {
         toast({
             title: "¡Oferta automática configurada!",
-            description: `Tu puja automática para ${auctionTitle} con un máximo de ${formatCurrency(Number(maxBid))} ha sido guardada.`,
+            description: `Tu puja automática para ${auction.groupId} con un máximo de ${formatCurrency(Number(maxBid))} ha sido guardada.`,
         });
     } else {
         toast({
           title: "¡Oferta realizada con éxito!",
-          description: `Tu oferta de ${formatCurrency(Number(offerAmount))} por el plan ${auctionTitle} ha sido registrada.`,
+          description: `Tu oferta de ${formatCurrency(Number(offerAmount))} por el plan ${auction.groupId} ha sido registrada.`,
         });
     }
 
+    // This would typically close the dialog via its parent state, here we simulate by resetting our local state
+    // and assuming the Dialog's onOpenChange will be called.
+    const closeButton = document.querySelector('[data-radix-dialog-close]') as HTMLElement;
+    closeButton?.click();
     resetDialog();
   };
   
@@ -87,6 +121,11 @@ export default function AuctionsPage() {
         {auctions.map(auction => {
           const minBidIncrement = auction.precioMinimo * 0.03;
           const nextMinBid = auction.highestBid + minBidIncrement;
+
+          const isManualOfferInvalid = !autoBidEnabled && (!offerAmount || Number(offerAmount) < nextMinBid);
+          const isAutoBidInvalid = autoBidEnabled && (!maxBid || !autoIncrement || Number(maxBid) <= auction.highestBid || Number(autoIncrement) < minBidIncrement);
+          const isOfferDisabled = !termsAccepted || isManualOfferInvalid || isAutoBidInvalid;
+
           return (
             <Card key={auction.id} className="flex flex-col">
               <CardHeader>
@@ -166,8 +205,9 @@ export default function AuctionsPage() {
                                     <Input 
                                         id="max-bid" 
                                         type="number" 
-                                        placeholder="Ej: 8500.00" 
+                                        placeholder={`> ${formatCurrency(auction.highestBid)}`}
                                         value={maxBid}
+                                        min={auction.highestBid + 0.01}
                                         onChange={(e) => setMaxBid(e.target.value)}
                                     />
                                    </div>
@@ -176,8 +216,9 @@ export default function AuctionsPage() {
                                     <Input 
                                         id="auto-increment" 
                                         type="number" 
-                                        placeholder={`Min: ${minBidIncrement.toFixed(2)}`}
+                                        placeholder={`Min: ${formatCurrency(minBidIncrement)}`}
                                         value={autoIncrement}
+                                        min={minBidIncrement}
                                         onChange={(e) => setAutoIncrement(e.target.value)}
                                     />
                                    </div>
@@ -189,8 +230,9 @@ export default function AuctionsPage() {
                                 <Input 
                                     id="offer-amount" 
                                     type="number" 
-                                    placeholder={nextMinBid.toFixed(2)} 
+                                    placeholder={formatCurrency(nextMinBid)}
                                     value={offerAmount}
+                                    min={nextMinBid}
                                     onChange={(e) => setOfferAmount(e.target.value)}
                                 />
                             </div>
@@ -214,8 +256,8 @@ export default function AuctionsPage() {
                       </DialogClose>
                       <Button 
                         type="button" 
-                        onClick={() => handleConfirmOffer(auction.groupId)}
-                        disabled={!termsAccepted || (autoBidEnabled ? (!maxBid || !autoIncrement) : !offerAmount)}
+                        onClick={() => handleConfirmOffer(auction)}
+                        disabled={isOfferDisabled}
                       >
                         Confirmar Oferta
                       </Button>
@@ -230,3 +272,5 @@ export default function AuctionsPage() {
     </>
   );
 }
+
+    
