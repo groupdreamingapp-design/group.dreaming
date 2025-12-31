@@ -26,6 +26,17 @@ const generateId = () => {
 
 const generateInitialGroups = (): Group[] => {
   const groups: Group[] = [];
+  const existingIds = new Set<string>();
+
+  const addGroup = (group: Group) => {
+    let newId = generateId();
+    while (existingIds.has(newId)) {
+        newId = generateId();
+    }
+    group.id = newId;
+    groups.push(group);
+    existingIds.add(newId);
+  }
 
   for (const capital of capitalOptions) {
     for (const plazo of plazoOptions) {
@@ -36,16 +47,10 @@ const generateInitialGroups = (): Group[] => {
 
       if (cuotaPromedio <= 1000) {
         const totalMembers = plazo * 2;
-        // Use a deterministic method to set initial members to avoid hydration errors
         const membersCount = (capital + plazo) % Math.max(1, Math.floor(totalMembers * 0.5));
         
-        let newId;
-        do {
-            newId = generateId();
-        } while (groups.some(g => g.id === newId));
-
-        groups.push({
-          id: newId,
+        addGroup({
+          id: '', // Will be generated
           capital,
           plazo,
           cuotaPromedio,
@@ -72,6 +77,8 @@ const generateInitialGroups = (): Group[] => {
     userIsMember: true,
     userIsAwarded: true,
   });
+  existingIds.add("ID-20240115-9998");
+
 
    groups.push({
     id: "ID-20230720-9999",
@@ -85,27 +92,26 @@ const generateInitialGroups = (): Group[] => {
     userIsMember: true,
     userIsAwarded: false,
   });
-
+  existingIds.add("ID-20230720-9999");
 
   return groups;
 };
 
-export const initialGroups: Group[] = generateInitialGroups();
+export let initialGroups: Group[] = generateInitialGroups();
 
 export const transactions: Transaction[] = [
     { id: "txn-1", date: "2024-07-15", type: "Depósito", description: "Transferencia bancaria", amount: 1000, status: "Completado" },
-    { id: "txn-2", date: "2024-07-10", type: "Pago de Cuota", description: "Grupo GR-001, cuota 5/60", amount: -380, status: "Completado" },
-    { id: "txn-3", date: "2024-07-10", type: "Pago de Cuota", description: "Grupo GR-002, cuota 12/48", amount: -235, status: "Completado" },
-    { id: "txn-4", date: "2024-06-25", type: "Liquidación", description: "Adjudicación GR-002", amount: 10000, status: "Completado" },
+    { id: "txn-2", date: "2024-07-10", type: "Pago de Cuota", description: "Grupo ID-20240115-9998, cuota 5/48", amount: -380, status: "Completado" },
+    { id: "txn-3", date: "2024-07-10", type: "Pago de Cuota", description: "Grupo ID-20230720-9999, cuota 12/36", amount: -455, status: "Completado" },
+    { id: "txn-4", date: "2024-06-25", type: "Liquidación", description: "Adjudicación ID-20240115-9998", amount: 15000, status: "Completado" },
     { id: "txn-5", date: "2024-06-15", type: "Retiro", description: "Retiro a cuenta bancaria", amount: -2000, status: "Completado" },
 ];
 
 export const auctions: Auction[] = [
-    { id: "auc-1", groupId: "GR-007", capital: 30000, plazo: 60, cuotasPagadas: 15, precioMinimo: 7000, highestBid: 7250, endDate: "2024-07-28", numberOfBids: 8 },
-    { id: "auc-2", groupId: "GR-008", capital: 15000, plazo: 36, cuotasPagadas: 20, precioMinimo: 6500, highestBid: 6500, endDate: "2024-07-29", numberOfBids: 1 },
+    { id: "auc-1", groupId: "ID-20240210-1138", capital: 30000, plazo: 60, cuotasPagadas: 15, precioMinimo: 7200, highestBid: 7520, endDate: "2024-07-28", numberOfBids: 8 },
+    { id: "auc-2", groupId: "ID-20240305-4815", capital: 15000, plazo: 36, cuotasPagadas: 20, precioMinimo: 8100, highestBid: 8100, endDate: "2024-07-29", numberOfBids: 1 },
 ]
 
-// Assuming GR-001 is the context for these installments
 const capital = 20000;
 const plazo = 60;
 
