@@ -12,18 +12,17 @@ import { Switch } from '@/components/ui/switch';
 import { ArrowLeft, Users, Clock, Users2, Calendar, Gavel, HandCoins, Ticket, Info, Trophy, FileX2, TrendingUp, Hand, Scale } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
 import { useGroups } from '@/hooks/use-groups';
 import { installments as allInstallments } from '@/lib/data';
 
+type GroupDetailClientProps = {
+  groupId: string;
+};
 
-export default function GroupDetailPage() {
-  const params = useParams();
+export default function GroupDetailClient({ groupId }: GroupDetailClientProps) {
   const { groups } = useGroups();
-  
-  const groupId = typeof params.id === 'string' ? params.id : '';
   const group = groups.find(g => g.id === groupId);
-  
+
   // In a real app, this would be filtered by group, here we pass all of them for simplicity
   const installments = allInstallments;
 
