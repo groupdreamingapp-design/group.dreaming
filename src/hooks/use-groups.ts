@@ -1,4 +1,3 @@
-
 'use client';
 
 import { createContext, useContext, useState, useCallback, ReactNode } from 'react';
@@ -27,16 +26,17 @@ function generateNewGroup(templateGroup: Group): Group {
     };
 }
 
-
 export function GroupsProvider({ children }: { children: ReactNode }) {
   const [groups, setGroups] = useState<Group[]>(initialGroups);
 
   const joinGroup = useCallback((groupId: string) => {
     setGroups(currentGroups => {
-      let newGroups = [...currentGroups];
+      const newGroups = [...currentGroups];
       const groupIndex = newGroups.findIndex(g => g.id === groupId);
       
-      if (groupIndex === -1) return currentGroups;
+      if (groupIndex === -1) {
+        return currentGroups;
+      }
 
       const groupToJoin = { ...newGroups[groupIndex] };
       
