@@ -9,32 +9,33 @@ const rulesConfig = [
         title: "Publicación y Precio Base",
         icon: FileText,
         points: [
-            "El vendedor publica su plan en subasta. Se establece un precio base, que considera el total de cuotas puras abonadas menos una deducción del 40%, más una comisión del 2% (+IVA).",
-            "La comisión del vendedor (2% + IVA) se descuenta del monto final de la venta."
+            "El vendedor publica su plan en subasta. El precio base se establece a partir del total de cuotas emitidas (incluyendo todos los conceptos), menos un 50%.",
+            "Una vez concretada la venta, del monto final a liquidar al vendedor se deduce cualquier concepto pendiente para entregar el plan libre de deudas, además de la comisión por venta (2% + IVA)."
         ]
     },
     {
         title: "Proceso de Oferta y Garantía de Venta",
         icon: ShieldCheck,
         points: [
-            "Los compradores interesados realizan ofertas por el plan durante un plazo de 48 horas.",
-            "Al ganar una subasta, el comprador tiene 24 horas para integrar el capital ofertado en su wallet.",
-            "Si un plan no recibe ninguna oferta al finalizar el plazo, la plataforma absorberá el plan, abonando al vendedor el precio base de subasta. Esto garantiza una liquidación segura para el vendedor y la integridad del grupo."
+            "Los compradores realizan ofertas durante el plazo de la subasta. Al ganar, el comprador tiene 24 horas para integrar el capital ofertado más la comisión de compra (2% + IVA).",
+            "Si el comprador no concreta el pago, el plan se vuelve a subastar y el comprador es bloqueado hasta que pague una multa del 10% + IVA sobre la oferta realizada.",
+            "Si un plan no recibe ofertas, la plataforma garantiza su compra al precio base, asegurando una liquidación para el vendedor."
         ]
     },
     {
         title: "Fondo de Reserva y Sostenibilidad",
         icon: Landmark,
         points: [
-            "Para financiar esta garantía, la plataforma genera un fondo de reserva en cada grupo, compuesto por el 50% de los ingresos del \"Derecho de Suscripción\" y el 50% de los \"Gastos Administrativos\".",
-            "Cuando la plataforma absorbe un plan, utiliza este fondo para cubrir las cuotas mensuales a valor de alícuota pura, asegurando que el capital del grupo se complete para todos los miembros."
+            "Para financiar la garantía de compra, la plataforma genera un fondo de reserva en cada grupo, compuesto por el 50% de los ingresos del \"Derecho de Suscripción\" y el 50% de los \"Gastos Administrativos\".",
+            "Cuando la plataforma absorbe un plan, utiliza este fondo para cubrir las cuotas mensuales, asegurando que el capital del grupo se complete para todos los miembros."
         ]
     },
     {
         title: "Para el Comprador",
         icon: Users,
         points: [
-            "La comisión de compra (2% + IVA) se descontará del capital que reciba al momento de resultar adjudicado en el futuro.",
+            "La comisión de compra (2% + IVA) se abona junto con el monto ofertado para concretar la adquisición del plan.",
+            "Al resultar adjudicado en el futuro, el comprador recibirá el capital completo del plan, ya que las comisiones fueron saldadas previamente."
         ]
     }
 ];
