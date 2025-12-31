@@ -26,12 +26,14 @@ const generateInitialGroups = (): Group[] => {
 
       if (cuotaPromedio <= 1000) {
         const totalMembers = plazo * 2;
+        // Use a deterministic method to set initial members to avoid hydration errors
+        const membersCount = (capital + plazo) % Math.max(1, Math.floor(totalMembers * 0.5));
         groups.push({
           id: `GR-${String(idCounter++).padStart(3, '0')}`,
           capital,
           plazo,
           cuotaPromedio,
-          membersCount: Math.floor(Math.random() * totalMembers * 0.5), // Start with some members
+          membersCount: membersCount,
           totalMembers,
           status: "Abierto",
           userIsMember: false,
@@ -125,6 +127,3 @@ export const installments: Installment[] = Array.from({ length: 60 }, (_, i) => 
         awards: i < 5 ? staticAwards[i] : undefined,
     }
 });
-
-// Rename 'groups' to 'initialGroups' to clarify its role
-export { initialGroups as groups };
