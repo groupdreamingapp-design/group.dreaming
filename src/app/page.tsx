@@ -57,7 +57,7 @@ export default function LandingPage() {
     },
     {
       title: "Subasta de Planes (Mercado Secundario)",
-      content: "El vendedor puede publicar su plan estableciendo un precio mínimo para cubrir deudas. La comisión del 2% + IVA se descuenta de la venta. Si no hay ofertas, la plataforma garantiza la compra al precio mínimo. El comprador asume una comisión del 2% + IVA sobre su futura adjudicación. Si un plan es adjudicado y puesto en subasta, el plazo de la misma será el tiempo restante para confirmar la adjudicación."
+      content: "El vendedor puede publicar su plan estableciendo un precio base para cubrir deudas. La comisión del 2% + IVA se descuenta de la venta. Si no hay ofertas, la plataforma garantiza la compra al precio base. El comprador asume una comisión del 2% + IVA sobre su futura adjudicación. Si un plan es adjudicado y puesto en subasta, el plazo de la misma será el tiempo restante para confirmar la adjudicación."
     },
     {
       title: "Política de Baja de Plan",
@@ -253,5 +253,3 @@ export default function LandingPage() {
   );
 
 }
-
-    

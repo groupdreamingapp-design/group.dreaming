@@ -70,7 +70,7 @@ export default function AuctionsPage() {
   const formatCurrencyNoDecimals = (amount: number) => new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(amount);
   
   const validateOffer = (auction: (typeof auctions)[0]) => {
-    const minBidIncrement = auction.precioMinimo * 0.03;
+    const minBidIncrement = auction.precioBase * 0.03;
     const nextMinBid = auction.highestBid + minBidIncrement;
 
     if (autoBidEnabled) {
@@ -189,7 +189,7 @@ export default function AuctionsPage() {
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
         {auctions.map(auction => {
-          const minBidIncrement = auction.precioMinimo * 0.03;
+          const minBidIncrement = auction.precioBase * 0.03;
           const nextMinBid = auction.highestBid + minBidIncrement;
 
           const isManualOfferInvalid = !autoBidEnabled && (!offerAmount || Number(offerAmount) < nextMinBid);
@@ -211,7 +211,7 @@ export default function AuctionsPage() {
                         </div>
                         <div className="text-right">
                              <p className="text-sm text-muted-foreground">Precio Base</p>
-                             <p className="text-base font-semibold">{formatCurrency(auction.precioMinimo)}</p>
+                             <p className="text-base font-semibold">{formatCurrency(auction.precioBase)}</p>
                         </div>
                     </div>
                      <div className="text-sm text-center border-t border-dashed pt-2">

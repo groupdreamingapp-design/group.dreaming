@@ -6,10 +6,10 @@ import Link from "next/link";
 
 const rulesConfig = [
     {
-        title: "Publicación y Precio Mínimo",
+        title: "Publicación y Precio Base",
         icon: FileText,
         points: [
-            "El vendedor publica su plan en subasta. Se establece un precio mínimo de forma automática, calculado para cubrir cualquier deuda pendiente del vendedor (cuotas vencidas, mora, etc.), asegurando que el comprador adquiera el plan libre de deudas.",
+            "El vendedor publica su plan en subasta. Se establece un precio base, que considera el total de cuotas puras abonadas menos una deducción del 40%, más una comisión del 2% (+IVA).",
             "La comisión del vendedor (2% + IVA) se descuenta del monto final de la venta."
         ]
     },
@@ -19,7 +19,7 @@ const rulesConfig = [
         points: [
             "Los compradores interesados realizan ofertas por el plan durante un plazo de 48 horas.",
             "Al ganar una subasta, el comprador tiene 24 horas para integrar el capital ofertado en su wallet.",
-            "Si un plan no recibe ninguna oferta al finalizar el plazo, la plataforma absorberá el plan, abonando al vendedor el precio mínimo de subasta. Esto garantiza una liquidación segura para el vendedor y la integridad del grupo."
+            "Si un plan no recibe ninguna oferta al finalizar el plazo, la plataforma absorberá el plan, abonando al vendedor el precio base de subasta. Esto garantiza una liquidación segura para el vendedor y la integridad del grupo."
         ]
     },
     {
