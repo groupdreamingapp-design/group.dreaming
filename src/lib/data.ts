@@ -51,9 +51,9 @@ export const transactions: Transaction[] = [
 
 const getFutureDate = (hours: number) => new Date(Date.now() + hours * 60 * 60 * 1000).toISOString();
 
-export const auctions: Auction[] = [
-    { id: "auc-1", groupId: "ID-20240210-1138", orderNumber: 15, capital: 30000, plazo: 60, cuotasPagadas: 15, precioBase: 7500, highestBid: 7520, endDate: getFutureDate(48), numberOfBids: 1 },
-    { id: "auc-2", groupId: "ID-20240305-4815", orderNumber: 42, capital: 15000, plazo: 36, cuotasPagadas: 20, precioBase: 8333, highestBid: 8333, endDate: getFutureDate(24), numberOfBids: 0, isPostAdjudicacion: true },
+export const auctions: Omit<Auction, 'precioBase'>[] = [
+    { id: "auc-1", groupId: "ID-20240210-1138", orderNumber: 15, capital: 30000, plazo: 60, cuotasPagadas: 15, highestBid: 7520, endDate: getFutureDate(48), numberOfBids: 1 },
+    { id: "auc-2", groupId: "ID-20240305-4815", orderNumber: 42, capital: 15000, plazo: 36, cuotasPagadas: 20, highestBid: 8333, endDate: getFutureDate(24), numberOfBids: 0, isPostAdjudicacion: true },
 ]
 
 const capital = 20000;

@@ -39,7 +39,6 @@ export type Auction = {
   capital: number;
   plazo: number;
   cuotasPagadas: number;
-  precioBase: number;
   highestBid: number;
   endDate: string;
   numberOfBids: number;

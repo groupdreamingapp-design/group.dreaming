@@ -70,8 +70,8 @@ export default function AuctionsPage() {
   const formatCurrency = (amount: number) => new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'USD' }).format(amount);
   const formatCurrencyNoDecimals = (amount: number) => new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(amount);
   
-  const validateOffer = (auction: (typeof auctions)[0]) => {
-    const minBidIncrement = auction.precioBase * 0.03;
+  const validateOffer = (auction: (typeof auctions)[0], precioBase: number) => {
+    const minBidIncrement = precioBase * 0.03;
     const nextMinBid = auction.highestBid + minBidIncrement;
 
     if (autoBidEnabled) {
@@ -123,9 +123,9 @@ export default function AuctionsPage() {
     return true;
   }
 
-  const handleAcceptTerms = (checked: boolean, auction: (typeof auctions)[0]) => {
+  const handleAcceptTerms = (checked: boolean, auction: (typeof auctions)[0], precioBase: number) => {
     if (checked) {
-        const isValid = validateOffer(auction);
+        const isValid = validateOffer(auction, precioBase);
         if (isValid) {
             setTermsAccepted(true);
         }
@@ -191,7 +191,11 @@ export default function AuctionsPage() {
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
         {auctions.map(auction => {
-          const minBidIncrement = auction.precioBase * 0.03;
+          // NOTE: This is a simulation based on the available data.
+          // In a real scenario, this would come from the backend.
+          const totalCuotasEmitidas = (auction.capital / auction.plazo) * auction.cuotasPagadas;
+          const precioBase = totalCuotasEmitidas * 0.5;
+          const minBidIncrement = precioBase * 0.03;
           const nextMinBid = auction.highestBid + minBidIncrement;
 
           const isManualOfferInvalid = !autoBidEnabled && (!offerAmount || Number(offerAmount) < nextMinBid);
@@ -213,7 +217,7 @@ export default function AuctionsPage() {
                         </div>
                         <div className="text-right">
                              <p className="text-sm text-muted-foreground">Precio Base</p>
-                             <p className="text-base font-semibold">{formatCurrency(auction.precioBase)}</p>
+                             <p className="text-base font-semibold">{formatCurrency(precioBase)}</p>
                         </div>
                     </div>
                      <div className="text-sm text-center border-t border-dashed pt-2">
@@ -311,7 +315,7 @@ export default function AuctionsPage() {
                         )}
                       
                        <div className="items-top flex space-x-2 pt-2">
-                           <Switch id="terms" checked={termsAccepted} onCheckedChange={(checked) => handleAcceptTerms(checked, auction)} disabled={!hasReadRules} />
+                           <Switch id="terms" checked={termsAccepted} onCheckedChange={(checked) => handleAcceptTerms(checked, auction, precioBase)} disabled={!hasReadRules} />
                           <div className="grid gap-1.5 leading-none">
                             <Label htmlFor="terms" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 flex items-center gap-2">
                               Acepto los términos y condiciones
