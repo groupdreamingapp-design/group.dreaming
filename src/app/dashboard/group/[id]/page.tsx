@@ -1,6 +1,10 @@
 
 import GroupDetailClient from './group-detail-client';
 
-export default function GroupDetailPage() {
-  return <GroupDetailClient />;
+type GroupDetailPageProps = {
+  params: { id: string };
+};
+
+export default function GroupDetailPage({ params }: GroupDetailPageProps) {
+  return <GroupDetailClient groupId={params.id} />;
 }
