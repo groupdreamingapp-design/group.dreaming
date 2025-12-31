@@ -11,29 +11,14 @@ export const user: User = {
 
 const IVA = 1.21;
 
-const generateId = () => {
-    const today = new Date();
-    const year = today.getFullYear();
-    const month = String(today.getMonth() + 1).padStart(2, '0');
-    const day = String(today.getDate()).padStart(2, '0');
-    const dateString = `${year}${month}${day}`;
-    const randomNumbers = String(Math.floor(Math.random() * 10000)).padStart(4, '0');
-    return `ID-${dateString}-${randomNumbers}`;
-};
-
-const generateInitialGroups = (): Group[] => {
-  const groups: Group[] = [
+export const initialGroups: Group[] = [
     { id: "ID-20240729-1001", capital: 5000, plazo: 12, cuotaPromedio: 458, membersCount: 10, totalMembers: 24, status: "Abierto", userIsMember: false, userIsAwarded: false, },
     { id: "ID-20240729-1002", capital: 10000, plazo: 24, cuotaPromedio: 458, membersCount: 20, totalMembers: 48, status: "Abierto", userIsMember: false, userIsAwarded: false, },
     { id: "ID-20240729-1003", capital: 15000, plazo: 36, cuotaPromedio: 458, membersCount: 30, totalMembers: 72, status: "Abierto", userIsMember: false, userIsAwarded: false, },
     { id: "ID-20240729-1004", capital: 20000, plazo: 48, cuotaPromedio: 458, membersCount: 40, totalMembers: 96, status: "Abierto", userIsMember: false, userIsAwarded: false, },
     { id: "ID-20240115-9998", capital: 15000, plazo: 48, cuotaPromedio: 345, membersCount: 96, totalMembers: 96, status: "Activo", monthsCompleted: 12, userIsMember: true, userIsAwarded: true, },
     { id: "ID-20230720-9999", capital: 15000, plazo: 36, cuotaPromedio: 455, membersCount: 72, totalMembers: 72, status: "Cerrado", monthsCompleted: 36, userIsMember: true, userIsAwarded: false, }
-  ];
-  return groups;
-};
-
-export let initialGroups: Group[] = generateInitialGroups();
+];
 
 export const transactions: Transaction[] = [
     { id: "txn-1", date: "2024-07-15", type: "Depósito", description: "Transferencia bancaria", amount: 1000, status: "Completado" },
