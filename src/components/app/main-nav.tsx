@@ -4,7 +4,7 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
-import { Gavel, LayoutDashboard, Search, Wallet, Users } from "lucide-react"
+import { Gavel, LayoutDashboard, Search, Wallet, Users, Bot } from "lucide-react"
 import { Badge } from "@/components/ui/badge";
 
 type MainNavProps = {

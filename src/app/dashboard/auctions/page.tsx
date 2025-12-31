@@ -5,29 +5,46 @@ import { useState } from "react";
 import { auctions } from "@/lib/data";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Clock, Tag, TrendingUp, Gavel, ArrowUp } from "lucide-react";
+import { Clock, Tag, TrendingUp, Gavel, ArrowUp, Bot } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Switch } from "@/components/ui/switch";
+import { Separator } from "@/components/ui/separator";
 
 export default function AuctionsPage() {
   const [offerAmount, setOfferAmount] = useState('');
   const [termsAccepted, setTermsAccepted] = useState(false);
+  const [autoBidEnabled, setAutoBidEnabled] = useState(false);
+  const [maxBid, setMaxBid] = useState('');
+  const [autoIncrement, setAutoIncrement] = useState('');
   const { toast } = useToast();
 
   const formatCurrency = (amount: number) => new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'USD' }).format(amount);
   
   const handleConfirmOffer = (auctionTitle: string) => {
-    if (!offerAmount) {
-        toast({
-            variant: "destructive",
-            title: "Error en la oferta",
-            description: "Por favor, ingresa un monto para tu oferta.",
-        });
-        return;
+    if (autoBidEnabled) {
+        if (!maxBid || !autoIncrement) {
+            toast({
+                variant: "destructive",
+                title: "Error en la oferta automática",
+                description: "Debes completar la oferta máxima y el monto de incremento.",
+            });
+            return;
+        }
+    } else {
+        if (!offerAmount) {
+            toast({
+                variant: "destructive",
+                title: "Error en la oferta",
+                description: "Por favor, ingresa un monto para tu oferta.",
+            });
+            return;
+        }
     }
+
     if (!termsAccepted) {
         toast({
             variant: "destructive",
@@ -36,17 +53,28 @@ export default function AuctionsPage() {
         });
         return;
     }
-    toast({
-      title: "¡Oferta realizada con éxito!",
-      description: `Tu oferta de ${formatCurrency(Number(offerAmount))} por el plan ${auctionTitle} ha sido registrada.`,
-    });
-    setOfferAmount('');
-    setTermsAccepted(false);
+
+    if (autoBidEnabled) {
+        toast({
+            title: "¡Oferta automática configurada!",
+            description: `Tu puja automática para ${auctionTitle} con un máximo de ${formatCurrency(Number(maxBid))} ha sido guardada.`,
+        });
+    } else {
+        toast({
+          title: "¡Oferta realizada con éxito!",
+          description: `Tu oferta de ${formatCurrency(Number(offerAmount))} por el plan ${auctionTitle} ha sido registrada.`,
+        });
+    }
+
+    resetDialog();
   };
   
   const resetDialog = () => {
     setOfferAmount('');
     setTermsAccepted(false);
+    setAutoBidEnabled(false);
+    setMaxBid('');
+    setAutoIncrement('');
   }
 
   return (
@@ -118,17 +146,57 @@ export default function AuctionsPage() {
                         <div className="font-medium">Próxima Puja Mínima:</div>
                         <div className="text-right font-bold">{formatCurrency(nextMinBid)}</div>
                       </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="offer-amount">Tu Oferta (USD)</Label>
-                        <Input 
-                            id="offer-amount" 
-                            type="number" 
-                            placeholder={nextMinBid.toFixed(2)} 
-                            value={offerAmount}
-                            onChange={(e) => setOfferAmount(e.target.value)}
-                        />
-                      </div>
-                       <div className="items-top flex space-x-2">
+                      
+                      <Separator />
+
+                       <div className="flex items-center justify-between">
+                          <Label htmlFor="autobid-switch" className="flex items-center gap-2">
+                            <Bot className="h-5 w-5" />
+                            <span>Oferta Automática</span>
+                          </Label>
+                          <Switch id="autobid-switch" checked={autoBidEnabled} onCheckedChange={setAutoBidEnabled} />
+                        </div>
+                        
+                        {autoBidEnabled ? (
+                            <div className="space-y-4 p-4 border rounded-md bg-muted/50">
+                               <p className="text-xs text-muted-foreground">El sistema pujará por ti hasta alcanzar tu límite, usando el incremento que definas.</p>
+                               <div className="grid grid-cols-2 gap-4">
+                                   <div className="space-y-2">
+                                    <Label htmlFor="max-bid">Oferta Máxima (USD)</Label>
+                                    <Input 
+                                        id="max-bid" 
+                                        type="number" 
+                                        placeholder="Ej: 8500.00" 
+                                        value={maxBid}
+                                        onChange={(e) => setMaxBid(e.target.value)}
+                                    />
+                                   </div>
+                                   <div className="space-y-2">
+                                    <Label htmlFor="auto-increment">Incremento por Puja (USD)</Label>
+                                    <Input 
+                                        id="auto-increment" 
+                                        type="number" 
+                                        placeholder={`Min: ${minBidIncrement.toFixed(2)}`}
+                                        value={autoIncrement}
+                                        onChange={(e) => setAutoIncrement(e.target.value)}
+                                    />
+                                   </div>
+                               </div>
+                            </div>
+                        ) : (
+                            <div className="space-y-2">
+                                <Label htmlFor="offer-amount">Tu Oferta (USD)</Label>
+                                <Input 
+                                    id="offer-amount" 
+                                    type="number" 
+                                    placeholder={nextMinBid.toFixed(2)} 
+                                    value={offerAmount}
+                                    onChange={(e) => setOfferAmount(e.target.value)}
+                                />
+                            </div>
+                        )}
+                      
+                       <div className="items-top flex space-x-2 pt-2">
                           <Checkbox id="terms" checked={termsAccepted} onCheckedChange={(checked) => setTermsAccepted(Boolean(checked))} />
                           <div className="grid gap-1.5 leading-none">
                             <Label htmlFor="terms" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
@@ -144,15 +212,13 @@ export default function AuctionsPage() {
                       <DialogClose asChild>
                         <Button type="button" variant="secondary">Cancelar</Button>
                       </DialogClose>
-                      <DialogClose asChild>
-                        <Button 
-                          type="button" 
-                          onClick={() => handleConfirmOffer(auction.groupId)}
-                          disabled={!termsAccepted || !offerAmount}
-                        >
-                          Confirmar Oferta
-                        </Button>
-                      </DialogClose>
+                      <Button 
+                        type="button" 
+                        onClick={() => handleConfirmOffer(auction.groupId)}
+                        disabled={!termsAccepted || (autoBidEnabled ? (!maxBid || !autoIncrement) : !offerAmount)}
+                      >
+                        Confirmar Oferta
+                      </Button>
                     </DialogFooter>
                   </DialogContent>
                 </Dialog>
