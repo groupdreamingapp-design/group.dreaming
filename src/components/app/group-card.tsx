@@ -3,10 +3,9 @@ import type { Group } from "@/lib/types";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { Users, Clock, CheckCircle2, Lock, Hourglass, Ticket, Gavel, Trophy, ArrowRight } from "lucide-react";
+import { Users, Clock, CheckCircle2, Lock, Hourglass, ArrowRight, Trophy } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
-import { toast } from "@/hooks/use-toast";
 
 type GroupCardProps = {
   group: Group;
@@ -41,10 +40,6 @@ export function GroupCard({ group, showJoinButton = false, onJoin }: GroupCardPr
   const handleJoinClick = () => {
     if (onJoin) {
       onJoin();
-      toast({
-        title: "¡Felicitaciones!",
-        description: `Te has unido al grupo ${group.id}.`,
-      });
     }
   };
 
