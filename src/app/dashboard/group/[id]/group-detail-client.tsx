@@ -1,7 +1,7 @@
 
 'use client';
 
-import type { Group, Installment } from '@/lib/types';
+import type { Group, Installment, Award } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
@@ -14,10 +14,48 @@ import { ArrowLeft, Users, Clock, Users2, Calendar, Gavel, HandCoins, Ticket, In
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import { useGroups } from '@/hooks/use-groups';
-import { installments as allInstallments, initialGroups, allAwards } from '@/lib/data';
+import { installments as allInstallments, initialGroups } from '@/lib/data';
+import { useMemo } from 'react';
 
 type GroupDetailClientProps = {
     groupId: string;
+};
+
+const generateStaticAwards = (totalMembers: number, totalMonths: number): Award[][] => {
+    // Create a shuffled list of unique member order numbers
+    const memberOrderNumbers = Array.from({ length: totalMembers }, (_, i) => i + 1);
+
+    // Simple pseudo-random shuffle to ensure consistency between server and client
+    let currentIndex = memberOrderNumbers.length;
+    let seed = 12345; // A fixed seed for the pseudo-random number generator
+    
+    // While there remain elements to shuffle.
+    while (currentIndex !== 0) {
+        seed = (seed * 9301 + 49297) % 233280;
+        const randomIndex = Math.floor(seed / 233280 * currentIndex);
+        currentIndex--;
+
+        // And swap it with the current element.
+        [memberOrderNumbers[currentIndex], memberOrderNumbers[randomIndex]] = [
+        memberOrderNumbers[randomIndex], memberOrderNumbers[currentIndex]];
+    }
+
+    const awards: Award[][] = [];
+    let memberIndex = 0;
+
+    for (let i = 0; i < totalMonths; i++) {
+        if (memberIndex >= totalMembers - 1) break; // Stop if we run out of members
+
+        const sorteoWinner = memberOrderNumbers[memberIndex++];
+        const licitacionWinner = memberOrderNumbers[memberIndex++];
+        
+        awards.push([
+            { type: 'sorteo', orderNumber: sorteoWinner },
+            { type: 'licitacion', orderNumber: licitacionWinner }
+        ]);
+    }
+
+    return awards;
 };
 
 export default function GroupDetailClient({ groupId }: GroupDetailClientProps) {
@@ -26,6 +64,12 @@ export default function GroupDetailClient({ groupId }: GroupDetailClientProps) {
   const groupTemplate = initialGroups.find(g => g.id === groupId);
   const dynamicGroupState = groups.find(g => g.id === groupId);
   const group = dynamicGroupState ? { ...groupTemplate, ...dynamicGroupState } : undefined;
+  
+  const groupAwards = useMemo(() => {
+    if (!group) return [];
+    return generateStaticAwards(group.totalMembers, group.plazo);
+  }, [group]);
+
 
   if (!group) {
     return (
@@ -127,7 +171,7 @@ export default function GroupDetailClient({ groupId }: GroupDetailClientProps) {
                       status = 'Futuro';
                     }
                     
-                    const currentAwards = status === 'Pagado' ? allAwards[(inst.number - 1) % allAwards.length] : undefined;
+                    const currentAwards = status === 'Pagado' ? groupAwards[inst.number - 1] : undefined;
 
                     return (
                       <TableRow key={inst.id}>
@@ -143,7 +187,7 @@ export default function GroupDetailClient({ groupId }: GroupDetailClientProps) {
                         </TableCell>
                          <TableCell className="flex items-center gap-2">
                           {currentAwards?.map(award => (
-                            <span key={award.type} className="flex items-center gap-1 text-xs">
+                            <span key={award.orderNumber} className="flex items-center gap-1 text-xs">
                               {award.type === 'sorteo' && <Ticket className="h-4 w-4 text-blue-500" />}
                               {award.type === 'licitacion' && <HandCoins className="h-4 w-4 text-orange-500" />}
                               #{award.orderNumber}

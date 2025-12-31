@@ -65,48 +65,6 @@ const totalSuscripcion = (capital * 0.03) * IVA; // 3% + IVA
 const mesesFinanciacionSuscripcion = Math.floor(plazo * 0.20);
 const cuotaSuscripcion = mesesFinanciacionSuscripcion > 0 ? totalSuscripcion / mesesFinanciacionSuscripcion : 0;
 
-const generateStaticAwards = (totalMembers: number, totalMonths: number): Award[][] => {
-    // Create a shuffled list of unique member order numbers
-    const memberOrderNumbers = Array.from({ length: totalMembers }, (_, i) => i + 1);
-
-    // Simple pseudo-random shuffle to ensure consistency between server and client
-    let currentIndex = memberOrderNumbers.length;
-    let seed = 12345; // A fixed seed for the pseudo-random number generator
-    
-    // While there remain elements to shuffle.
-    while (currentIndex !== 0) {
-        // Pick a remaining element.
-        seed = (seed * 9301 + 49297) % 233280;
-        const randomIndex = Math.floor(seed / 233280 * currentIndex);
-        currentIndex--;
-
-        // And swap it with the current element.
-        [memberOrderNumbers[currentIndex], memberOrderNumbers[randomIndex]] = [
-        memberOrderNumbers[randomIndex], memberOrderNumbers[currentIndex]];
-    }
-
-    const awards: Award[][] = [];
-    let memberIndex = 0;
-
-    for (let i = 0; i < totalMonths; i++) {
-        if (memberIndex >= totalMembers - 1) break; // Stop if we run out of members
-
-        const sorteoWinner = memberOrderNumbers[memberIndex++];
-        const licitacionWinner = memberOrderNumbers[memberIndex++];
-        
-        awards.push([
-            { type: 'sorteo', orderNumber: sorteoWinner },
-            { type: 'licitacion', orderNumber: licitacionWinner }
-        ]);
-    }
-
-    return awards;
-};
-
-
-export const allAwards: Award[][] = generateStaticAwards(144, 84);
-
-
 export const installments: Installment[] = Array.from({ length: 84 }, (_, i) => { // Increased length to satisfy all plans
     const saldoCapital = capital - (alicuotaPura * i);
     const seguroVida = saldoCapital * 0.0009; // 0.09% del saldo de capital
