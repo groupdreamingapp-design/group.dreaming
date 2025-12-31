@@ -51,10 +51,10 @@ export default function LandingPage() {
         </Link>
         <nav className="flex items-center gap-4">
           <Button variant="ghost" asChild>
-            <Link href="/dashboard">Ingresar</Link>
+            <Link href="/login">Ingresar</Link>
           </Button>
           <Button asChild>
-            <Link href="/dashboard">Comenzar Ahora</Link>
+            <Link href="/register">Comenzar Ahora</Link>
           </Button>
         </nav>
       </header>
@@ -83,7 +83,7 @@ export default function LandingPage() {
             </p>
             <div className="mt-10 flex items-center justify-center gap-x-6">
               <Button size="lg" asChild>
-                <Link href="/dashboard">
+                <Link href="/register">
                   Únete a un Grupo <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
               </Button>
