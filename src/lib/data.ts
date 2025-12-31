@@ -108,7 +108,7 @@ export const transactions: Transaction[] = [
 ];
 
 export const auctions: Auction[] = [
-    { id: "auc-1", groupId: "ID-20240210-1138", capital: 30000, plazo: 60, cuotasPagadas: 15, precioMinimo: 7200, highestBid: 7520, endDate: "2024-07-28", numberOfBids: 8 },
+    { id: "auc-1", groupId: "ID-20240210-1138", capital: 30000, plazo: 60, cuotasPagadas: 15, precioMinimo: 7200, highestBid: 7520, endDate: "2024-07-28", numberOfBids: 1 },
     { id: "auc-2", groupId: "ID-20240305-4815", capital: 15000, plazo: 36, cuotasPagadas: 20, precioMinimo: 8100, highestBid: 8100, endDate: "2024-07-29", numberOfBids: 0 },
 ]
 
