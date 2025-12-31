@@ -21,10 +21,20 @@ type GroupDetailClientProps = {
     groupId: string;
 };
 
-const generateStaticAwards = (totalMembers: number, totalMonths: number): Award[][] => {
-    // Create a shuffled list of unique member order numbers
+const generateStaticAwards = (totalMembers: number, totalMonths: number, isAwarded: boolean = false): Award[][] => {
     const memberOrderNumbers = Array.from({ length: totalMembers }, (_, i) => i + 1);
 
+    // If the user is awarded, ensure their order number (42) is among the winners.
+    if (isAwarded) {
+        const userOrderNumber = 42;
+        const userIndex = memberOrderNumbers.indexOf(userOrderNumber);
+        if (userIndex > -1) {
+            // Swap user's number with the one at a winning position (e.g., the 5th winner)
+            const winningPosition = 4; // 5th winner (index 4)
+            [memberOrderNumbers[userIndex], memberOrderNumbers[winningPosition]] = [memberOrderNumbers[winningPosition], memberOrderNumbers[userIndex]];
+        }
+    }
+    
     // Simple pseudo-random shuffle to ensure consistency between server and client
     let currentIndex = memberOrderNumbers.length;
     let seed = 12345; // A fixed seed for the pseudo-random number generator
@@ -44,7 +54,8 @@ const generateStaticAwards = (totalMembers: number, totalMonths: number): Award[
     let memberIndex = 0;
 
     for (let i = 0; i < totalMonths; i++) {
-        if (memberIndex >= totalMembers - 1) break; // Stop if we run out of members
+        // Ensure we don't go out of bounds and have at least two members left to award
+        if (memberIndex >= totalMembers - 1) break;
 
         const sorteoWinner = memberOrderNumbers[memberIndex++];
         const licitacionWinner = memberOrderNumbers[memberIndex++];
@@ -67,7 +78,8 @@ export default function GroupDetailClient({ groupId }: GroupDetailClientProps) {
   
   const groupAwards = useMemo(() => {
     if (!group) return [];
-    return generateStaticAwards(group.totalMembers, group.plazo);
+    // Pass userIsAwarded status to ensure the user appears as a winner if they are awarded
+    return generateStaticAwards(group.totalMembers, group.plazo, group.userIsAwarded);
   }, [group]);
 
 
@@ -335,3 +347,5 @@ export default function GroupDetailClient({ groupId }: GroupDetailClientProps) {
     </>
   );
 }
+
+    
