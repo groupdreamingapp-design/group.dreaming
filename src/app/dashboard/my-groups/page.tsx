@@ -1,127 +1,80 @@
 
 'use client';
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useGroups } from "@/hooks/use-groups";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import Link from "next/link";
+import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { GroupCard } from "@/components/app/group-card";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
-import type { Group } from "@/lib/types";
+import Link from "next/link";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import type { Group, GroupStatus } from "@/lib/types";
 
 export default function MyGroupsPage() {
   const { groups } = useGroups();
-  const formatCurrency = (amount: number) => new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(amount);
+  const [activeTab, setActiveTab] = useState<GroupStatus | "Todos">("Todos");
 
-  const myGroups = useMemo(() => groups.filter(g => g.userIsMember).sort((a,b) => {
-    const statusOrder = { "Activo": 1, "Abierto": 2, "Pendiente": 3, "Cerrado": 4 };
-    return statusOrder[a.status] - statusOrder[b.status];
-  }), [groups]);
+  const myGroups = useMemo(() => groups.filter(g => g.userIsMember), [groups]);
 
-  const getProgress = (group: Group) => {
-    if (group.status === 'Activo' && group.monthsCompleted) {
-      return (group.monthsCompleted / group.plazo) * 100;
+  const filteredGroups = useMemo(() => {
+    if (activeTab === "Todos") {
+      return myGroups.sort((a, b) => {
+        const statusOrder = { "Activo": 1, "Abierto": 2, "Pendiente": 3, "Cerrado": 4 };
+        return statusOrder[a.status] - statusOrder[b.status];
+      });
     }
-    if (group.status === 'Abierto') {
-      return (group.membersCount / group.totalMembers) * 100;
-    }
-    if (group.status === 'Cerrado') {
-      return 100;
-    }
-    return 0;
-  }
-  
-  const getProgressText = (group: Group) => {
-    if (group.status === 'Activo' && group.monthsCompleted) {
-      return `${group.monthsCompleted} de ${group.plazo} meses`;
-    }
-    if (group.status === 'Abierto') {
-      return `${group.membersCount} de ${group.totalMembers} miembros`;
-    }
-    return `Finalizado`;
-  }
+    return myGroups.filter(g => g.status === activeTab);
+  }, [myGroups, activeTab]);
 
-  const getStatusVariant = (status: Group['status']) => {
-    switch (status) {
-      case "Activo": return "default";
-      case "Abierto": return "secondary";
-      case "Pendiente": return "outline";
-      case "Cerrado": return "destructive";
-      default: return "default";
-    }
-  }
-
+  const tabs: (GroupStatus | "Todos")[] = ["Todos", "Activo", "Abierto", "Pendiente", "Cerrado"];
 
   return (
     <>
-        <div>
-            <h1 className="text-3xl font-bold font-headline">Mis Grupos</h1>
-            <p className="text-muted-foreground">Un resumen de todos tus planes de ahorro colectivo.</p>
-        </div>
+      <div>
+        <h1 className="text-3xl font-bold font-headline">Mis Grupos</h1>
+        <p className="text-muted-foreground">Un resumen de todos tus planes de ahorro colectivo.</p>
+      </div>
       
-        <Card>
-            <CardHeader>
-                <CardTitle>Todos mis planes</CardTitle>
-                <CardDescription>Aquí encontrarás todos los grupos a los que te has unido.</CardDescription>
-            </CardHeader>
-          <CardContent>
-            {myGroups.length > 0 ? (
-                 <Table>
-                    <TableHeader>
-                        <TableRow>
-                        <TableHead>Grupo</TableHead>
-                        <TableHead>Capital</TableHead>
-                        <TableHead>Plazo</TableHead>
-                        <TableHead>Progreso</TableHead>
-                        <TableHead>Estado</TableHead>
-                        <TableHead className="text-right">Acción</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {myGroups.map(group => (
-                            <TableRow key={group.id}>
-                                <TableCell className="font-medium">{group.id}</TableCell>
-                                <TableCell>{formatCurrency(group.capital)}</TableCell>
-                                <TableCell>{group.plazo} meses</TableCell>
-                                <TableCell>
-                                    <div className="flex flex-col gap-1">
-                                        <Progress value={getProgress(group)} className="h-2" />
-                                        <span className="text-xs text-muted-foreground">{getProgressText(group)}</span>
-                                    </div>
-                                </TableCell>
-                                <TableCell>
-                                    <Badge variant={getStatusVariant(group.status)}
-                                    className={cn(
-                                        group.status === 'Activo' && 'bg-green-500/20 text-green-700 border-green-500/30',
-                                        group.status === 'Abierto' && 'bg-blue-500/20 text-blue-700 border-blue-500/30',
-                                        group.status === 'Pendiente' && 'bg-yellow-500/20 text-yellow-700 border-yellow-500/30',
-                                    )}
-                                    >{group.status}</Badge>
-                                </TableCell>
-                                <TableCell className="text-right">
-                                    <Button asChild variant="outline" size="sm">
-                                        <Link href={`/dashboard/group/${group.id}`}>Ver Detalles</Link>
-                                    </Button>
-                                </TableCell>
-                            </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
-            ) : (
-                <div className="text-center py-16 text-muted-foreground flex flex-col items-center gap-4">
-                    <p>Aún no te has unido a ningún grupo.</p>
-                    <Button asChild>
-                    <Link href="/dashboard/explore">
-                        ¡Explora los grupos disponibles y empieza a cumplir tus sueños!
-                    </Link>
-                    </Button>
-                </div>
-            )}
-          </CardContent>
-        </Card>
+      <Card>
+        <CardHeader>
+          <CardTitle>Todos mis planes</CardTitle>
+          <CardDescription>Aquí encontrarás todos los grupos a los que te has unido.</CardDescription>
+          <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as GroupStatus | "Todos")} className="pt-4">
+            <TabsList>
+              {tabs.map(tab => {
+                const count = tab === "Todos" ? myGroups.length : myGroups.filter(g => g.status === tab).length;
+                if (count > 0) {
+                  return (
+                    <TabsTrigger key={tab} value={tab}>
+                      {tab} ({count})
+                    </TabsTrigger>
+                  );
+                }
+                return null;
+              })}
+            </TabsList>
+          </Tabs>
+        </CardHeader>
+
+        {myGroups.length > 0 ? (
+          <div className="p-6 pt-0">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              {filteredGroups.map(group => (
+                <GroupCard key={group.id} group={group} />
+              ))}
+            </div>
+          </div>
+        ) : (
+          <div className="text-center py-16 text-muted-foreground flex flex-col items-center gap-4">
+            <p>Aún no te has unido a ningún grupo.</p>
+            <Button asChild>
+              <Link href="/dashboard/explore">
+                ¡Explora los grupos disponibles y empieza a cumplir tus sueños!
+              </Link>
+            </Button>
+          </div>
+        )}
+      </Card>
     </>
   );
 }
