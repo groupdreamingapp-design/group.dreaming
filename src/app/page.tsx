@@ -27,6 +27,15 @@ export default function LandingPage() {
     { title: "Capital Suscripto", content: "Es el monto total en Dólares Estadounidenses (USD) del financiamiento al que el USUARIO adhiere." },
     { title: "Plazo", content: "Es la cantidad total de cuotas mensuales, iguales y consecutivas en las que se divide el plan." },
     { title: "Alícuota Pura", content: "Es el valor que resulta de dividir el Capital Suscripto por el Plazo. Representa la porción de capital puro dentro de cada cuota." },
+    { title: "Miembros", content: "Son todos los participantes que conforman un grupo de financiamiento." },
+    { title: "Seguro de Vida", content: "Es un seguro mensual obligatorio sobre saldos deudores que cubre el capital pendiente de pago en caso de fallecimiento del titular." },
+    { title: "Adjudicación", content: "Es el acto por el cual un miembro del grupo obtiene el derecho a recibir el capital suscripto. Puede ocurrir por sorteo o licitación." },
+    { title: "Licitación (o Pujo)", content: "Una oferta que realiza un miembro, consistente en el adelanto de un número de cuotas puras, para aumentar sus posibilidades de ser adjudicado." },
+    { title: "Sorteo", content: "El método de adjudicación mensual donde un miembro es seleccionado al azar entre los miembros con cuota al día para recibir el capital." },
+    { title: "Derecho de Suscripción", content: "Un costo único que se paga al ingresar a un grupo, que cubre los gastos iniciales de administración y estructuración." },
+    { title: "Subasta (Mercado Secundario)", content: "El mecanismo que permite a un miembro ceder onerosamente su plan a otro inversor, ofreciendo una vía de salida flexible." },
+    { title: "Baja del Plan", content: "La solicitud de un miembro para rescindir su participación en el grupo antes de su finalización, sujeta a las condiciones del contrato." },
+    { title: "Mora", content: "El estado en el que se encuentra un miembro al no cumplir con el pago de una o más cuotas en la fecha de vencimiento establecida." },
   ];
 
   const rules = [
