@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
-import { Gavel, LayoutDashboard, Search, Users, Wallet } from "lucide-react"
+import { Gavel, LayoutDashboard, Search, Wallet } from "lucide-react"
 import { Badge } from "@/components/ui/badge";
 
 type MainNavProps = {
@@ -18,11 +18,6 @@ export function MainNav({ isMobile = false }: MainNavProps) {
       href: "/dashboard",
       label: "Dashboard",
       icon: LayoutDashboard,
-    },
-    {
-      href: "/dashboard/my-groups",
-      label: "Mis Grupos",
-      icon: Users,
     },
     {
       href: "/dashboard/explore-groups",
