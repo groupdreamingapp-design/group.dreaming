@@ -57,8 +57,8 @@ export default function GroupDetailClient({ groupId }: GroupDetailClientProps) {
         <Link href="/dashboard" className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary mb-2">
           <ArrowLeft className="h-4 w-4" /> Volver a Mi Panel
         </Link>
-        <h1 className="text-3xl font-bold font-headline">Grupo {group.id}</h1>
-        <p className="text-muted-foreground">Capital de {formatCurrency(group.capital)} en {group.plazo} meses.</p>
+        <h1 className="text-3xl font-bold font-headline">{formatCurrency(group.capital)}</h1>
+        <p className="text-muted-foreground">en {group.plazo} meses (Grupo {group.id})</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
