@@ -10,7 +10,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { GroupCard } from "@/components/app/group-card"
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -23,7 +22,6 @@ export default function DashboardPage() {
 
   const myGroups = useMemo(() => groups.filter(g => g.userIsMember), [groups]);
   const activeGroups = useMemo(() => myGroups.filter(g => g.status === 'Activo' || g.status === 'Abierto' || g.status === 'Pendiente'), [myGroups]);
-  const closedGroups = useMemo(() => myGroups.filter(g => g.status === 'Cerrado'), [myGroups]);
 
   return (
     <>
@@ -37,47 +35,26 @@ export default function DashboardPage() {
       <div className="grid gap-4">
         <Card>
           <CardHeader>
-            <CardTitle>Mis Grupos</CardTitle>
-            <CardDescription>Un resumen de todos tus planes de ahorro colectivo.</CardDescription>
+            <CardTitle>Mis Grupos Activos</CardTitle>
+            <CardDescription>Un resumen de tus planes de ahorro colectivo activos.</CardDescription>
           </CardHeader>
           <CardContent>
-            <Tabs defaultValue="activos" className="w-full">
-              <TabsList className="grid w-full grid-cols-2 md:w-[400px]">
-                <TabsTrigger value="activos">Activos</TabsTrigger>
-                <TabsTrigger value="finalizados">Finalizados</TabsTrigger>
-              </TabsList>
-              <TabsContent value="activos">
-                  {activeGroups.length > 0 ? (
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mt-4">
-                          {activeGroups.map(group => (
-                              <GroupCard key={group.id} group={group} />
-                          ))}
-                      </div>
-                  ) : (
-                      <div className="text-center py-16 text-muted-foreground flex flex-col items-center gap-4">
-                          <p>Aún no te has unido a ningún grupo.</p>
-                          <Button asChild>
-                            <Link href="/dashboard/explore">
-                              ¡Explora los grupos disponibles y empieza a cumplir tus sueños!
-                            </Link>
-                          </Button>
-                      </div>
-                  )}
-              </TabsContent>
-              <TabsContent value="finalizados">
-                  {closedGroups.length > 0 ? (
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mt-4">
-                          {closedGroups.map(group => (
-                              <GroupCard key={group.id} group={group} />
-                          ))}
-                      </div>
-                  ) : (
-                      <div className="text-center py-16 text-muted-foreground">
-                          <p>No tienes grupos finalizados.</p>
-                      </div>
-                  )}
-              </TabsContent>
-            </Tabs>
+              {activeGroups.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mt-4">
+                      {activeGroups.map(group => (
+                          <GroupCard key={group.id} group={group} />
+                      ))}
+                  </div>
+              ) : (
+                  <div className="text-center py-16 text-muted-foreground flex flex-col items-center gap-4">
+                      <p>Aún no te has unido a ningún grupo.</p>
+                      <Button asChild>
+                        <Link href="/dashboard/explore">
+                          ¡Explora los grupos disponibles y empieza a cumplir tus sueños!
+                        </Link>
+                      </Button>
+                  </div>
+              )}
           </CardContent>
         </Card>
       </div>
