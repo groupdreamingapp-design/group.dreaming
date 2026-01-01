@@ -25,7 +25,7 @@ type UserNavContextType = {
 const UserNavContext = createContext<UserNavContextType | undefined>(undefined);
 
 export function UserNavProvider({ children }: { children: ReactNode }) {
-  const [isVerified, setIsVerified] = useState(false);
+  const [isVerified, setIsVerified] = useState(true);
   return (
     <UserNavContext.Provider value={{ isVerified, setIsVerified }}>
       {children}
