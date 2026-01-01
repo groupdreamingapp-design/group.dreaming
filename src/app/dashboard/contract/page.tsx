@@ -18,7 +18,7 @@ const contractClauses = [
         content: "EL SUSCRIPTOR se integra a un grupo con un número determinado de miembros, un plazo y un capital definidos. Mensualmente, abonará una cuota compuesta por: a) Alícuota (parte del capital), b) Gastos Administrativos, c) Seguro de Vida sobre saldo deudor. Las adjudicaciones se realizan mensualmente, una por sorteo y otra por licitación, entre los miembros con cuotas al día."
     },
     {
-        title: "CUARTA: DERECHOS Y OBLIGACIONES DE LA ADMINISTRADORA",
+        title: "CUARTA: DERECHOS Y OBLIGACIONES DE LA ADMINISTRADora",
         content: "LA ADMINISTRADORA se obliga a: gestionar los fondos, realizar los actos de adjudicación con transparencia, entregar los capitales a los adjudicatarios en los plazos estipulados y administrar el Mercado Secundario. Tiene derecho a percibir los Gastos Administrativos y comisiones por los servicios prestados."
     },
     {
@@ -30,7 +30,11 @@ const contractClauses = [
         content: "La falta de pago de dos (2) o más cuotas consecutivas o alternadas facultará a LA ADMINISTRADORA a declarar la rescisión del contrato. Si el plan fue adquirido en el mercado secundario, se procederá a una 'Baja Forzosa'. Si es un plan original, se procederá a una 'Subasta Forzosa'. La baja voluntaria implica la devolución del capital puro aportado al final del ciclo del grupo, descontando las penalidades correspondientes."
     },
     {
-        title: "SÉPTIMA: JURISDICCIÓN",
+        title: "SÉPTIMA: MONEDA Y TIPO DE CAMBIO",
+        content: "Todos los valores, capitales, cuotas y transacciones expresados en la plataforma se denominan en Dólares Estadounidenses (USD). Cualquier pago, liquidación o transferencia que deba realizarse en Pesos Argentinos (ARS) se convertirá utilizando la cotización de 'Dólar MEP' (dólar bolsa) vendedora informada por una fuente de mercado de referencia al cierre del día hábil inmediato anterior a la fecha de la operación."
+    },
+    {
+        title: "OCTAVA: JURISDICCIÓN",
         content: "Para cualquier controversia que pudiera surgir de la interpretación o ejecución del presente contrato, las partes se someten a la jurisdicción de los Tribunales Ordinarios de la Ciudad Autónoma de Buenos Aires, renunciando a cualquier otro fuero o jurisdicción."
     }
 ];
