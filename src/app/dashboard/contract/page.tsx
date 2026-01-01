@@ -26,19 +26,23 @@ const contractClauses = [
         content: "EL SUSCRIPTOR se obliga a pagar puntualmente las cuotas. Tiene derecho a participar de los actos de adjudicación, licitar, ceder su plan en el Mercado Secundario (subasta) o solicitar la baja. En caso de ser adjudicado, se compromete a seguir pagando las cuotas restantes hasta la finalización del plazo del grupo."
     },
     {
-        title: "SEXTA: FINALIZACIÓN DEL CONTRATO, INCUMPLIMIENTO Y BAJA",
+        title: "SEXTA: GARANTÍAS DE ADJUDICACIÓN",
+        content: "Al momento de resultar adjudicado y previo a la entrega del capital, EL SUSCRIPTOR deberá constituir una garantía a satisfacción de LA ADMINISTRADORA para asegurar el cumplimiento del pago de las cuotas restantes. La garantía requerida será determinada por LA ADMINISTRADORA en función del análisis de riesgo crediticio, el saldo deudor y el plazo restante del plan. Las garantías aceptadas podrán ser, a modo enunciativo: a) presentación de uno o más recibos de sueldo que demuestren solvencia suficiente, b) una garantía propietaria de un inmueble, c) la contratación de un seguro de caución a cargo de EL SUSCRIPTOR."
+    },
+    {
+        title: "SÉPTIMA: FINALIZACIÓN DEL CONTRATO, INCUMPLIMIENTO Y BAJA",
         content: "El contrato finalizará de pleno derecho al vencimiento del plazo del grupo, una vez que todas las cuotas hayan sido abonadas y el capital adjudicado haya sido entregado. Por otro lado, la falta de pago de dos (2) o más cuotas consecutivas o alternadas facultará a LA ADMINISTRADORA a declarar la rescisión del contrato. Si el plan fue adquirido en el mercado secundario, se procederá a una 'Baja Forzosa'. Si es un plan original, se procederá a una 'Subasta Forzosa'. La baja voluntaria implica la devolución del capital puro aportado al final del ciclo del grupo, descontando las penalidades correspondientes."
     },
     {
-        title: "SÉPTIMA: MONEDA Y TIPO DE CAMBIO",
+        title: "OCTAVA: MONEDA Y TIPO DE CAMBIO",
         content: "Todos los valores, capitales, cuotas y transacciones expresados en la plataforma se denominan en Dólares Estadounidenses (USD). Cualquier pago, liquidación o transferencia que deba realizarse en Pesos Argentinos (ARS) se convertirá utilizando la cotización de 'Dólar MEP' (dólar bolsa) vendedora informada por una fuente de mercado de referencia al cierre del día hábil inmediato anterior a la fecha de la operación."
     },
     {
-        title: "OCTAVA: LIMITACIÓN DE RESPONSABILIDAD",
+        title: "NOVENA: LIMITACIÓN DE RESPONSABILIDAD",
         content: "LA ADMINISTRADORA no será responsable por daños, perjuicios o pérdidas sufridas por EL SUSCRIPTOR causados por fallas en el sistema, en el servidor o en Internet, que sean ajenas a su control. Tampoco será responsable por cualquier virus que pudiera infectar el equipo de EL SUSCRIPTOR como consecuencia del acceso o uso de su sitio web. EL SUSCRIPTOR es el único responsable de la confidencialidad de su contraseña y del uso de su cuenta, y exime de responsabilidad a LA ADMINISTRADora por el acceso no autorizado o uso indebido de la misma por parte de terceros."
     },
     {
-        title: "NOVENA: JURISDICCIÓN",
+        title: "DÉCIMA: JURISDICCIÓN",
         content: "Para cualquier controversia que pudiera surgir de la interpretación o ejecución del presente contrato, las partes se someten a la jurisdicción de los Tribunales Ordinarios de la Ciudad Autónoma de Buenos Aires, renunciando a cualquier otro fuero o jurisdicción."
     }
 ];
