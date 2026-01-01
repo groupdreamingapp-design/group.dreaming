@@ -26,21 +26,20 @@ const capitalOptions = [5000, 10000, 15000, 20000, 25000];
 const plazoOptions = [12, 24, 36, 48, 60, 72, 84];
 
 const generatedGroups: Group[] = [];
+let groupCounter = 1000;
+const todayForId = new Date('2026-01-01T00:00:00Z');
+const year = todayForId.getFullYear();
+const month = String(todayForId.getMonth() + 1).padStart(2, '0');
+const day = String(todayForId.getDate()).padStart(2, '0');
+const dateString = `${year}${month}${day}`;
 
-let groupCounter = 1;
 
 for (const capital of capitalOptions) {
     for (const plazo of plazoOptions) {
         const cuotaPromedio = calculateCuotaPromedio(capital, plazo);
 
         if (cuotaPromedio <= 1000) {
-            const today = new Date();
-            const year = today.getFullYear();
-            const month = String(today.getMonth() + 1).padStart(2, '0');
-            const day = String(today.getDate()).padStart(2, '0');
-            const dateString = `${year}${month}${day}`;
-            const randomNumbers = String(Math.floor(Math.random() * 9000) + 1000).padStart(4, '0');
-            const newId = `ID-${dateString}-${randomNumbers}-${groupCounter++}`;
+            const newId = `ID-${dateString}-${groupCounter++}`;
 
             let totalMembers;
             if (plazo <= 24) totalMembers = 48;
@@ -64,14 +63,15 @@ for (const capital of capitalOptions) {
     }
 }
 
-// Add the new active group from the past
+// Add the active group from the past
 const activeGroupCapital = 15000;
 const activeGroupPlazo = 24;
 const pastActivationDate = new Date('2023-06-05T00:00:00Z');
-const monthsCompleted = differenceInMonths(new Date('2026-01-01T00:00:00Z'), pastActivationDate);
+const today = new Date('2026-01-01T00:00:00Z');
+const monthsCompleted = differenceInMonths(today, pastActivationDate);
 
 generatedGroups.push({
-    id: 'ID-ACTIVE-2023',
+    id: 'ID-20230605-1001',
     capital: activeGroupCapital,
     plazo: activeGroupPlazo,
     cuotaPromedio: calculateCuotaPromedio(activeGroupCapital, activeGroupPlazo),
@@ -89,7 +89,7 @@ generatedGroups.push({
 const futureGroupCapital = 15000;
 const futureGroupPlazo = 24;
 const futureActivationDate = new Date('2025-06-05T00:00:00Z');
-const futureMonthsCompleted = differenceInMonths(new Date('2026-01-01T00:00:00Z'), futureActivationDate);
+const futureMonthsCompleted = differenceInMonths(today, futureActivationDate);
 
 
 generatedGroups.push({
@@ -204,6 +204,7 @@ export const generateExampleInstallments = (capital: number, plazo: number): Ins
     
 
     
+
 
 
 
