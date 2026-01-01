@@ -26,12 +26,6 @@ export default function TransparencyPage() {
                 </CardHeader>
                 <CardContent>
                     <div className="mt-2 grid grid-cols-1 md:grid-cols-3 gap-8 items-start relative">
-                        {/* Flechas y conectores */}
-                        <div className="hidden md:block absolute top-1/2 left-0 right-0 h-[2px] bg-border -translate-y-1/2"></div>
-                        <div className="hidden md:block absolute top-1/2 left-1/4 h-12 w-[2px] bg-border -translate-y-full"></div>
-                        <div className="hidden md:block absolute top-1/2 left-1/2 h-12 w-[2px] bg-border -translate-y-full"></div>
-                        <div className="hidden md:block absolute top-1/2 right-1/4 h-12 w-[2px] bg-border -translate-y-full"></div>
-
                         <div className="z-10 flex flex-col items-center">
                             <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/50 mb-2">
                                 <Banknote className="h-6 w-6 text-blue-600 dark:text-blue-400" />
@@ -223,3 +217,5 @@ export default function TransparencyPage() {
         </>
     );
 }
+
+    
