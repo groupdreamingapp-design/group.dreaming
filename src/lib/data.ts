@@ -68,7 +68,7 @@ for (const capital of capitalOptions) {
 const activeGroupCapital = 15000;
 const activeGroupPlazo = 24;
 const pastActivationDate = new Date('2023-06-05T00:00:00Z');
-const monthsCompleted = differenceInMonths(startOfToday(), pastActivationDate);
+const monthsCompleted = differenceInMonths(new Date('2026-01-01T00:00:00Z'), pastActivationDate);
 
 generatedGroups.push({
     id: 'ID-ACTIVE-2023',
@@ -85,13 +85,15 @@ generatedGroups.push({
 });
 
 
-// Add the future active group
+// Add the future active group (now past, based on 'today' = 2026-01-01)
 const futureGroupCapital = 15000;
 const futureGroupPlazo = 24;
 const futureActivationDate = new Date('2025-06-05T00:00:00Z');
+const futureMonthsCompleted = differenceInMonths(new Date('2026-01-01T00:00:00Z'), futureActivationDate);
+
 
 generatedGroups.push({
-    id: 'ID-FUTURE-2025',
+    id: 'ID-ACTIVE-2025',
     capital: futureGroupCapital,
     plazo: futureGroupPlazo,
     cuotaPromedio: calculateCuotaPromedio(futureGroupCapital, futureGroupPlazo),
@@ -100,7 +102,7 @@ generatedGroups.push({
     status: 'Activo',
     userIsMember: true,
     userIsAwarded: false,
-    monthsCompleted: 0,
+    monthsCompleted: futureMonthsCompleted,
     activationDate: futureActivationDate.toISOString(),
 });
 
@@ -202,6 +204,7 @@ export const generateExampleInstallments = (capital: number, plazo: number): Ins
     
 
     
+
 
 
 
