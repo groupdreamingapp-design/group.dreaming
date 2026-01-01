@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils';
 import { GroupsProvider } from '@/components/app/providers';
 import { UserNavProvider } from '@/components/app/user-nav';
 import { FirebaseClientProvider } from '@/firebase/client-provider';
+import { UserProvider } from '@/firebase/auth/use-user';
 
 export const metadata: Metadata = {
   title: 'Group Dreaming',
@@ -29,11 +30,13 @@ export default function RootLayout({
         )}
       >
         <FirebaseClientProvider>
-          <UserNavProvider>
-            <GroupsProvider>
-              {children}
-            </GroupsProvider>
-          </UserNavProvider>
+          <UserProvider>
+            <UserNavProvider>
+              <GroupsProvider>
+                {children}
+              </GroupsProvider>
+            </UserNavProvider>
+          </UserProvider>
         </FirebaseClientProvider>
         <Toaster />
       </body>

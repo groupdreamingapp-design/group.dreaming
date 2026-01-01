@@ -6,13 +6,13 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Users, Scale, Rows, ShieldCheck } from "lucide-react";
 import { Logo } from '@/components/icons';
-import { user as mockUser } from "@/lib/data";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
+import { useUser } from "@/firebase/auth/use-user";
 
 export default function WhyUsPage() {
-  const user = mockUser;
+  const { user } = useUser();
 
   const pillars = [
     {
