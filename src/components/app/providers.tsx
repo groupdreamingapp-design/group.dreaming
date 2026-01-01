@@ -3,7 +3,7 @@
 'use client';
 
 import { useState, useCallback, ReactNode, useEffect, useRef } from 'react';
-import { initialGroups, installments as allInstallments } from '@/lib/data';
+import { initialGroups, generateInstallments } from '@/lib/data';
 import type { Group } from '@/lib/types';
 import { GroupsContext } from '@/hooks/use-groups';
 import { toast } from '@/hooks/use-toast';
@@ -27,6 +27,7 @@ function generateNewGroup(templateGroup: Group): Group {
       userIsMember: false,
       userIsAwarded: false,
       monthsCompleted: 0,
+      activationDate: undefined,
     };
 }
 
@@ -90,9 +91,9 @@ export function GroupsProvider({ children }: { children: ReactNode }) {
     const checkOverdue = () => {
         setGroups(currentGroups => {
             const groupsToUpdate = currentGroups.map(group => {
-                if (group.userIsMember && group.status === 'Activo' && !group.userIsAwarded) {
+                if (group.userIsMember && group.status === 'Activo' && !group.userIsAwarded && group.activationDate) {
                     const today = new Date();
-                    const groupInstallments = allInstallments.slice(0, group.plazo);
+                    const groupInstallments = generateInstallments(group.capital, group.plazo, group.activationDate);
                     const overdueInstallments = groupInstallments.filter(inst => {
                         const isPaid = inst.number <= (group.monthsCompleted || 0);
                         const dueDate = parseISO(inst.dueDate);

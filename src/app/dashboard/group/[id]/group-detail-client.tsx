@@ -15,7 +15,7 @@ import { ArrowLeft, Users, Clock, Users2, Calendar, Gavel, HandCoins, Ticket, In
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import { useGroups } from '@/hooks/use-groups';
-import { installments as allInstallments, initialGroups } from '@/lib/data';
+import { generateInstallments, initialGroups } from '@/lib/data';
 import { useMemo, useState } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from '@/components/ui/separator';
@@ -100,6 +100,11 @@ export default function GroupDetailClient({ groupId }: GroupDetailClientProps) {
     return generateStaticAwards(group.id, group.totalMembers, group.plazo, group.userIsAwarded);
   }, [group?.id, group?.totalMembers, group?.plazo, group?.userIsAwarded]);
 
+  const installments = useMemo(() => {
+    if (!group || !group.activationDate) return [];
+    return generateInstallments(group.capital, group.plazo, group.activationDate);
+  }, [group?.capital, group?.plazo, group?.activationDate]);
+
 
   if (!group) {
     return (
@@ -114,7 +119,6 @@ export default function GroupDetailClient({ groupId }: GroupDetailClientProps) {
     );
   }
 
-  const installments = allInstallments.slice(0, group.plazo);
   const cuotasPagadas = group.monthsCompleted || 0;
   const cuotasRestantes = group.plazo - cuotasPagadas;
 
@@ -129,7 +133,7 @@ export default function GroupDetailClient({ groupId }: GroupDetailClientProps) {
   const IVA = 1.21;
   const penalidadBaja = capitalAportadoPuro * 0.05 * IVA;
 
-  const totalCuotasEmitidas = allInstallments
+  const totalCuotasEmitidas = installments
     .slice(0, cuotasPagadas)
     .reduce((acc, installment) => acc + installment.total, 0);
 

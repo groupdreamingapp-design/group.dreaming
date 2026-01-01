@@ -23,10 +23,10 @@ const calculateCuotaPromedio = (capital: number, plazo: number): number => {
 }
 
 export const initialGroups: Group[] = [
-    { id: "ID-20240115-9998", capital: 15000, plazo: 48, cuotaPromedio: 345, membersCount: 96, totalMembers: 96, status: "Activo", monthsCompleted: 12, userIsMember: true, userIsAwarded: true, activationDate: '2024-01-15' },
-    { id: "ID-20230720-9999", capital: 15000, plazo: 36, cuotaPromedio: 455, membersCount: 72, totalMembers: 72, status: "Cerrado", monthsCompleted: 36, userIsMember: true, userIsAwarded: true, activationDate: '2023-07-20' },
-    { id: "ID-20240510-8888", capital: 20000, plazo: 60, cuotaPromedio: calculateCuotaPromedio(20000, 60), membersCount: 120, totalMembers: 120, status: "Activo", monthsCompleted: 1, userIsMember: true, userIsAwarded: false, activationDate: '2024-05-10' },
-    { id: "ID-20231101-7777", capital: 10000, plazo: 24, cuotaPromedio: calculateCuotaPromedio(10000, 24), membersCount: 48, totalMembers: 48, status: "Activo", monthsCompleted: 2, userIsMember: true, userIsAwarded: false, activationDate: '2023-11-01' },
+    { id: "ID-20240115-9998", capital: 15000, plazo: 48, cuotaPromedio: 345, membersCount: 96, totalMembers: 96, status: "Activo", monthsCompleted: 12, userIsMember: true, userIsAwarded: true, activationDate: '2024-01-15T12:00:00Z' },
+    { id: "ID-20230720-9999", capital: 15000, plazo: 36, cuotaPromedio: 455, membersCount: 72, totalMembers: 72, status: "Cerrado", monthsCompleted: 36, userIsMember: true, userIsAwarded: true, activationDate: '2023-07-20T12:00:00Z' },
+    { id: "ID-20240510-8888", capital: 20000, plazo: 60, cuotaPromedio: calculateCuotaPromedio(20000, 60), membersCount: 120, totalMembers: 120, status: "Activo", monthsCompleted: 1, userIsMember: true, userIsAwarded: false, activationDate: '2024-05-10T12:00:00Z' },
+    { id: "ID-20231101-7777", capital: 10000, plazo: 24, cuotaPromedio: calculateCuotaPromedio(10000, 24), membersCount: 48, totalMembers: 48, status: "Activo", monthsCompleted: 2, userIsMember: true, userIsAwarded: false, activationDate: '2023-11-01T12:00:00Z' },
 
 
     // Grupos Abiertos (Nuevos y variados)
@@ -61,45 +61,40 @@ export let auctions: Omit<Auction, 'precioBase'>[] = [
     { id: "auc-2", groupId: "ID-20240305-4815", orderNumber: 42, capital: 15000, plazo: 36, cuotasPagadas: 20, highestBid: 4166.67, endDate: getFutureDate(24), numberOfBids: 0, isPostAdjudicacion: true },
 ];
 
-const capital = 20000;
-const plazo = 60;
-
-const alicuotaPura = capital / plazo;
-const gastosAdm = (alicuotaPura * 0.10) * IVA; // 10% + IVA
-const totalSuscripcion = (capital * 0.03) * IVA; // 3% + IVA
-const mesesFinanciacionSuscripcion = Math.floor(plazo * 0.20);
-const cuotaSuscripcion = mesesFinanciacionSuscripcion > 0 ? totalSuscripcion / mesesFinanciacionSuscripcion : 0;
-
-// Use a static date to prevent hydration errors.
-const generateDueDates = (count: number): Date[] => {
-    const startDate = new Date('2023-11-10T12:00:00Z');
-    return Array.from({ length: count }, (_, i) => addMonths(startDate, i));
-};
-
-const dueDates = generateDueDates(84);
-
-export const installments: Installment[] = Array.from({ length: 84 }, (_, i) => {
-    const saldoCapital = capital - (alicuotaPura * i);
-    const seguroVida = saldoCapital * 0.0009; // 0.09% del saldo de capital
-    const derechoSuscripcion = i < mesesFinanciacionSuscripcion ? cuotaSuscripcion : 0;
-    const totalCuota = alicuotaPura + gastosAdm + seguroVida + derechoSuscripcion;
+export const generateInstallments = (capital: number, plazo: number, activationDate: string): Installment[] => {
+    const IVA = 1.21;
+    const alicuotaPura = capital / plazo;
+    const gastosAdm = (alicuotaPura * 0.10) * IVA; // 10% + IVA
+    const totalSuscripcion = (capital * 0.03) * IVA; // 3% + IVA
+    const mesesFinanciacionSuscripcion = Math.floor(plazo * 0.20);
+    const cuotaSuscripcion = mesesFinanciacionSuscripcion > 0 ? totalSuscripcion / mesesFinanciacionSuscripcion : 0;
     
-    const dueDate = dueDates[i];
+    const startDate = parseISO(activationDate);
 
-    return {
-        id: `cuota-${i + 1}`,
-        number: i + 1,
-        dueDate: format(dueDate, 'yyyy-MM-dd'),
-        status: 'Futuro',
-        total: totalCuota,
-        breakdown: {
-            alicuotaPura: alicuotaPura,
-            gastosAdm: gastosAdm,
-            seguroVida: seguroVida,
-            derechoSuscripcion: i < mesesFinanciacionSuscripcion ? derechoSuscripcion : undefined,
-        },
-    }
-});
+    return Array.from({ length: plazo }, (_, i) => {
+        const saldoCapital = capital - (alicuotaPura * i);
+        const seguroVida = saldoCapital * 0.0009; // 0.09% del saldo de capital
+        const derechoSuscripcion = i < mesesFinanciacionSuscripcion ? cuotaSuscripcion : 0;
+        const totalCuota = alicuotaPura + gastosAdm + seguroVida + derechoSuscripcion;
+        
+        // La primera cuota vence el día 10 del mes siguiente a la activación
+        const dueDate = setDate(addMonths(startDate, i + 1), 10);
+
+        return {
+            id: `cuota-${i + 1}`,
+            number: i + 1,
+            dueDate: dueDate.toISOString(),
+            status: 'Futuro',
+            total: totalCuota,
+            breakdown: {
+                alicuotaPura: alicuotaPura,
+                gastosAdm: gastosAdm,
+                seguroVida: seguroVida,
+                derechoSuscripcion: i < mesesFinanciacionSuscripcion ? derechoSuscripcion : undefined,
+            },
+        }
+    });
+};
 
 
 export const generateExampleInstallments = (capital: number, plazo: number): Installment[] => {
@@ -130,7 +125,3 @@ export const generateExampleInstallments = (capital: number, plazo: number): Ins
         };
     });
 };
-
-    
-
-
