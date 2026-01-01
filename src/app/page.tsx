@@ -2,37 +2,42 @@
 'use client';
 
 import Link from "next/link";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Users, Scale, Rows, ShieldCheck } from "lucide-react";
+import { ArrowRight, Users, Scale, Rows, ShieldCheck, Star } from "lucide-react";
 import { Logo } from '@/components/icons';
-import { user as mockUser } from "@/lib/data"; // Use mock user
+import { user as mockUser } from "@/lib/data";
+import { Card, CardContent } from "@/components/ui/card";
+import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
+import { PlaceHolderImages } from "@/lib/placeholder-images";
 
 export default function WhyUsPage() {
-  // We'll use a mock user for now.
   const user = mockUser;
 
   const pillars = [
     {
       icon: Users,
-      title: "Comunidad sobre Capital",
-      description: "No eres un número de cliente, eres parte de un grupo con un objetivo común. Nos apalancamos en la confianza y el esfuerzo colectivo, no en la deuda."
+      title: "Comunidad",
+      description: "Nos apalancamos en la confianza y el esfuerzo colectivo, no en la deuda."
     },
     {
       icon: Scale,
-      title: "Transparencia Radical",
-      description: "Las reglas son claras y para todos por igual. Sin letra chica, sin tasas ocultas, sin sorpresas. Sabes exactamente qué pagas y por qué."
+      title: "Transparencia",
+      description: "Sin letra chica ni tasas ocultas. Sabes exactamente qué pagas y por qué."
     },
     {
       icon: Rows,
-      title: "Flexibilidad Real",
-      description: "La vida cambia, tus planes también pueden hacerlo. Nuestro mercado secundario (subastas) te da una vía de salida cuando la necesitas."
+      title: "Flexibilidad",
+      description: "Nuestro mercado secundario te da una vía de salida cuando la necesitas."
     },
     {
       icon: ShieldCheck,
-      title: "Seguridad y Tecnología",
-      description: "Combinamos la confianza de un círculo de amigos con la robustez de una plataforma tecnológica segura que protege tu dinero y tus datos."
+      title: "Seguridad",
+      description: "Plataforma robusta que combina confianza con tecnología para proteger tu dinero."
     }
   ];
+
+  const goals = PlaceHolderImages.filter(img => ["goal-car", "goal-travel", "goal-house"].includes(img.id));
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
@@ -77,33 +82,68 @@ export default function WhyUsPage() {
       </header>
 
       <main className="flex-1">
-        <section className="py-20 md:py-32">
+        <section className="py-20 md:py-28">
           <div className="container mx-auto px-4 text-center">
             <h1 className="font-headline text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl">
               Tus metas, más cerca que nunca.
             </h1>
             <p className="mx-auto mt-6 max-w-3xl text-lg text-muted-foreground sm:text-xl">
-              Group Dreaming es la plataforma de financiamiento colectivo que transforma el ahorro en comunidad en el impulso para hacer realidad tus sueños. Sin deudas, con transparencia y con el poder del grupo.
+              Somos la plataforma de financiamiento colectivo que transforma el ahorro en comunidad en el impulso para hacer realidad tus sueños. Sin deudas, con transparencia y con el poder del grupo.
             </p>
           </div>
         </section>
 
+        <section className="py-24 sm:py-32">
+          <div className="container mx-auto px-4">
+             <Carousel
+              opts={{
+                align: "start",
+                loop: true,
+              }}
+              className="w-full"
+            >
+              <CarouselContent>
+                {goals.map((goal, index) => (
+                  <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/3">
+                    <div className="p-1">
+                      <Card className="overflow-hidden">
+                        <CardContent className="relative flex aspect-[4/3] items-center justify-center p-0">
+                          <Image
+                            src={goal.imageUrl}
+                            alt={goal.description}
+                            width={goal.width}
+                            height={goal.height}
+                            className="w-full h-full object-cover"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                           <h3 className="absolute bottom-4 left-4 text-2xl font-bold text-white">
+                            {goal.description}
+                          </h3>
+                        </CardContent>
+                      </Card>
+                    </div>
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+            </Carousel>
+          </div>
+        </section>
+        
         <section className="py-24 sm:py-32 bg-secondary">
           <div className="container mx-auto px-4">
             <div className="mx-auto max-w-5xl">
-              <h2 className="text-center font-headline text-3xl font-bold tracking-tight sm:text-4xl">
-                Por qué Group Dreaming es diferente
-              </h2>
-              <div className="mt-16 grid grid-cols-1 gap-12 md:grid-cols-2">
-                {pillars.map((pillar, index) => (
-                  <div key={index} className="flex gap-6">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary shrink-0">
-                      <pillar.icon className="h-6 w-6" />
+              <div className="text-center">
+                <h2 className="text-base font-semibold leading-7 text-primary">NUESTROS PILARES</h2>
+                <p className="mt-2 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">Por qué Group Dreaming es diferente</p>
+              </div>
+              <div className="mt-16 grid grid-cols-1 gap-x-8 gap-y-10 sm:grid-cols-2 lg:grid-cols-4">
+                {pillars.map((pillar) => (
+                  <div key={pillar.title} className="flex flex-col items-center text-center">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                      <pillar.icon className="h-6 w-6" aria-hidden="true" />
                     </div>
-                    <div>
-                      <h3 className="text-xl font-bold">{pillar.title}</h3>
-                      <p className="mt-2 text-muted-foreground">{pillar.description}</p>
-                    </div>
+                    <h3 className="mt-4 text-lg font-semibold leading-7 text-foreground">{pillar.title}</h3>
+                    <p className="mt-1 text-sm leading-6 text-muted-foreground">{pillar.description}</p>
                   </div>
                 ))}
               </div>
