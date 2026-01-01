@@ -27,17 +27,17 @@ type GroupDetailClientProps = {
     groupId: string;
 };
 
-const generateStaticAwards = (groupId: string, totalMembers: number, totalMonths: number, isAwarded: boolean = false): Award[][] => {
+const generateStaticAwards = (group: Group): Award[][] => {
     let seed = 0;
-    for (let i = 0; i < groupId.length; i++) {
-        seed = (seed + groupId.charCodeAt(i)) % 1000000;
+    for (let i = 0; i < group.id.length; i++) {
+        seed = (seed + group.id.charCodeAt(i)) % 1000000;
     }
     const customRandom = () => {
         const x = Math.sin(seed++) * 10000;
         return x - Math.floor(x);
     };
 
-    const memberOrderNumbers = Array.from({ length: totalMembers }, (_, i) => i + 1);
+    const memberOrderNumbers = Array.from({ length: group.totalMembers }, (_, i) => i + 1);
     const userOrderNumber = 42; 
 
     const shuffle = (array: number[]) => {
@@ -50,16 +50,27 @@ const generateStaticAwards = (groupId: string, totalMembers: number, totalMonths
     
     let potentialWinners = [...memberOrderNumbers];
     
-    if (isAwarded) {
+    // Si el usuario ya está adjudicado, lo quitamos del pool general para no volver a adjudicarlo
+    // Y luego lo insertaremos en una posición fija para simular su adjudicación pasada.
+    if (group.userIsAwarded) {
         const userIndex = potentialWinners.indexOf(userOrderNumber);
         if (userIndex > -1) {
             potentialWinners.splice(userIndex, 1);
         }
     }
     
+    // Si el plan está subastado, el usuario no puede ser adjudicado.
+    if (group.status === 'Subastado') {
+        const userIndex = potentialWinners.indexOf(userOrderNumber);
+        if (userIndex > -1) {
+            potentialWinners.splice(userIndex, 1);
+        }
+    }
+
     potentialWinners = shuffle(potentialWinners);
     
-    if (isAwarded) {
+    // Si el usuario está adjudicado, lo insertamos en el 5to mes (índice 4) para el ejemplo.
+    if (group.userIsAwarded) {
         const awardsPerMonth = 2;
         const insertPosition = 4 * awardsPerMonth; 
         
@@ -69,7 +80,7 @@ const generateStaticAwards = (groupId: string, totalMembers: number, totalMonths
     const awards: Award[][] = [];
     let winnerPool = [...potentialWinners];
     
-    for (let i = 0; i < totalMonths; i++) {
+    for (let i = 0; i < group.plazo; i++) {
         const monthAwards: Award[] = [];
         if (winnerPool.length > 0) {
             monthAwards.push({ type: 'sorteo', orderNumber: winnerPool.shift()! });
@@ -97,8 +108,8 @@ export default function GroupDetailClient({ groupId }: GroupDetailClientProps) {
   
   const groupAwards = useMemo(() => {
     if (!group) return [];
-    return generateStaticAwards(group.id, group.totalMembers, group.plazo, group.userIsAwarded);
-  }, [group?.id, group?.totalMembers, group?.plazo, group?.userIsAwarded]);
+    return generateStaticAwards(group);
+  }, [group]);
 
   const installments = useMemo(() => {
     if (!group || !group.activationDate) return [];
