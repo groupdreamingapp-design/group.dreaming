@@ -3,10 +3,11 @@
 
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Users, Scale, Rows, ShieldCheck } from "lucide-react";
+import { ArrowRight, Users, Scale, Rows, ShieldCheck, Banknote, PiggyBank, Briefcase, Plus, Minus, ArrowDown } from "lucide-react";
 import { Logo } from '@/components/icons';
 import { useState, useEffect } from "react";
 import { user } from "@/lib/data";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 
 export default function WhyUsPage() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -113,8 +114,110 @@ export default function WhyUsPage() {
             </div>
           </div>
         </section>
-
+        
         <section className="py-24 sm:py-32">
+            <div className="container mx-auto px-4">
+                <div className="mx-auto max-w-5xl text-center">
+                    <h2 className="font-headline text-3xl font-bold tracking-tight sm:text-4xl">
+                        Transparencia Financiera: ¿Cómo se administran los fondos?
+                    </h2>
+                    <p className="mt-4 text-lg text-muted-foreground">
+                        Cuando un grupo se activa, tu cuota se divide de forma transparente para asegurar el funcionamiento y la sostenibilidad del sistema.
+                    </p>
+                </div>
+                
+                <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8 items-start relative">
+                    {/* Flechas y conectores */}
+                    <div className="hidden md:block absolute top-1/2 left-0 right-0 h-[2px] bg-border -translate-y-1/2"></div>
+                    <div className="hidden md:block absolute top-1/2 left-1/4 h-12 w-[2px] bg-border -translate-y-full"></div>
+                    <div className="hidden md:block absolute top-1/2 left-1/2 h-12 w-[2px] bg-border -translate-y-full"></div>
+                    <div className="hidden md:block absolute top-1/2 right-1/4 h-12 w-[2px] bg-border -translate-y-full"></div>
+
+                    <Card className="z-10">
+                        <CardHeader className="text-center">
+                            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/50 mb-2">
+                                <Banknote className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                            </div>
+                            <CardTitle>1. Fondo General del Grupo</CardTitle>
+                            <CardDescription>Capital para adjudicaciones</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <p className="text-sm text-muted-foreground text-center">Este es el corazón del grupo. Se utiliza para las adjudicaciones mensuales por sorteo y licitación.</p>
+                            <ul className="mt-4 space-y-2 text-sm">
+                                <li className="flex items-center gap-2">
+                                    <Plus className="h-4 w-4 text-green-500" />
+                                    <span>Alícuotas Puras</span>
+                                </li>
+                                <li className="flex items-center gap-2">
+                                    <Plus className="h-4 w-4 text-green-500" />
+                                    <span>Capital de Licitaciones</span>
+                                </li>
+                                <li className="flex items-center gap-2">
+                                    <Plus className="h-4 w-4 text-green-500" />
+                                    <span>Adelanto de Cuotas (valor puro)</span>
+                                </li>
+                            </ul>
+                        </CardContent>
+                    </Card>
+
+                    <Card className="z-10">
+                        <CardHeader className="text-center">
+                             <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-yellow-100 dark:bg-yellow-900/50 mb-2">
+                                <PiggyBank className="h-6 w-6 text-yellow-600 dark:text-yellow-400" />
+                            </div>
+                            <CardTitle>2. Fondo de Reserva</CardTitle>
+                            <CardDescription>Garantía y solvencia del grupo</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                           <p className="text-sm text-muted-foreground text-center">Cubre eventuales incumplimientos y garantiza la compra de planes si no hay ofertas en subasta.</p>
+                             <ul className="mt-4 space-y-2 text-sm">
+                                <li className="flex items-center gap-2">
+                                    <Plus className="h-4 w-4 text-green-500" />
+                                    <span>50% de Gastos Administrativos</span>
+                                </li>
+                                <li className="flex items-center gap-2">
+                                    <Plus className="h-4 w-4 text-green-500" />
+                                    <span>50% de Derechos de Suscripción</span>
+                                </li>
+                                 <li className="flex items-center gap-2">
+                                    <Plus className="h-4 w-4 text-green-500" />
+                                    <span>Multas e intereses</span>
+                                </li>
+                            </ul>
+                        </CardContent>
+                    </Card>
+
+                    <Card className="z-10">
+                        <CardHeader className="text-center">
+                            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/50 mb-2">
+                                <Briefcase className="h-6 w-6 text-green-600 dark:text-green-400" />
+                            </div>
+                            <CardTitle>3. Ingresos de la Plataforma</CardTitle>
+                            <CardDescription>Sostenibilidad del servicio</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <p className="text-sm text-muted-foreground text-center">Financia la operación, la tecnología y el equipo que hace posible Group Dreaming.</p>
+                             <ul className="mt-4 space-y-2 text-sm">
+                                <li className="flex items-center gap-2">
+                                    <Plus className="h-4 w-4 text-green-500" />
+                                    <span>50% de Gastos Administrativos</span>
+                                </li>
+                                <li className="flex items-center gap-2">
+                                    <Plus className="h-4 w-4 text-green-500" />
+                                    <span>50% de Derechos de Suscripción</span>
+                                </li>
+                                <li className="flex items-center gap-2">
+                                    <Plus className="h-4 w-4 text-green-500" />
+                                    <span>Comisiones del Mercado Secundario</span>
+                                </li>
+                            </ul>
+                        </CardContent>
+                    </Card>
+                </div>
+            </div>
+        </section>
+
+        <section className="py-24 sm:py-32 bg-secondary">
           <div className="container mx-auto px-4 text-center">
             <h2 className="font-headline text-3xl font-bold tracking-tight sm:text-4xl">
               ¿Listo para empezar a soñar en grupo?
@@ -133,7 +236,7 @@ export default function WhyUsPage() {
         </section>
       </main>
 
-      <footer className="bg-secondary">
+      <footer className="bg-background border-t">
         <div className="container mx-auto px-4 py-8 text-center text-muted-foreground">
           <p>&copy; {new Date().getFullYear()} Group Dreaming (Group Dreaming S.A.S.). Todos los derechos reservados.</p>
         </div>
@@ -141,3 +244,4 @@ export default function WhyUsPage() {
     </div>
   );
 }
+
