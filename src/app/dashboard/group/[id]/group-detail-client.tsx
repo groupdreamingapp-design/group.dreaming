@@ -97,22 +97,17 @@ const generateStaticAwards = (group: Group): Award[][] => {
 
 // Component to safely format dates on the client side, avoiding hydration mismatch.
 function ClientFormattedDate({ dateString, formatString }: { dateString: string, formatString: string }) {
-  const [formattedDate, setFormattedDate] = useState(dateString.split('T')[0]);
+  const [formattedDate, setFormattedDate] = useState(dateString);
 
   useEffect(() => {
-    // This effect runs only on the client, after hydration.
-    // It updates the date to the user's local timezone format.
     try {
       const date = parseISO(dateString);
       setFormattedDate(format(date, formatString, { locale: es }));
     } catch (error) {
-      // Keep the original string if it's not a valid date
       setFormattedDate(dateString);
     }
   }, [dateString, formatString]);
 
-  // Initially, render the raw date string on the server and during hydration.
-  // The useEffect will then format it on the client.
   return <>{formattedDate}</>;
 }
 
@@ -125,6 +120,7 @@ export default function GroupDetailClient({ groupId }: GroupDetailClientProps) {
   const [termsAcceptedAdvance, setTermsAcceptedAdvance] = useState(false);
   const [termsAcceptedBid, setTermsAcceptedBid] = useState(false);
   const [termsAcceptedAuction, setTermsAcceptedAuction] = useState(false);
+  const [selectedInstallment, setSelectedInstallment] = useState<Installment | null>(null);
 
 
   const group = useMemo(() => groups.find(g => g.id === groupId), [groups, groupId]);
@@ -369,7 +365,7 @@ export default function GroupDetailClient({ groupId }: GroupDetailClientProps) {
                                  <Card className="bg-muted/50">
                                      <CardContent className="p-4 text-sm space-y-1">
                                          <p>Monto de la oferta (valor puro): <strong>{formatCurrency(bidSavings.totalToPay)}</strong></p>
-                                         <p>Ahorro estimado (gastos adm. y seguros): <span className="text-green-600 font-semibold">{formatCurrency(bidSavings.totalSaving)}</span></p>
+                                         <p className="text-green-600 font-semibold">Ahorro estimado (gastos adm. y seguros): {formatCurrency(bidSavings.totalSaving)}</p>
                                      </CardContent>
                                  </Card>
                              ) : (
@@ -394,7 +390,7 @@ export default function GroupDetailClient({ groupId }: GroupDetailClientProps) {
                          </DialogFooter>
                        </DialogContent>
                      </Dialog>
-                     <Dialog onOpenChange={() => setTermsAcceptedAuction(false)}>
+                     <Dialog onOpenChange={(open) => !open && setTermsAcceptedAuction(false)}>
                        <DialogTrigger asChild>
                          <Button size="sm" variant="secondary" disabled={!isPlanActive || cuotasPagadas < 3}>
                            <Hand className="mr-2 h-4 w-4" /> Subastar
@@ -552,25 +548,9 @@ export default function GroupDetailClient({ groupId }: GroupDetailClientProps) {
                           </TableCell>
                           <TableCell className="text-right font-mono">{formatCurrency(inst.total)}</TableCell>
                           <TableCell className="text-center">
-                            <Dialog>
-                              <DialogTrigger asChild>
-                                <Button variant="outline" size="sm">Ver Detalle</Button>
-                              </DialogTrigger>
-                              <DialogContent>
-                                <DialogHeader>
-                                  <DialogTitle>Detalle de la Cuota #{inst.number}</DialogTitle>
-                                </DialogHeader>
-                                <div className="grid gap-2 text-sm">
-                                    <div className="flex justify-between"><span>Alícuota Pura:</span><strong>{formatCurrency(inst.breakdown.alicuotaPura)}</strong></div>
-                                    <div className="flex justify-between"><span>Gastos Adm (IVA incl.):</span><strong>{formatCurrency(inst.breakdown.gastosAdm)}</strong></div>
-                                    {inst.breakdown.derechoSuscripcion && (
-                                      <div className="flex justify-between"><span>Derecho Suscripción (IVA incl.):</span><strong>{formatCurrency(inst.breakdown.derechoSuscripcion)}</strong></div>
-                                    )}
-                                    <div className="flex justify-between"><span>Seguro de Vida:</span><strong>{formatCurrency(inst.breakdown.seguroVida)}</strong></div>
-                                    <div className="flex justify-between font-bold text-base border-t pt-2 mt-2"><span>Total:</span><span>{formatCurrency(inst.total)}</span></div>
-                                </div>
-                              </DialogContent>
-                            </Dialog>
+                            <Button variant="outline" size="sm" onClick={() => setSelectedInstallment(inst)}>
+                              Ver Detalle
+                            </Button>
                           </TableCell>
                         </TableRow>
                       )
@@ -581,20 +561,26 @@ export default function GroupDetailClient({ groupId }: GroupDetailClientProps) {
             </Card>
           </div>
         )}
-
-        {isMember && group.status === 'Cerrado' && (
-          <div className="lg:col-span-3">
-            <Card>
-              <CardHeader>
-                <CardTitle>Plan Finalizado</CardTitle>
-                <CardDescription>
-                  Este grupo ha concluido. No hay más acciones disponibles.
-                </CardDescription>
-              </CardHeader>
-            </Card>
-          </div>
-        )}
       </div>
+
+      {selectedInstallment && (
+        <Dialog open={!!selectedInstallment} onOpenChange={(open) => !open && setSelectedInstallment(null)}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Detalle de la Cuota #{selectedInstallment.number}</DialogTitle>
+            </DialogHeader>
+            <div className="grid gap-2 text-sm">
+                <div className="flex justify-between"><span>Alícuota Pura:</span><strong>{formatCurrency(selectedInstallment.breakdown.alicuotaPura)}</strong></div>
+                <div className="flex justify-between"><span>Gastos Adm (IVA incl.):</span><strong>{formatCurrency(selectedInstallment.breakdown.gastosAdm)}</strong></div>
+                {selectedInstallment.breakdown.derechoSuscripcion && (
+                  <div className="flex justify-between"><span>Derecho Suscripción (IVA incl.):</span><strong>{formatCurrency(selectedInstallment.breakdown.derechoSuscripcion)}</strong></div>
+                )}
+                <div className="flex justify-between"><span>Seguro de Vida:</span><strong>{formatCurrency(selectedInstallment.breakdown.seguroVida)}</strong></div>
+                <div className="flex justify-between font-bold text-base border-t pt-2 mt-2"><span>Total:</span><span>{formatCurrency(selectedInstallment.total)}</span></div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
     </>
   );
 }
