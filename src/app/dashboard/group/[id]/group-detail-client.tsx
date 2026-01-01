@@ -471,7 +471,7 @@ export default function GroupDetailClient({ groupId }: GroupDetailClientProps) {
                           }
                       }
                       
-                      const currentAwards = (isPlanActive && inst.number >= 2 && (cuotasPagadas >= inst.number - 1 || isBefore(parseISO(inst.dueDate), addDays(today, 5)))) ? groupAwards[inst.number - 2] : undefined;
+                      const currentAwards = (isPlanActive && inst.number >= 2 && status === 'Pagado') ? groupAwards[inst.number - 2] : undefined;
                       const awardDate = (isPlanActive && currentAwards) ? format(addDays(parseISO(inst.dueDate), 5), 'dd/MM/yyyy') : undefined;
 
                       return (
