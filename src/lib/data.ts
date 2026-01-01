@@ -40,7 +40,7 @@ for (const capital of capitalOptions) {
 
         if (cuotaPromedio <= 1000) {
             const sequentialNumber = String(groupCounter++).padStart(4, '0');
-            const newId = `ID-${dateString}-${sequentialNumber}`;
+            const newId = `ID-20260101-${sequentialNumber}`;
 
             let totalMembers;
             if (plazo <= 24) totalMembers = 48;
@@ -207,6 +207,7 @@ function generateNewGroup(templateGroup: Group): Group {
     
 
     
+
 
 
 
