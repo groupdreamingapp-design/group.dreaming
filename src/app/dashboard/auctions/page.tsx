@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useEffect } from "react";
@@ -83,6 +84,10 @@ export default function AuctionsPage() {
 
         const precioBase = totalCuotasEmitidas * 0.5;
 
+        const auctionStartDate = g.auctionStartDate ? new Date(g.auctionStartDate) : new Date();
+        const endDate = new Date(auctionStartDate.getTime() + 48 * 60 * 60 * 1000).toISOString();
+
+
         return {
             id: g.id,
             groupId: g.id,
@@ -91,7 +96,7 @@ export default function AuctionsPage() {
             plazo: g.plazo,
             cuotasPagadas: g.monthsCompleted || 0,
             highestBid: precioBase, // Start with the base price as the highest bid
-            endDate: new Date(Date.now() + 1000 * 60 * 60 * 24 * 3).toISOString(), // Mock end date
+            endDate: endDate,
             numberOfBids: 0, // Start with 0 bids
             isMine: g.userIsMember,
             isPostAdjudicacion: !!g.userIsAwarded,

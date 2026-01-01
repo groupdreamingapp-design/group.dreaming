@@ -119,7 +119,7 @@ export function GroupsProvider({ children }: { children: ReactNode }) {
                                 }
                              } else {
                                 if (group.status !== 'Subastado') {
-                                    return { ...group, status: 'Subastado' as const };
+                                    return { ...group, status: 'Subastado' as const, auctionStartDate: new Date().toISOString() };
                                 }
                              }
                         }
@@ -272,7 +272,7 @@ export function GroupsProvider({ children }: { children: ReactNode }) {
     userInitiatedAuctionRef.current = groupId;
     setGroups(currentGroups => {
       return currentGroups.map(g => 
-        g.id === groupId ? { ...g, status: 'Subastado' } : g
+        g.id === groupId ? { ...g, status: 'Subastado', auctionStartDate: new Date().toISOString() } : g
       );
     });
   }, []);
