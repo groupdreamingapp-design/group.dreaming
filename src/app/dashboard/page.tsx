@@ -4,7 +4,7 @@
 import { useMemo } from "react";
 import { user, transactions } from "@/lib/data"
 import { useGroups } from "@/hooks/use-groups";
-import { Repeat, Wallet, PieChart } from "lucide-react"
+import { Repeat, Wallet, PieChart, Info } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
@@ -27,6 +27,8 @@ export default function DashboardPage() {
     const statusOrder = { "Activo": 1, "Abierto": 2, "Pendiente": 3, "Subastado": 4, "Cerrado": 5 };
     return statusOrder[a.status] - statusOrder[b.status];
   }), [groups]);
+
+  const activeGroups = useMemo(() => myGroups.filter(g => g.status === 'Activo'), [myGroups]);
 
   const subscribedCapital = useMemo(() => {
     return groups
@@ -88,19 +90,28 @@ export default function DashboardPage() {
                   <div>
                     <p className="text-sm text-muted-foreground">Saldo Disponible</p>
                     <p className="text-2xl font-bold">{formatCurrency(availableBalance)}</p>
-                    <p className="text-xs text-muted-foreground">+20% que el mes pasado</p>
                   </div>
                 </div>
               </div>
               <div className="flex flex-col gap-4">
-                 <div className="flex items-center gap-4">
-                  <Repeat className="h-8 w-8 text-muted-foreground" />
-                  <div>
-                    <p className="text-sm text-muted-foreground">Próxima Cuota</p>
-                    <p className="text-2xl font-bold">{formatCurrency(615)}</p>
-                    <p className="text-xs text-muted-foreground">Vence en 15 días</p>
-                  </div>
-                </div>
+                 {activeGroups.length > 0 ? (
+                    <div className="flex items-center gap-4">
+                      <Repeat className="h-8 w-8 text-muted-foreground" />
+                      <div>
+                        <p className="text-sm text-muted-foreground">Próxima Cuota</p>
+                        <p className="text-2xl font-bold">{formatCurrency(615)}</p>
+                        <p className="text-xs text-muted-foreground">Vence en 15 días</p>
+                      </div>
+                    </div>
+                 ) : (
+                    <div className="flex items-center gap-4 rounded-lg bg-muted p-4 h-full">
+                        <Info className="h-8 w-8 text-muted-foreground" />
+                         <div>
+                            <p className="text-sm font-semibold">Todo listo para empezar</p>
+                            <p className="text-xs text-muted-foreground">Aún no tienes cuotas a pagar. ¡Únete a un grupo para comenzar!</p>
+                        </div>
+                    </div>
+                 )}
               </div>
               <div className="flex flex-col gap-4">
                  <div className="flex items-center gap-4">
