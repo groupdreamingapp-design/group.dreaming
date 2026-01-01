@@ -35,8 +35,8 @@ const rulesConfig = [
         title: "Para el Comprador",
         icon: Users,
         points: [
-            "Al ganar la subasta, el comprador debe abonar únicamente el monto ofertado para adquirir el plan.",
-            "La comisión de compra (2% + IVA) se descontará del capital que reciba al momento de resultar adjudicado en el futuro."
+            "Al ganar la subasta, el comprador debe abonar el monto total ofertado más la comisión de compra (2% + IVA) para adquirir el plan.",
+            "Una vez adquirido, el comprador asume los derechos y obligaciones del plan, incluyendo los pagos de cuotas futuras."
         ]
     }
 ];
