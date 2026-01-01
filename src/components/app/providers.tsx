@@ -259,11 +259,19 @@ export function GroupsProvider({ children }: { children: ReactNode }) {
         lastJoinedGroupRef.current = joinedGroup;
     }
   }, [toast]);
+  
+  const auctionGroup = useCallback((groupId: string) => {
+    setGroups(currentGroups => {
+      return currentGroups.map(g => 
+        g.id === groupId ? { ...g, status: 'Subastado' } : g
+      );
+    });
+  }, []);
 
   const formatCurrency = (amount: number) => new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(amount);
 
   return (
-    <GroupsContext.Provider value={{ groups, joinGroup }}>
+    <GroupsContext.Provider value={{ groups, joinGroup, auctionGroup }}>
       {children}
     </GroupsContext.Provider>
   );

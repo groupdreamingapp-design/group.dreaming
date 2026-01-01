@@ -1,3 +1,4 @@
+
 'use client';
 
 import { createContext, useContext, useState, useCallback, ReactNode } from 'react';
@@ -8,6 +9,7 @@ import type { Group } from '@/lib/types';
 interface GroupsContextType {
   groups: Group[];
   joinGroup: (groupId: string) => void;
+  auctionGroup: (groupId: string) => void;
 }
 
 // 2. Create the context with an initial undefined value

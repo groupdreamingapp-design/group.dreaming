@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
@@ -20,6 +20,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Separator } from '@/components/ui/separator';
 import { addDays, parseISO, format, isBefore, isToday } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { useToast } from '@/hooks/use-toast';
 
 
 type GroupDetailClientProps = {
@@ -117,7 +118,8 @@ function ClientFormattedDate({ dateString, formatString }: { dateString: string,
 
 
 export default function GroupDetailClient({ groupId }: GroupDetailClientProps) {
-  const { groups, joinGroup } = useGroups();
+  const { groups, joinGroup, auctionGroup } = useGroups();
+  const { toast } = useToast();
   const [cuotasToAdvance, setCuotasToAdvance] = useState<number>(0);
   const [cuotasToBid, setCuotasToBid] = useState<number>(0);
   const [termsAcceptedAdvance, setTermsAcceptedAdvance] = useState(false);
@@ -230,6 +232,14 @@ export default function GroupDetailClient({ groupId }: GroupDetailClientProps) {
   const formatCurrency = (amount: number) => new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'USD' }).format(amount);
   const formatCurrencyNoDecimals = (amount: number) => new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(amount);
   
+  const handleAuctionConfirm = () => {
+    if (!group) return;
+    auctionGroup(group.id);
+    toast({
+      title: "¡Plan puesto en subasta!",
+      description: `Tu plan ${group.id} ahora está visible en el mercado secundario.`,
+    });
+  };
 
   return (
     <>
@@ -414,7 +424,15 @@ export default function GroupDetailClient({ groupId }: GroupDetailClientProps) {
                              </div>
                          </div>
                          <DialogFooter>
-                             <Button type="submit" disabled={!termsAcceptedAuction}>Poner en Subasta</Button>
+                          <DialogClose asChild>
+                            <Button
+                                type="button"
+                                onClick={handleAuctionConfirm}
+                                disabled={!termsAcceptedAuction}
+                            >
+                                Poner en Subasta
+                            </Button>
+                          </DialogClose>
                          </DialogFooter>
                        </DialogContent>
                      </Dialog>
