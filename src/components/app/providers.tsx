@@ -116,20 +116,30 @@ export function GroupsProvider({ children }: { children: ReactNode }) {
 
     const timer = setTimeout(checkOverdue, 3000);
     return () => clearTimeout(timer);
-}, []);
+}, [groups]);
 
 
-  // Effect to show toast when a group is auctioned
+  // Effect to show toast when a group is auctioned or sold
   useEffect(() => {
     const prevGroups = prevGroupsRef.current;
     groups.forEach(currentGroup => {
         const prevGroup = prevGroups.find(p => p.id === currentGroup.id);
-        if (prevGroup && prevGroup.status === 'Activo' && currentGroup.status === 'Subastado') {
-            toast({
-                variant: "destructive",
-                title: "Plan en Subasta Forzosa",
-                description: `Tu plan ${currentGroup.id} ha sido puesto en subasta por tener 2 o más cuotas vencidas.`,
-            });
+        if (prevGroup) {
+            // Toast for forced auction
+            if (prevGroup.status === 'Activo' && currentGroup.status === 'Subastado') {
+                toast({
+                    variant: "destructive",
+                    title: "Plan en Subasta Forzosa",
+                    description: `Tu plan ${currentGroup.id} ha sido puesto en subasta por tener 2 o más cuotas vencidas.`,
+                });
+            }
+            // Toast for sold auction
+            if (prevGroup.userIsMember && !currentGroup.userIsMember && prevGroup.status === 'Subastado') {
+                 toast({
+                    title: "¡Subasta Finalizada!",
+                    description: `Tu plan ${currentGroup.id} ha sido vendido con éxito en el mercado secundario.`,
+                });
+            }
         }
     });
     
@@ -144,10 +154,7 @@ export function GroupsProvider({ children }: { children: ReactNode }) {
                 const groupExistedAndWasAuctioned = currentGroups.some(g => g.id === groupToSellId && g.userIsMember && g.status === 'Subastado');
 
                 if (groupExistedAndWasAuctioned) {
-                    toast({
-                        title: "¡Subasta Finalizada!",
-                        description: `Tu plan ${groupToSellId} ha sido vendido con éxito en el mercado secundario.`,
-                    });
+                    // Just update the state, the other useEffect will handle the toast
                     return currentGroups.map(g => g.id === groupToSellId ? { ...g, userIsMember: false } : g);
                 }
                 return currentGroups;
