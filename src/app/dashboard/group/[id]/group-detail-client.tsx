@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { ArrowLeft, Users, Clock, Users2, Calendar, Gavel, HandCoins, Ticket, Info, Trophy, FileX2, TrendingUp, Hand, Scale, CalendarCheck, Gift, Check, X, Award as AwardIcon } from 'lucide-react';
+import { ArrowLeft, Users, Clock, Users2, Calendar, Gavel, HandCoins, Ticket, Info, Trophy, FileX2, TrendingUp, Hand, Scale, CalendarCheck, Gift, Check, X, Award as AwardIcon, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import { useGroups } from '@/hooks/use-groups';
@@ -68,31 +68,69 @@ const generateStaticAwards = (group: Group): Award[][] => {
         potentialWinners.splice(insertPosition, 0, userOrderNumber);
     }
     
-    const awards: Award[][] = [];
+    const awards: Award[][] = Array.from({ length: group.plazo }, () => []);
     let winnerPool = [...potentialWinners];
+    let desertedLicitaciones = 0;
     
     for (let i = 0; i < group.plazo; i++) {
-        const monthAwards: Award[] = [];
-        const remainingMonths = group.plazo - i;
-        const remainingWinners = winnerPool.length;
-        
-        let awardsThisMonth = 2;
-        
-        if (remainingWinners > 0 && (remainingWinners / remainingMonths > 2)) {
-             awardsThisMonth = Math.ceil(remainingWinners / remainingMonths);
-             if(awardsThisMonth % 2 !== 0) awardsThisMonth++;
-             awardsThisMonth = Math.min(4, awardsThisMonth);
-        }
+        const isLastMonth = i === group.plazo - 1;
 
-        for(let j = 0; j < awardsThisMonth && winnerPool.length > 0; j++) {
-            const awardType = j % 2 === 0 ? 'sorteo' : 'licitacion';
-            monthAwards.push({ type: awardType, orderNumber: winnerPool.shift()! });
-        }
-        
-        if (monthAwards.length > 0) {
-            awards.push(monthAwards);
+        if (isLastMonth) {
+            // Final month: adjudicate everyone left, plus deserted licitaciones
+            if (winnerPool.length > 0) {
+                 winnerPool.forEach(winner => {
+                    awards[i].push({ type: 'sorteo-extra', orderNumber: winner });
+                });
+                winnerPool = [];
+            }
+        } else {
+            // Regular months
+            const remainingMonths = group.plazo - 1 - i;
+            const remainingWinners = winnerPool.length;
+
+            let awardsThisMonth = 2; // Default: 1 sorteo, 1 licitacion
+             if (remainingWinners > 0 && remainingMonths > 0 && (remainingWinners / remainingMonths > 2)) {
+                 awardsThisMonth = Math.ceil(remainingWinners / remainingMonths);
+                 if(awardsThisMonth % 2 !== 0) awardsThisMonth++; // Ensure pairs of sorteo/licitacion
+                 awardsThisMonth = Math.min(4, awardsThisMonth);
+            }
+
+            if (winnerPool.length > 0) {
+                 // Sorteo
+                awards[i].push({ type: 'sorteo', orderNumber: winnerPool.shift()! });
+            }
+
+            if (winnerPool.length > 0) {
+                // Licitacion with a chance to be deserted
+                const isDeserted = customRandom() < 0.15; // 15% chance
+                if (!isDeserted) {
+                    awards[i].push({ type: 'licitacion', orderNumber: winnerPool.shift()! });
+                } else {
+                    desertedLicitaciones++;
+                }
+            }
+
+            // Handle extra awards if needed
+            for(let j = 2; j < awardsThisMonth && winnerPool.length > 0; j+=2) {
+                 if (winnerPool.length > 0) awards[i].push({ type: 'sorteo', orderNumber: winnerPool.shift()! });
+                 if (winnerPool.length > 0) awards[i].push({ type: 'licitacion', orderNumber: winnerPool.shift()! });
+            }
         }
     }
+
+     // Add deserted licitaciones as extra sorteos in the last month
+    if (desertedLicitaciones > 0) {
+        const lastMonthIndex = group.plazo - 1;
+        for (let i = 0; i < desertedLicitaciones; i++) {
+            // Find a winner that wasn't from the last month's mass adjudication
+            const pastWinners = awards.slice(0, lastMonthIndex).flat().map(a => a.orderNumber);
+            let extraWinner = memberOrderNumbers.find(n => !pastWinners.includes(n) && !awards[lastMonthIndex].some(a => a.orderNumber === n));
+             if (extraWinner) {
+                awards[lastMonthIndex].push({ type: 'sorteo-extra', orderNumber: extraWinner });
+            }
+        }
+    }
+
 
     return awards;
 };
@@ -166,12 +204,24 @@ export default function GroupDetailClient({ groupId }: GroupDetailClientProps) {
     return generateInstallments(group.capital, group.plazo, group.activationDate);
   }, [group?.capital, group?.plazo, group?.activationDate]);
 
-  const awardMonth = groupAwards.flat().find(a => a.orderNumber === 42) 
-    ? groupAwards.findIndex(monthAwards => monthAwards.some(a => a.orderNumber === 42)) + 1 
-    : undefined;
+  const userAwardInfo = useMemo(() => {
+    if (!group) return undefined;
+    for (let i = 0; i < groupAwards.length; i++) {
+      const monthAward = groupAwards[i].find(a => a.orderNumber === 42);
+      if (monthAward) {
+        return {
+          month: i + 1,
+          type: monthAward.type
+        };
+      }
+    }
+    return undefined;
+  }, [groupAwards, group]);
 
+  const awardMonth = userAwardInfo?.month;
   const benefitThresholdMonth = Math.floor(group.plazo * 0.8);
-  const isEligibleForBenefit = group.userIsAwarded && awardMonth && awardMonth > benefitThresholdMonth;
+  const isEligibleForBenefit = group.userIsAwarded && awardMonth && awardMonth > benefitThresholdMonth && (userAwardInfo?.type === 'sorteo' || userAwardInfo?.type === 'sorteo-extra');
+
   const hasNoOverduePayments = useMemo(() => {
       if(!group.activationDate) return true;
       const groupInstallments = generateInstallments(group.capital, group.plazo, group.activationDate);
@@ -301,7 +351,7 @@ export default function GroupDetailClient({ groupId }: GroupDetailClientProps) {
                  <Card className="bg-green-500/10 border-green-500">
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2 text-green-800"><Gift className="h-6 w-6"/> ¡Beneficio "Los últimos serán los primeros"!</CardTitle>
-                        <CardDescription className="text-green-700">Felicitaciones, has sido adjudicado en la recta final y cumples con las condiciones para acceder a este beneficio.</CardDescription>
+                        <CardDescription className="text-green-700">Felicitaciones, has sido adjudicado por sorteo en la recta final y cumples con las condiciones para acceder a este beneficio.</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
                          <div>
@@ -309,7 +359,7 @@ export default function GroupDetailClient({ groupId }: GroupDetailClientProps) {
                             <ul className="text-sm space-y-2">
                                 <li className="flex items-center gap-2">
                                     {isEligibleForBenefit ? <Check className="h-4 w-4 text-green-600" /> : <X className="h-4 w-4 text-red-600" />}
-                                    <span>Adjudicado en el último 20% del plan (mes {awardMonth} de {group.plazo}).</span>
+                                    <span>Adjudicado por sorteo en el último 20% del plan (mes {awardMonth} de {group.plazo}).</span>
                                 </li>
                                 <li className="flex items-center gap-2">
                                     {hasNoOverduePayments ? <Check className="h-4 w-4 text-green-600" /> : <X className="h-4 w-4 text-red-600" />}
@@ -568,8 +618,8 @@ export default function GroupDetailClient({ groupId }: GroupDetailClientProps) {
                           }
                       }
                       
-                      const currentAwards = (isPlanActive && inst.number >= 2 && (status === 'Pagado' || status === 'Vencido')) ? groupAwards[inst.number - 2] : undefined;
-                      const awardDateString = (isPlanActive && currentAwards) ? addDays(parseISO(inst.dueDate), 5).toISOString() : undefined;
+                      const currentAwards = groupAwards[inst.number - 1];
+                      const awardDateString = (isPlanActive && currentAwards && currentAwards.length > 0) ? addDays(parseISO(inst.dueDate), 5).toISOString() : undefined;
 
                       return (
                         <TableRow key={inst.id}>
@@ -585,17 +635,18 @@ export default function GroupDetailClient({ groupId }: GroupDetailClientProps) {
                             >{status}</Badge>
                           </TableCell>
                            <TableCell className="text-xs text-muted-foreground">
-                              {awardDateString && inst.number >= 2 && (
+                              {awardDateString && (
                                   <div className="flex items-center gap-2">
                                        <CalendarCheck className="h-4 w-4" />
                                        <span>{<ClientFormattedDate dateString={awardDateString} formatString="dd/MM/yyyy" />}</span>
                                   </div>
                               )}
-                              <div className="flex items-center gap-3 mt-1">
+                              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1">
                                  {currentAwards?.map(award => (
                                   <div key={`${award.type}-${award.orderNumber}`} className="flex items-center gap-1">
                                     {award.type === 'sorteo' && <Ticket className="h-4 w-4 text-blue-500" />}
                                     {award.type === 'licitacion' && <HandCoins className="h-4 w-4 text-orange-500" />}
+                                    {award.type === 'sorteo-extra' && <Sparkles className="h-4 w-4 text-fuchsia-500" />}
                                     <span className={cn(award.orderNumber === 42 && "font-bold text-primary")}>#{award.orderNumber}</span>
                                   </div>
                                 ))}
