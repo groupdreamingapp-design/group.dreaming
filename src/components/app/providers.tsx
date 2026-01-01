@@ -88,6 +88,7 @@ export function GroupsProvider({ children }: { children: ReactNode }) {
   }, [groups]);
 
   // Effect to check for overdue payments and force auction
+ /*
  useEffect(() => {
     const checkOverdue = () => {
         setGroups(currentGroups => {
@@ -132,6 +133,7 @@ export function GroupsProvider({ children }: { children: ReactNode }) {
 
     return () => clearInterval(timer);
 }, [groups]);
+*/
 
 
   // Effect to show toast when a group is auctioned
