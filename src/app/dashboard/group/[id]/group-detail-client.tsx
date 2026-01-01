@@ -134,6 +134,8 @@ export default function GroupDetailClient({ groupId }: GroupDetailClientProps) {
 
   const cuotasPagadas = group.monthsCompleted || 0;
   const cuotasRestantes = group.plazo - cuotasPagadas;
+  const cuotasFuturas = cuotasRestantes > 0 ? cuotasRestantes -1 : 0;
+
 
   const formatCurrency = (amount: number) => new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'USD' }).format(amount);
   const formatCurrencyNoDecimals = (amount: number) => new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(amount);
@@ -186,11 +188,10 @@ export default function GroupDetailClient({ groupId }: GroupDetailClientProps) {
     if (!isPlanActive && group.status !== 'Subastado') return -1;
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    return installments.findIndex(inst => {
-        const isPaid = inst.number <= cuotasPagadas;
-        const dueDate = parseISO(inst.dueDate);
-        return !isPaid && !isBefore(dueDate, today);
-    });
+    
+    return installments.findIndex(inst => 
+        !isBefore(parseISO(inst.dueDate), today) && inst.number > cuotasPagadas
+    );
   }, [installments, cuotasPagadas, isPlanActive, group.status]);
 
   return (
@@ -257,7 +258,7 @@ export default function GroupDetailClient({ groupId }: GroupDetailClientProps) {
                                      <SelectValue placeholder="Selecciona la cantidad de cuotas" />
                                  </SelectTrigger>
                                  <SelectContent>
-                                     {Array.from({ length: cuotasRestantes }, (_, i) => i + 1).map(num => (
+                                     {Array.from({ length: cuotasFuturas }, (_, i) => i + 1).map(num => (
                                          <SelectItem key={num} value={String(num)}>{num} cuota{num > 1 && 's'}</SelectItem>
                                      ))}
                                  </SelectContent>
@@ -300,7 +301,7 @@ export default function GroupDetailClient({ groupId }: GroupDetailClientProps) {
                                          <SelectValue placeholder="Selecciona la cantidad de cuotas" />
                                      </SelectTrigger>
                                      <SelectContent>
-                                         {Array.from({ length: cuotasRestantes }, (_, i) => i + 1).map(num => (
+                                         {Array.from({ length: cuotasFuturas }, (_, i) => i + 1).map(num => (
                                              <SelectItem key={num} value={String(num)}>{num} cuota{num > 1 && 's'}</SelectItem>
                                          ))}
                                      </SelectContent>
@@ -381,11 +382,11 @@ export default function GroupDetailClient({ groupId }: GroupDetailClientProps) {
             <Card>
               <CardHeader>
                 <CardTitle>Plan de Cuotas { (group.status === 'Abierto' || group.status === 'Pendiente') ? '(Ejemplo)' : ''}</CardTitle>
-                {group.status === 'Subastado' && (
+                {(group.userIsMember && group.status === 'Subastado') ? (
                     <CardDescription className="!text-orange-600 font-semibold">
                         Este plan está en el mercado secundario. Las acciones se gestionan desde la sección de Subastas.
                     </CardDescription>
-                )}
+                ) : null}
               </CardHeader>
               <CardContent>
                 <Table>
@@ -410,9 +411,9 @@ export default function GroupDetailClient({ groupId }: GroupDetailClientProps) {
                           const isPaid = inst.number <= cuotasPagadas;
                           if (isBefore(dueDate, today)) {
                               status = isPaid ? 'Pagado' : 'Vencido';
-                          } else { // Due date is today or in the future
+                          } else {
                               if (isPaid) {
-                                  status = 'Pagado';
+                                status = 'Pagado';
                               } else if (index === pendingInstallmentIndex) {
                                   status = 'Pendiente';
                               } else {
@@ -502,5 +503,3 @@ export default function GroupDetailClient({ groupId }: GroupDetailClientProps) {
     </>
   );
 }
-
-    
