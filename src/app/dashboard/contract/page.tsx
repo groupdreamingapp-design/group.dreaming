@@ -18,7 +18,7 @@ const contractClauses = [
         content: "EL SUSCRIPTOR se integra a un grupo con un número determinado de miembros, un plazo y un capital definidos. Mensualmente, abonará una cuota compuesta por: a) Alícuota (parte del capital), b) Gastos Administrativos, c) Seguro de Vida sobre saldo deudor. Las adjudicaciones se realizan mensualmente, una por sorteo y otra por licitación, entre los miembros con cuotas al día."
     },
     {
-        title: "CUARTA: DERECHOS Y OBLIGACIONES DE LA ADMINISTRADora",
+        title: "CUARTA: DERECHOS Y OBLIGACIONES DE LA ADMINISTRADORA",
         content: "LA ADMINISTRADORA se obliga a: gestionar los fondos, realizar los actos de adjudicación con transparencia, entregar los capitales a los adjudicatarios en los plazos estipulados y administrar el Mercado Secundario. Tiene derecho a percibir los Gastos Administrativos y comisiones por los servicios prestados."
     },
     {
@@ -26,8 +26,8 @@ const contractClauses = [
         content: "EL SUSCRIPTOR se obliga a pagar puntualmente las cuotas. Tiene derecho a participar de los actos de adjudicación, licitar, ceder su plan en el Mercado Secundario (subasta) o solicitar la baja. En caso de ser adjudicado, se compromete a seguir pagando las cuotas restantes hasta la finalización del plazo del grupo."
     },
     {
-        title: "SEXTA: INCUMPLIMIENTO Y BAJA",
-        content: "La falta de pago de dos (2) o más cuotas consecutivas o alternadas facultará a LA ADMINISTRADORA a declarar la rescisión del contrato. Si el plan fue adquirido en el mercado secundario, se procederá a una 'Baja Forzosa'. Si es un plan original, se procederá a una 'Subasta Forzosa'. La baja voluntaria implica la devolución del capital puro aportado al final del ciclo del grupo, descontando las penalidades correspondientes."
+        title: "SEXTA: FINALIZACIÓN DEL CONTRATO, INCUMPLIMIENTO Y BAJA",
+        content: "El contrato finalizará de pleno derecho al vencimiento del plazo del grupo, una vez que todas las cuotas hayan sido abonadas y el capital adjudicado haya sido entregado. Por otro lado, la falta de pago de dos (2) o más cuotas consecutivas o alternadas facultará a LA ADMINISTRADORA a declarar la rescisión del contrato. Si el plan fue adquirido en el mercado secundario, se procederá a una 'Baja Forzosa'. Si es un plan original, se procederá a una 'Subasta Forzosa'. La baja voluntaria implica la devolución del capital puro aportado al final del ciclo del grupo, descontando las penalidades correspondientes."
     },
     {
         title: "SÉPTIMA: MONEDA Y TIPO DE CAMBIO",
