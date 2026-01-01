@@ -1,4 +1,5 @@
 
+
 export type User = {
   id: string;
   name: string;
@@ -19,6 +20,7 @@ export type Group = {
   userIsMember: boolean;
   userIsAwarded?: boolean;
   monthsCompleted?: number;
+  isOverdue?: boolean; // To identify the group that uses past due dates
 };
 
 export type TransactionType = "Depósito" | "Retiro" | "Pago de Cuota" | "Licitación" | "Subasta" | "Liquidación";

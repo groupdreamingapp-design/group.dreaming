@@ -1,6 +1,8 @@
 
 import type { Group, User, Transaction, Auction, Installment, Award } from './types';
 import { PlaceHolderImages } from './placeholder-images';
+import { format, addMonths, setDate, addDays } from 'date-fns';
+import { es } from 'date-fns/locale';
 
 export const user: User = {
   id: 'user-1',
@@ -20,11 +22,10 @@ const calculateCuotaPromedio = (capital: number, plazo: number): number => {
 }
 
 export const initialGroups: Group[] = [
-    // Grupos del usuario (para mantener el estado de "Mis Grupos")
     { id: "ID-20240115-9998", capital: 15000, plazo: 48, cuotaPromedio: 345, membersCount: 96, totalMembers: 96, status: "Activo", monthsCompleted: 12, userIsMember: true, userIsAwarded: true },
     { id: "ID-20230720-9999", capital: 15000, plazo: 36, cuotaPromedio: 455, membersCount: 72, totalMembers: 72, status: "Cerrado", monthsCompleted: 36, userIsMember: true, userIsAwarded: true, },
     { id: "ID-20240510-8888", capital: 20000, plazo: 60, cuotaPromedio: calculateCuotaPromedio(20000, 60), membersCount: 120, totalMembers: 120, status: "Activo", monthsCompleted: 5, userIsMember: true, userIsAwarded: false },
-    { id: "ID-20231101-7777", capital: 10000, plazo: 24, cuotaPromedio: calculateCuotaPromedio(10000, 24), membersCount: 48, totalMembers: 48, status: "Activo", monthsCompleted: 4, userIsMember: true, userIsAwarded: false },
+    { id: "ID-20231101-7777", capital: 10000, plazo: 24, cuotaPromedio: calculateCuotaPromedio(10000, 24), membersCount: 48, totalMembers: 48, status: "Activo", monthsCompleted: 4, userIsMember: true, userIsAwarded: false, isOverdue: true },
 
 
     // Grupos Abiertos (Nuevos y variados)
@@ -54,11 +55,10 @@ export const transactions: Transaction[] = [
 
 const getFutureDate = (hours: number) => new Date(Date.now() + hours * 60 * 60 * 1000).toISOString();
 
-export const auctions: Omit<Auction, 'precioBase'>[] = [
+export let auctions: Omit<Auction, 'precioBase'>[] = [
     { id: "auc-1", groupId: "ID-20240210-1138", orderNumber: 15, capital: 30000, plazo: 60, cuotasPagadas: 15, highestBid: 7520, endDate: getFutureDate(48), numberOfBids: 1 },
     { id: "auc-2", groupId: "ID-20240305-4815", orderNumber: 42, capital: 15000, plazo: 36, cuotasPagadas: 20, highestBid: 4166.67, endDate: getFutureDate(24), numberOfBids: 0, isPostAdjudicacion: true },
-    { id: "auc-3", groupId: "ID-20231101-7777", orderNumber: 7, capital: 10000, plazo: 24, cuotasPagadas: 4, highestBid: 833.33, endDate: getFutureDate(72), numberOfBids: 0 },
-]
+];
 
 const capital = 20000;
 const plazo = 60;
@@ -69,26 +69,32 @@ const totalSuscripcion = (capital * 0.03) * IVA; // 3% + IVA
 const mesesFinanciacionSuscripcion = Math.floor(plazo * 0.20);
 const cuotaSuscripcion = mesesFinanciacionSuscripcion > 0 ? totalSuscripcion / mesesFinanciacionSuscripcion : 0;
 
-const fixedPastDates = [
-    "2024-04-10",
-    "2024-05-10",
-    "2024-06-10",
-    "2024-07-10",
-];
+// Generate consistent due dates based on a fixed start date
+const generateDueDates = (count: number, startMonthOffset: number): Date[] => {
+    const today = new Date();
+    const startDate = setDate(addMonths(today, startMonthOffset), 10);
+    return Array.from({ length: count }, (_, i) => addMonths(startDate, i));
+};
 
-export const installments: Installment[] = Array.from({ length: 84 }, (_, i) => { // Increased length to satisfy all plans
+// We generate dates for the overdue example starting 4 months ago
+const pastDueDates = generateDueDates(84, -4); 
+
+// We generate dates for "normal" plans starting 1 month in the future
+const futureDueDates = generateDueDates(84, 1); 
+
+export const installments: Installment[] = Array.from({ length: 84 }, (_, i) => {
     const saldoCapital = capital - (alicuotaPura * i);
     const seguroVida = saldoCapital * 0.0009; // 0.09% del saldo de capital
     const derechoSuscripcion = i < mesesFinanciacionSuscripcion ? cuotaSuscripcion : 0;
     const totalCuota = alicuotaPura + gastosAdm + seguroVida + derechoSuscripcion;
     
-    // Use fixed past dates for the overdue group example to avoid hydration errors
-    const dueDate = i < 4 ? fixedPastDates[i] : `2024-${String(((i + 7) % 12) + 1).padStart(2,'0')}-10`;
+    // We use a different set of dates for the overdue plan example
+    const dueDate = pastDueDates[i];
 
     return {
         id: `cuota-${i + 1}`,
         number: i + 1,
-        dueDate: dueDate,
+        dueDate: format(dueDate, 'yyyy-MM-dd'),
         status: 'Futuro',
         total: totalCuota,
         breakdown: {
@@ -99,6 +105,7 @@ export const installments: Installment[] = Array.from({ length: 84 }, (_, i) => 
         },
     }
 });
+
 
 export const generateExampleInstallments = (capital: number, plazo: number): Installment[] => {
     const alicuotaPura = capital / plazo;

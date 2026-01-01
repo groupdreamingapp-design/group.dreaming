@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { ArrowLeft, Users, Clock, Users2, Calendar, Gavel, HandCoins, Ticket, Info, Trophy, FileX2, TrendingUp, Hand, Scale } from 'lucide-react';
+import { ArrowLeft, Users, Clock, Users2, Calendar, Gavel, HandCoins, Ticket, Info, Trophy, FileX2, TrendingUp, Hand, Scale, CalendarCheck } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import { useGroups } from '@/hooks/use-groups';
@@ -18,6 +18,8 @@ import { installments as allInstallments, initialGroups } from '@/lib/data';
 import { useMemo, useState } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from '@/components/ui/separator';
+import { addDays, parseISO, format } from 'date-fns';
+import { es } from 'date-fns/locale';
 
 
 type GroupDetailClientProps = {
@@ -117,6 +119,7 @@ export default function GroupDetailClient({ groupId }: GroupDetailClientProps) {
 
   const formatCurrency = (amount: number) => new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'USD' }).format(amount);
   const formatCurrencyNoDecimals = (amount: number) => new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(amount);
+  const formatDate = (dateString: string) => format(parseISO(dateString), 'dd/MM/yyyy');
   const isMember = group.userIsMember;
   
   const alicuotaPuraTotal = installments.length > 0 ? installments[0].breakdown.alicuotaPura : 0;
@@ -193,137 +196,137 @@ export default function GroupDetailClient({ groupId }: GroupDetailClientProps) {
           </Card>
         </div>
         
-         {isMember && group.status === 'Activo' && (
-          <div className="lg:col-span-3">
-            <Card>
-              <CardHeader>
-                <CardTitle>Acciones del Plan</CardTitle>
-                <CardDescription>Opciones disponibles para tu plan.</CardDescription>
-              </CardHeader>
-              <CardContent className="flex flex-wrap gap-2">
-                <Dialog>
-                  <DialogTrigger asChild><Button size="sm" variant="secondary"><TrendingUp className="mr-2 h-4 w-4" /> Adelantar</Button></DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader><DialogTitle>Adelantar Cuotas</DialogTitle><DialogDescription>Paga cuotas futuras para acortar tu plan y obtén una bonificación.</DialogDescription></DialogHeader>
-                    <div className="space-y-4">
-                        <p className="text-sm text-muted-foreground">No compite por adjudicación, pero reduce el costo final de tu plan.</p>
-                        <div className="grid w-full max-w-sm items-center gap-1.5">
-                            <Label htmlFor="cuotas-adelantar">Cantidad de cuotas a adelantar</Label>
-                             <Select onValueChange={(value) => setCuotasToAdvance(Number(value))}>
-                                <SelectTrigger id="cuotas-adelantar">
-                                    <SelectValue placeholder="Selecciona la cantidad de cuotas" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {Array.from({ length: cuotasRestantes }, (_, i) => i + 1).map(num => (
-                                        <SelectItem key={num} value={String(num)}>{num} cuota{num > 1 && 's'}</SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                        </div>
-                        {cuotasToAdvance > 0 ? (
-                            <Card className="bg-muted/50">
-                                <CardContent className="p-4 text-sm space-y-1">
-                                    <p>Pagarías (valor puro): <strong>{formatCurrency(advanceSavings.totalToPay)}</strong></p>
-                                    <p>En lugar de (valor final): <span className='line-through'>{formatCurrency(advanceSavings.totalOriginal)}</span></p>
-                                    <p className="text-green-600 font-semibold">¡Ahorras {formatCurrency(advanceSavings.totalSaving)} en gastos y seguros!</p>
-                                </CardContent>
-                            </Card>
-                        ) : (
-                            <p className="text-xs text-muted-foreground">Selecciona una cantidad de cuotas para ver el ahorro.</p>
-                        )}
-                    </div>
-                    <DialogFooter>
-                        <Button type="submit">Adelantar Cuotas</Button>
-                    </DialogFooter>
-                  </DialogContent>
-                </Dialog>
-
-                {!group.userIsAwarded && (
-                  <>
-                    <Dialog>
-                      <DialogTrigger asChild><Button size="sm"><Gavel className="mr-2 h-4 w-4" /> Licitar</Button></DialogTrigger>
-                      <DialogContent>
-                        <DialogHeader><DialogTitle>Licitar por Adjudicación</DialogTitle><DialogDescription>Ofrece adelantar cuotas para obtener el capital. Quien más ofrezca, gana.</DialogDescription></DialogHeader>
-                        <div className="space-y-4">
-                            <p className="text-sm text-muted-foreground">Tu oferta competirá con otros miembros. Si ganas, el monto se usa para cancelar las últimas cuotas de tu plan.</p>
-                            <div className="grid w-full max-w-sm items-center gap-1.5">
-                                <Label htmlFor="cuotas-licitar">Cuotas a licitar (adelantar)</Label>
-                                <Select onValueChange={(value) => setCuotasToBid(Number(value))}>
-                                    <SelectTrigger id="cuotas-licitar">
-                                        <SelectValue placeholder="Selecciona la cantidad de cuotas" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {Array.from({ length: cuotasRestantes }, (_, i) => i + 1).map(num => (
-                                            <SelectItem key={num} value={String(num)}>{num} cuota{num > 1 && 's'}</SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                            {cuotasToBid > 0 ? (
-                                <Card className="bg-muted/50">
-                                    <CardContent className="p-4 text-sm space-y-1">
-                                        <p>Pagarías (valor puro): <strong>{formatCurrency(bidSavings.totalToPay)}</strong></p>
-                                        <p>En lugar de (valor final): <span className='line-through'>{formatCurrency(bidSavings.totalOriginal)}</span></p>
-                                        <p className="text-green-600 font-semibold">¡Ahorras {formatCurrency(bidSavings.totalSaving)} en gastos y seguros!</p>
-                                    </CardContent>
-                                </Card>
-                            ) : (
-                                <p className="text-xs text-muted-foreground">Selecciona una cantidad de cuotas para ver el ahorro.</p>
-                            )}
-                            <div className="flex items-center space-x-2">
-                              <Switch id="licitacion-automatica" />
-                              <Label htmlFor="licitacion-automatica">Activar Licitación Automática</Label>
-                            </div>
-                            <p className="text-xs text-muted-foreground">Recuerda que si ganas y no integras el capital, se aplicará una multa del 2% (+IVA) sobre tu oferta.</p>
-                        </div>
-                        <DialogFooter>
-                            <Button type="submit">Confirmar Licitación</Button>
-                        </DialogFooter>
-                      </DialogContent>
-                    </Dialog>
-                    <Dialog>
-                      <DialogTrigger asChild><Button size="sm" variant="secondary"><Hand className="mr-2 h-4 w-4" /> Subastar</Button></DialogTrigger>
+        {isMember && group.status === 'Activo' && (
+           <div className="lg:col-span-3">
+             <Card>
+               <CardHeader>
+                 <CardTitle>Acciones del Plan</CardTitle>
+                 <CardDescription>Opciones disponibles para tu plan.</CardDescription>
+               </CardHeader>
+               <CardContent className="flex flex-wrap gap-2">
+                 <Dialog onOpenChange={() => setCuotasToAdvance(0)}>
+                   <DialogTrigger asChild><Button size="sm" variant="secondary"><TrendingUp className="mr-2 h-4 w-4" /> Adelantar</Button></DialogTrigger>
+                   <DialogContent>
+                     <DialogHeader><DialogTitle>Adelantar Cuotas</DialogTitle><DialogDescription>Paga cuotas futuras para acortar tu plan y obtén una bonificación.</DialogDescription></DialogHeader>
+                     <div className="space-y-4">
+                         <p className="text-sm text-muted-foreground">No compite por adjudicación, pero reduce el costo final de tu plan.</p>
+                         <div className="grid w-full max-w-sm items-center gap-1.5">
+                             <Label htmlFor="cuotas-adelantar">Cantidad de cuotas a adelantar</Label>
+                              <Select onValueChange={(value) => setCuotasToAdvance(Number(value))}>
+                                 <SelectTrigger id="cuotas-adelantar">
+                                     <SelectValue placeholder="Selecciona la cantidad de cuotas" />
+                                 </SelectTrigger>
+                                 <SelectContent>
+                                     {Array.from({ length: cuotasRestantes }, (_, i) => i + 1).map(num => (
+                                         <SelectItem key={num} value={String(num)}>{num} cuota{num > 1 && 's'}</SelectItem>
+                                     ))}
+                                 </SelectContent>
+                             </Select>
+                         </div>
+                         {cuotasToAdvance > 0 ? (
+                             <Card className="bg-muted/50">
+                                 <CardContent className="p-4 text-sm space-y-1">
+                                     <p>Pagarías (valor puro): <strong>{formatCurrency(advanceSavings.totalToPay)}</strong></p>
+                                     <p>En lugar de (valor final): <span className='line-through'>{formatCurrency(advanceSavings.totalOriginal)}</span></p>
+                                     <p className="text-green-600 font-semibold">¡Ahorras {formatCurrency(advanceSavings.totalSaving)} en gastos y seguros!</p>
+                                 </CardContent>
+                             </Card>
+                         ) : (
+                             <p className="text-xs text-muted-foreground">Selecciona una cantidad de cuotas para ver el ahorro.</p>
+                         )}
+                     </div>
+                     <DialogFooter>
+                         <Button type="submit">Adelantar Cuotas</Button>
+                     </DialogFooter>
+                   </DialogContent>
+                 </Dialog>
+ 
+                 {!group.userIsAwarded && (
+                   <>
+                     <Dialog onOpenChange={() => setCuotasToBid(0)}>
+                       <DialogTrigger asChild><Button size="sm"><Gavel className="mr-2 h-4 w-4" /> Licitar</Button></DialogTrigger>
                        <DialogContent>
-                        <DialogHeader><DialogTitle>Subastar Plan (Vender)</DialogTitle><DialogDescription>Ofrece tu plan en el mercado secundario a otros inversores.</DialogDescription></DialogHeader>
+                         <DialogHeader><DialogTitle>Licitar por Adjudicación</DialogTitle><DialogDescription>Ofrece adelantar cuotas para obtener el capital. Quien más ofrezca, gana.</DialogDescription></DialogHeader>
+                         <div className="space-y-4">
+                             <p className="text-sm text-muted-foreground">Tu oferta competirá con otros miembros. Si ganas, el monto se usa para cancelar las últimas cuotas de tu plan.</p>
+                             <div className="grid w-full max-w-sm items-center gap-1.5">
+                                 <Label htmlFor="cuotas-licitar">Cuotas a licitar (adelantar)</Label>
+                                 <Select onValueChange={(value) => setCuotasToBid(Number(value))}>
+                                     <SelectTrigger id="cuotas-licitar">
+                                         <SelectValue placeholder="Selecciona la cantidad de cuotas" />
+                                     </SelectTrigger>
+                                     <SelectContent>
+                                         {Array.from({ length: cuotasRestantes }, (_, i) => i + 1).map(num => (
+                                             <SelectItem key={num} value={String(num)}>{num} cuota{num > 1 && 's'}</SelectItem>
+                                         ))}
+                                     </SelectContent>
+                                 </Select>
+                             </div>
+                             {cuotasToBid > 0 ? (
+                                 <Card className="bg-muted/50">
+                                     <CardContent className="p-4 text-sm space-y-1">
+                                         <p>Pagarías (valor puro): <strong>{formatCurrency(bidSavings.totalToPay)}</strong></p>
+                                         <p>En lugar de (valor final): <span className='line-through'>{formatCurrency(bidSavings.totalOriginal)}</span></p>
+                                         <p className="text-green-600 font-semibold">¡Ahorras {formatCurrency(bidSavings.totalSaving)} en gastos y seguros!</p>
+                                     </CardContent>
+                                 </Card>
+                             ) : (
+                                 <p className="text-xs text-muted-foreground">Selecciona una cantidad de cuotas para ver el ahorro.</p>
+                             )}
+                             <div className="flex items-center space-x-2">
+                               <Switch id="licitacion-automatica" />
+                               <Label htmlFor="licitacion-automatica">Activar Licitación Automática</Label>
+                             </div>
+                             <p className="text-xs text-muted-foreground">Recuerda que si ganas y no integras el capital, se aplicará una multa del 2% (+IVA) sobre tu oferta.</p>
+                         </div>
+                         <DialogFooter>
+                             <Button type="submit">Confirmar Licitación</Button>
+                         </DialogFooter>
+                       </DialogContent>
+                     </Dialog>
+                     <Dialog>
+                       <DialogTrigger asChild><Button size="sm" variant="secondary"><Hand className="mr-2 h-4 w-4" /> Subastar</Button></DialogTrigger>
+                        <DialogContent>
+                         <DialogHeader><DialogTitle>Subastar Plan (Vender)</DialogTitle><DialogDescription>Ofrece tu plan en el mercado secundario a otros inversores.</DialogDescription></DialogHeader>
+                          <div className="space-y-4 text-sm">
+                             <p>Esta es tu vía de salida flexible. A continuación un ejemplo del cálculo del precio base y lo que recibirías.</p>
+                             <Card className="bg-muted/50 p-4 space-y-2">
+                                <div className="flex justify-between"><span>Total Cuotas Emitidas:</span><strong>{formatCurrency(totalCuotasEmitidas)}</strong></div>
+                                <div className="flex justify-between"><span>Precio Base Subasta (50%):</span><strong>{formatCurrency(precioBaseSubasta)}</strong></div>
+                                <div className="flex justify-between text-red-600"><span>Comisión por Venta (2% + IVA):</span><strong>-{formatCurrency(comisionVenta)}</strong></div>
+                                <div className="flex justify-between font-bold border-t pt-2"><span>Liquidación Estimada (al Precio Base):</span><strong>{formatCurrency(liquidacionEstimada)}</strong></div>
+                                <p className="text-xs text-muted-foreground mt-2">El valor final dependerá del precio de venta en la subasta.</p>
+                             </Card>
+                         </div>
+                         <DialogFooter>
+                             <Button type="submit">Poner en Subasta</Button>
+                         </DialogFooter>
+                       </DialogContent>
+                     </Dialog>
+                     <Dialog>
+                       <DialogTrigger asChild><Button size="sm" variant="destructive"><FileX2 className="mr-2 h-4 w-4" /> Dar de Baja</Button></DialogTrigger>
+                       <DialogContent>
+                         <DialogHeader><DialogTitle>Dar de Baja el Plan</DialogTitle><DialogDescription>Rescinde tu contrato. Aplica solo para planes no adjudicados.</DialogDescription></DialogHeader>
                          <div className="space-y-4 text-sm">
-                            <p>Esta es tu vía de salida flexible. A continuación un ejemplo del cálculo del precio base y lo que recibirías.</p>
-                            <Card className="bg-muted/50 p-4 space-y-2">
-                               <div className="flex justify-between"><span>Total Cuotas Emitidas:</span><strong>{formatCurrency(totalCuotasEmitidas)}</strong></div>
-                               <div className="flex justify-between"><span>Precio Base Subasta (50%):</span><strong>{formatCurrency(precioBaseSubasta)}</strong></div>
-                               <div className="flex justify-between text-red-600"><span>Comisión por Venta (2% + IVA):</span><strong>-{formatCurrency(comisionVenta)}</strong></div>
-                               <div className="flex justify-between font-bold border-t pt-2"><span>Liquidación Estimada (al Precio Base):</span><strong>{formatCurrency(liquidacionEstimada)}</strong></div>
-                               <p className="text-xs text-muted-foreground mt-2">El valor final dependerá del precio de venta en la subasta.</p>
-                            </Card>
-                        </div>
-                        <DialogFooter>
-                            <Button type="submit">Poner en Subasta</Button>
-                        </DialogFooter>
-                      </DialogContent>
-                    </Dialog>
-                    <Dialog>
-                      <DialogTrigger asChild><Button size="sm" variant="destructive"><FileX2 className="mr-2 h-4 w-4" /> Dar de Baja</Button></DialogTrigger>
-                      <DialogContent>
-                        <DialogHeader><DialogTitle>Dar de Baja el Plan</DialogTitle><DialogDescription>Rescinde tu contrato. Aplica solo para planes no adjudicados.</DialogDescription></DialogHeader>
-                        <div className="space-y-4 text-sm">
-                            <p>Se te devolverá el capital puro aportado al finalizar el grupo, menos una penalidad. Ejemplo del cálculo:</p>
-                            <Card className="bg-muted/50 p-4 space-y-2">
-                               <div className="flex justify-between"><span>Capital Aportado (Puro):</span><strong>{formatCurrency(capitalAportadoPuro)}</strong></div>
-                               <div className="flex justify-between text-red-600"><span>Penalidad (5% + IVA):</span><strong>-{formatCurrency(penalidadBaja)}</strong></div>
-                               <div className="flex justify-between font-bold border-t pt-2"><span>Monto a Devolver (al final):</span><strong>{formatCurrency(capitalAportadoPuro - penalidadBaja)}</strong></div>
-                            </Card>
-                             <p className="text-xs text-muted-foreground">La devolución se efectuará una vez finalizado el plazo original del grupo para no afectar al resto de los miembros.</p>
-                        </div>
-                        <DialogFooter>
-                            <Button type="submit" variant="destructive">Confirmar Baja</Button>
-                        </DialogFooter>
-                      </DialogContent>
-                    </Dialog>
-                  </>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-        )}
+                             <p>Se te devolverá el capital puro aportado al finalizar el grupo, menos una penalidad. Ejemplo del cálculo:</p>
+                             <Card className="bg-muted/50 p-4 space-y-2">
+                                <div className="flex justify-between"><span>Capital Aportado (Puro):</span><strong>{formatCurrency(capitalAportadoPuro)}</strong></div>
+                                <div className="flex justify-between text-red-600"><span>Penalidad (5% + IVA):</span><strong>-{formatCurrency(penalidadBaja)}</strong></div>
+                                <div className="flex justify-between font-bold border-t pt-2"><span>Monto a Devolver (al final):</span><strong>{formatCurrency(capitalAportadoPuro - penalidadBaja)}</strong></div>
+                             </Card>
+                              <p className="text-xs text-muted-foreground">La devolución se efectuará una vez finalizado el plazo original del grupo para no afectar al resto de los miembros.</p>
+                         </div>
+                         <DialogFooter>
+                             <Button type="submit" variant="destructive">Confirmar Baja</Button>
+                         </DialogFooter>
+                       </DialogContent>
+                     </Dialog>
+                   </>
+                 )}
+               </CardContent>
+             </Card>
+           </div>
+         )}
         
         <div className="lg:col-span-3">
           <Card>
@@ -345,8 +348,13 @@ export default function GroupDetailClient({ groupId }: GroupDetailClientProps) {
                 <TableBody>
                   {installments.map((inst) => {
                     let status: Installment['status'];
+                    const today = new Date();
+                    const dueDate = parseISO(inst.dueDate);
+                    
                     if (inst.number <= cuotasPagadas) {
                       status = 'Pagado';
+                    } else if (dueDate < today) {
+                        status = 'Vencido';
                     } else if (group.status === 'Activo' && inst.number === cuotasPagadas + 1) {
                       status = 'Pendiente';
                     } else {
@@ -354,27 +362,37 @@ export default function GroupDetailClient({ groupId }: GroupDetailClientProps) {
                     }
                     
                     const currentAwards = status === 'Pagado' ? groupAwards[inst.number - 1] : undefined;
+                    const awardDate = status === 'Pagado' ? format(addDays(dueDate, 5), 'dd/MM/yyyy') : undefined;
 
                     return (
                       <TableRow key={inst.id}>
                         <TableCell>{inst.number}</TableCell>
-                        <TableCell>{inst.dueDate}</TableCell>
+                        <TableCell>{formatDate(inst.dueDate)}</TableCell>
                         <TableCell>
-                          <Badge variant={status === 'Pagado' ? 'default' : status === 'Pendiente' ? 'secondary' : 'outline'}
+                          <Badge variant={status === 'Pagado' ? 'default' : status === 'Pendiente' ? 'secondary' : status === 'Vencido' ? 'destructive' : 'outline'}
                             className={cn(
                               status === 'Pagado' && 'bg-green-500/20 text-green-700 border-green-500/30',
                               status === 'Pendiente' && 'bg-yellow-500/20 text-yellow-700 border-yellow-500/30',
+                              status === 'Vencido' && 'bg-red-500/20 text-red-700 border-red-500/30',
                             )}
                           >{status}</Badge>
                         </TableCell>
-                         <TableCell className="flex items-center gap-2">
-                           {currentAwards?.map(award => (
-                            <span key={`${award.type}-${award.orderNumber}`} className="flex items-center gap-1 text-xs">
-                              {award.type === 'sorteo' && <Ticket className="h-4 w-4 text-blue-500" />}
-                              {award.type === 'licitacion' && <HandCoins className="h-4 w-4 text-orange-500" />}
-                              #{award.orderNumber}
-                            </span>
-                          ))}
+                         <TableCell className="text-xs text-muted-foreground">
+                            {awardDate && (
+                                <div className="flex items-center gap-2">
+                                     <CalendarCheck className="h-4 w-4" />
+                                     <span>{awardDate}</span>
+                                </div>
+                            )}
+                            <div className="flex items-center gap-3 mt-1">
+                               {currentAwards?.map(award => (
+                                <div key={`${award.type}-${award.orderNumber}`} className="flex items-center gap-1">
+                                  {award.type === 'sorteo' && <Ticket className="h-4 w-4 text-blue-500" />}
+                                  {award.type === 'licitacion' && <HandCoins className="h-4 w-4 text-orange-500" />}
+                                  <span>#{award.orderNumber}</span>
+                                </div>
+                              ))}
+                            </div>
                         </TableCell>
                         <TableCell className="text-right font-mono">{formatCurrency(inst.total)}</TableCell>
                         <TableCell className="text-center">
@@ -421,5 +439,3 @@ export default function GroupDetailClient({ groupId }: GroupDetailClientProps) {
     </>
   );
 }
-
-    
