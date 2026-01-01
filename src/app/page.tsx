@@ -83,10 +83,10 @@ export default function WhyUsPage() {
         <section className="py-20 md:py-32">
           <div className="container mx-auto px-4 text-center">
             <h1 className="font-headline text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl">
-              La banca tradicional quedó en el pasado.
+              Tus metas, más cerca que nunca.
             </h1>
             <p className="mx-auto mt-6 max-w-3xl text-lg text-muted-foreground sm:text-xl">
-              Mientras otros te ofrecen deuda, nosotros te ofrecemos una comunidad. Creamos un sistema de ahorro colectivo donde el esfuerzo de todos es el impulso para cada uno, sin intereses bancarios ni burocracia.
+              Group Dreaming es la plataforma de financiamiento colectivo que transforma el ahorro en comunidad en el impulso para hacer realidad tus sueños. Sin deudas, con transparencia y con el poder del grupo.
             </p>
           </div>
         </section>
