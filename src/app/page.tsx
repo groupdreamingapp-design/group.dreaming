@@ -19,7 +19,7 @@ const goalImages = [
 ]
 
 export default function LandingPage() {
-  const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
+  const [currentYear, setCurrentYear] = useState<number | null>(null);
 
   useEffect(() => {
     setCurrentYear(new Date().getFullYear());
@@ -251,7 +251,7 @@ export default function LandingPage() {
 
       <footer className="bg-secondary">
         <div className="container mx-auto px-4 py-8 text-center text-muted-foreground">
-          <p>&copy; {currentYear} Group Dreaming (Group Dreaming S.A.S.). Todos los derechos reservados.</p>
+          {currentYear && <p>&copy; {currentYear} Group Dreaming (Group Dreaming S.A.S.). Todos los derechos reservados.</p>}
           <p className="text-sm mt-2">Hecho con ❤️ para cumplir sueños.</p>
         </div>
       </footer>
