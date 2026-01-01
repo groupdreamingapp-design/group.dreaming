@@ -377,8 +377,9 @@ export default function GroupDetailClient({ groupId }: GroupDetailClientProps) {
                         }
                     }
                     
-                    const currentAwards = status === 'Pagado' ? groupAwards[inst.number - 1] : undefined;
-                    const awardDate = status === 'Pagado' ? format(addDays(dueDate, 5), 'dd/MM/yyyy') : undefined;
+                    const isMonthPast = status === 'Pagado' || status === 'Vencido';
+                    const currentAwards = isMonthPast ? groupAwards[inst.number - 1] : undefined;
+                    const awardDate = isMonthPast ? format(addDays(dueDate, 5), 'dd/MM/yyyy') : undefined;
 
                     return (
                       <TableRow key={inst.id}>
