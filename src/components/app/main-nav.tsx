@@ -41,6 +41,11 @@ export function MainNav({ isMobile = false }: MainNavProps) {
       label: "Billetera",
       icon: Wallet,
     },
+    {
+      href: "/dashboard/transparency",
+      label: "Transparencia",
+      icon: PieChart,
+    },
   ];
 
   const linkClass = (href: string) => cn(
