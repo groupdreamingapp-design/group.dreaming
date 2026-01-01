@@ -30,7 +30,7 @@ export default function DashboardPage() {
 
   const subscribedCapital = useMemo(() => {
     return groups
-        .filter(g => g.userIsMember && (g.status === 'Activo' || g.status === 'Pendiente' || g.status === 'Abierto'))
+        .filter(g => g.userIsMember && g.status === 'Activo')
         .reduce((acc, g) => acc + g.capital, 0);
   }, [groups]);
 

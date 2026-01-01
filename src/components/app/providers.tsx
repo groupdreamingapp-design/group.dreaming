@@ -193,7 +193,7 @@ export function GroupsProvider({ children }: { children: ReactNode }) {
         if (!groupToJoin) return currentGroups;
 
         const subscribedCapital = currentGroups
-            .filter(g => g.userIsMember && (g.status === 'Activo' || g.status === 'Pendiente' || g.status === 'Abierto'))
+            .filter(g => g.userIsMember && g.status === 'Activo')
             .reduce((acc, g) => acc + g.capital, 0);
 
         if (subscribedCapital + groupToJoin.capital > MAX_CAPITAL) {
