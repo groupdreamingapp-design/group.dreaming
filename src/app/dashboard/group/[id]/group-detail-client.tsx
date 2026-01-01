@@ -78,7 +78,7 @@ const generateStaticAwards = (group: Group): Award[][] => {
         let awardsThisMonth = regularAwardsPerMonth;
         
         // If remaining winners can't be covered by 2 awards/month, increase to 4
-        if (remainingWinners > remainingMonths * regularAwardsPerMonth) {
+        if (remainingWinners > 0 && remainingWinners <= (remainingMonths * 4) && remainingWinners > (remainingMonths * 2) ) {
             awardsThisMonth = 4;
         }
 
@@ -403,18 +403,12 @@ export default function GroupDetailClient({ groupId }: GroupDetailClientProps) {
                     let today = new Date();
                     today.setHours(0, 0, 0, 0);
 
+                    const isPastOrToday = isBefore(dueDate, today) || isToday(dueDate);
+
                     if (isPlanActive) {
-                        if (group.userIsAwarded) {
-                            if (index < nextPendingInstallmentIndex) {
-                                status = 'Pagado';
-                            } else if (index === nextPendingInstallmentIndex) {
-                                status = 'Pendiente';
-                            } else {
-                                status = 'Futuro';
-                            }
-                        } else if (inst.number <= cuotasPagadas) {
+                        if (inst.number <= cuotasPagadas && isPastOrToday) {
                             status = 'Pagado';
-                        } else if (isBefore(dueDate, today)) {
+                        } else if (isBefore(dueDate, today) && inst.number > cuotasPagadas) {
                             status = 'Vencido';
                         } else if (index === nextPendingInstallmentIndex) {
                             status = 'Pendiente';
@@ -426,7 +420,7 @@ export default function GroupDetailClient({ groupId }: GroupDetailClientProps) {
                     }
                     
                     const isMonthPast = isPlanActive && isBefore(dueDate, today);
-                    const currentAwards = (isPlanActive && inst.number >= 2 && (cuotasPagadas >= inst.number - 1)) ? groupAwards[inst.number - 1] : undefined;
+                    const currentAwards = (isPlanActive && inst.number >= 2 && (cuotasPagadas >= inst.number - 1 || isBefore(dueDate, addDays(today, 5)))) ? groupAwards[inst.number - 2] : undefined;
                     const awardDate = (isPlanActive && currentAwards) ? format(addDays(dueDate, 5), 'dd/MM/yyyy') : undefined;
 
                     return (
