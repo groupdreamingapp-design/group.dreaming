@@ -102,12 +102,7 @@ const staticBaseDate = new Date('2026-01-10T12:00:00Z').getTime();
 const getFutureDate = (hours: number) => new Date(staticBaseDate + hours * 60 * 60 * 1000).toISOString();
 
 
-export let auctions: Omit<Auction, 'precioBase'>[] = [
-    { id: "auc-1", groupId: "ID-20240210-1138", orderNumber: 15, capital: 30000, plazo: 60, cuotasPagadas: 15, highestBid: 7520, endDate: getFutureDate(48), numberOfBids: 1 },
-    { id: "auc-2", groupId: "ID-20240305-4815", orderNumber: 42, capital: 15000, plazo: 36, cuotasPagadas: 20, highestBid: 4166.67, endDate: getFutureDate(24), numberOfBids: 0, isPostAdjudicacion: true },
-    { id: "auc-3", groupId: "ID-20231101-7777", orderNumber: 23, capital: 10000, plazo: 24, cuotasPagadas: 19, highestBid: 7800, endDate: getFutureDate(2), numberOfBids: 5, isMine: true },
-    { id: "auc-4", groupId: "ID-20240510-8888", orderNumber: 88, capital: 20000, plazo: 60, cuotasPagadas: 5, highestBid: 0, endDate: getFutureDate(48), numberOfBids: 0 },
-];
+export let auctions: Omit<Auction, 'precioBase'>[] = [];
 
 export const generateInstallments = (capital: number, plazo: number, activationDate: string): Installment[] => {
     const IVA = 1.21;
@@ -212,6 +207,7 @@ function generateNewGroup(templateGroup: Group): Group {
     
 
     
+
 
 
 
