@@ -5,18 +5,10 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Users, Scale, Rows, ShieldCheck } from "lucide-react";
 import { Logo } from '@/components/icons';
-import { useState, useEffect } from "react";
-import { user } from "@/lib/data";
+import { useUser } from "@/firebase";
 
 export default function WhyUsPage() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-
-  useEffect(() => {
-    // Simulate checking user session
-    if (user && user.id) {
-        setIsLoggedIn(true);
-    }
-  }, []);
+  const user = useUser();
 
   const pillars = [
     {
@@ -53,7 +45,7 @@ export default function WhyUsPage() {
           <Button variant="ghost" asChild><Link href="/dashboard/explore">Explorar Grupos</Link></Button>
           <Button variant="ghost" asChild><Link href="/dashboard/transparency">Transparencia</Link></Button>
           <div className="w-px h-6 bg-border mx-2"></div>
-          {isLoggedIn ? (
+          {user ? (
             <Button asChild>
               <Link href="/dashboard">Ir a mi Panel</Link>
             </Button>
@@ -69,7 +61,7 @@ export default function WhyUsPage() {
           )}
         </nav>
          <nav className="md:hidden flex items-center gap-2">
-          {isLoggedIn ? (
+          {user ? (
              <Button asChild size="sm">
                 <Link href="/dashboard">Mi Panel</Link>
               </Button>

@@ -2,7 +2,9 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 import { cn } from '@/lib/utils';
-import { Providers } from '@/components/app/providers';
+import { GroupsProvider } from '@/components/app/providers';
+import { AuthProvider } from '@/components/app/auth-provider';
+import { FirebaseClientProvider } from '@/firebase';
 
 export const metadata: Metadata = {
   title: 'Group Dreaming',
@@ -26,9 +28,13 @@ export default function RootLayout({
           "min-h-screen bg-background font-body antialiased",
         )}
       >
-        <Providers>
-          {children}
-        </Providers>
+        <FirebaseClientProvider>
+          <GroupsProvider>
+            <AuthProvider>
+              {children}
+            </AuthProvider>
+          </GroupsProvider>
+        </FirebaseClientProvider>
         <Toaster />
       </body>
     </html>

@@ -6,7 +6,7 @@ import { useState, useCallback, ReactNode, useEffect, useRef } from 'react';
 import { initialGroups, generateInstallments } from '@/lib/data';
 import type { Group } from '@/lib/types';
 import { GroupsContext } from '@/hooks/use-groups';
-import { toast } from '@/hooks/use-toast';
+import { useToast } from '@/hooks/use-toast';
 import { parseISO, differenceInHours, isBefore } from 'date-fns';
 
 function generateNewGroup(templateGroup: Group): Group {
@@ -248,14 +248,5 @@ export function GroupsProvider({ children }: { children: ReactNode }) {
     <GroupsContext.Provider value={{ groups, joinGroup }}>
       {children}
     </GroupsContext.Provider>
-  );
-}
-
-
-export function Providers({ children }: { children: ReactNode }) {
-  return (
-    <GroupsProvider>
-      {children}
-    </GroupsProvider>
   );
 }
