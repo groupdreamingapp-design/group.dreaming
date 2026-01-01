@@ -8,15 +8,14 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Banknote, Download, Upload, Wallet as WalletIcon, Calendar as CalendarIcon, ListRestart, ShieldCheck } from "lucide-react";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Download, Upload, Calendar as CalendarIcon, ListRestart } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { format, parseISO, startOfDay, endOfDay } from "date-fns";
 import type { DateRange } from "react-day-picker";
+import { PaymentMethods } from '@/components/app/payment-methods';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
 
 type TransactionTypeFilter = 'todos' | 'ingreso' | 'egreso';
 
@@ -78,40 +77,13 @@ export default function WalletPage() {
         </Card>
 
         <Card className="lg:col-span-2">
-          <CardHeader>
-            <CardTitle>Débito Automático</CardTitle>
-            <CardDescription>El pago de tus cuotas está automatizado para tu comodidad.</CardDescription>
-          </CardHeader>
-          <CardContent className="grid gap-6">
-            <div className="flex items-start justify-between space-x-4 rounded-lg border bg-secondary/50 p-4">
-              <ShieldCheck className="h-6 w-6 text-primary mt-1" />
-              <div className="flex-1">
-                <p className="font-semibold">El débito automático de cuotas está activo</p>
-                <p className="text-sm text-muted-foreground">
-                  Para evitar atrasos, el sistema cobrará automáticamente tu cuota en la fecha de vencimiento desde tu método de pago seleccionado.
-                </p>
-              </div>
-            </div>
-             <div>
-                <Label className="mb-3 block">Selecciona tu método de pago preferido:</Label>
-                <RadioGroup defaultValue="wallet" className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <RadioGroupItem value="wallet" id="r1" className="peer sr-only" />
-                    <Label htmlFor="r1" className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary">
-                      <WalletIcon className="mb-3 h-6 w-6" />
-                      Pagar con Wallet
-                    </Label>
-                  </div>
-                  <div>
-                    <RadioGroupItem value="bank" id="r2" className="peer sr-only" />
-                    <Label htmlFor="r2" className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary">
-                      <Banknote className="mb-3 h-6 w-6" />
-                      Cuenta Bancaria
-                    </Label>
-                  </div>
-                </RadioGroup>
-            </div>
-          </CardContent>
+           <CardHeader>
+                <CardTitle>Métodos de Pago</CardTitle>
+                <CardDescription>Configura cómo se realizarán tus pagos de débito automático.</CardDescription>
+            </CardHeader>
+            <CardContent>
+                <PaymentMethods />
+            </CardContent>
         </Card>
       </div>
 
