@@ -1,8 +1,12 @@
 
+'use client';
+
+import { useState } from "react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, HelpCircle } from "lucide-react";
+import { ArrowLeft, HelpCircle, Search, SearchX } from "lucide-react";
 import Link from "next/link";
+import { Input } from "@/components/ui/input";
 
 const faqData = [
     {
@@ -36,6 +40,13 @@ const faqData = [
 ];
 
 export default function FaqPage() {
+    const [searchTerm, setSearchTerm] = useState('');
+
+    const filteredFaqs = faqData.filter(item => 
+        item.question.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.answer.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
     return (
         <>
             <div className="mb-6">
@@ -52,18 +63,39 @@ export default function FaqPage() {
                 <p className="text-muted-foreground">Encuentra respuestas a las dudas más comunes sobre Group Dreaming.</p>
             </div>
 
-            <Accordion type="single" collapsible className="w-full">
-                {faqData.map((item, index) => (
-                    <AccordionItem key={index} value={`item-${index}`}>
-                        <AccordionTrigger className="text-left hover:no-underline text-lg">
-                            {item.question}
-                        </AccordionTrigger>
-                        <AccordionContent className="text-base text-muted-foreground leading-relaxed">
-                            {item.answer}
-                        </AccordionContent>
-                    </AccordionItem>
-                ))}
-            </Accordion>
+            <div className="relative mb-8">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Input 
+                    type="search"
+                    placeholder="Busca por palabras clave..."
+                    className="pl-10"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                />
+            </div>
+
+            {filteredFaqs.length > 0 ? (
+                <Accordion type="single" collapsible className="w-full">
+                    {filteredFaqs.map((item, index) => (
+                        <AccordionItem key={index} value={`item-${index}`}>
+                            <AccordionTrigger className="text-left hover:no-underline text-lg">
+                                {item.question}
+                            </AccordionTrigger>
+                            <AccordionContent className="text-base text-muted-foreground leading-relaxed">
+                                {item.answer}
+                            </AccordionContent>
+                        </AccordionItem>
+                    ))}
+                </Accordion>
+            ) : (
+                <div className="text-center py-16 text-muted-foreground flex flex-col items-center gap-4 border border-dashed rounded-lg">
+                    <SearchX className="h-12 w-12 text-muted-foreground/50" />
+                    <h3 className="text-xl font-semibold">No se encontraron resultados</h3>
+                    <p className="max-w-md">
+                        No hemos encontrado ninguna pregunta que coincida con tu búsqueda. Intenta con otras palabras.
+                    </p>
+                </div>
+            )}
         </>
     );
 }
