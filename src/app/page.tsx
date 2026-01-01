@@ -184,6 +184,7 @@ export default function WhyUsPage() {
                                     <span>Multas e intereses</span>
                                 </li>
                             </ul>
+                             <p className="text-xs text-muted-foreground text-center mt-4 border-t pt-2">El remanente de este fondo se transfiere a la plataforma una vez que el grupo finaliza.</p>
                         </CardContent>
                     </Card>
 
@@ -209,6 +210,10 @@ export default function WhyUsPage() {
                                 <li className="flex items-center gap-2">
                                     <Plus className="h-4 w-4 text-green-500" />
                                     <span>Comisiones del Mercado Secundario</span>
+                                </li>
+                                <li className="flex items-center gap-2">
+                                    <Plus className="h-4 w-4 text-green-500" />
+                                    <span>Remanente del Fondo de Reserva</span>
                                 </li>
                             </ul>
                         </CardContent>
@@ -245,3 +250,4 @@ export default function WhyUsPage() {
   );
 }
 
+    
