@@ -18,17 +18,16 @@ const rulesConfig = [
         title: "Proceso de Oferta y Garantía",
         icon: ShieldCheck,
         points: [
-            "Los compradores realizan ofertas durante el plazo de la subasta. Al ganar, tienen 24hs para integrar el capital ofertado.",
-            "Si el comprador no paga su oferta ganadora, será bloqueado hasta que pague una multa del 10% + IVA sobre el valor de su oferta.",
-            "Si un plan no recibe ofertas, la plataforma lo absorbe para garantizar la liquidación. Luego, utilizará sus propios fondos para realizar la oferta de licitación más alta posible en el mes siguiente, adjudicando ese capital."
+            "Los compradores realizan ofertas durante el plazo de la subasta. Al ganar, tienen 24hs para integrar el capital ofertado más la comisión.",
+            "Si el comprador no paga su oferta ganadora, será bloqueado hasta pagar una multa (10% + IVA sobre su oferta) y el plan volverá al vendedor.",
+            "Si un plan no recibe ofertas, la plataforma lo absorbe y utilizará sus propios fondos para realizar la oferta de licitación más alta posible en el mes siguiente, adjudicando ese capital y garantizando la liquidación al vendedor."
         ]
     },
     {
         title: "Para el Comprador",
         icon: Users,
         points: [
-            "Al ganar y pagar la subasta, el comprador asume los derechos y obligaciones del plan, incluyendo los pagos de cuotas futuras.",
-            "La comisión de compra (2% + IVA) se descontará automáticamente del capital que el comprador reciba al momento de su adjudicación.",
+            "Al ganar y pagar la subasta (monto ofertado + comisión), el comprador asume los derechos y obligaciones del plan, incluyendo los pagos de cuotas futuras.",
         ]
     },
     {
