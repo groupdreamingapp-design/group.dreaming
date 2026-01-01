@@ -128,19 +128,6 @@ export default function ProfileSetupPage() {
                                 
                                 {hasDefinedGoal && (
                                     <div className="space-y-8 animate-in fade-in-50">
-                                      {hasDefinedGoal === 'yes' && (
-                                          <div className="space-y-2">
-                                              <Label htmlFor="goal-description" className="font-semibold">Describe tu objetivo (Opcional)</Label>
-                                              <p className="text-sm text-muted-foreground">Ej: "Comprar un auto familiar", "Adelanto para mi primera casa", "Invertir en maquinaria para mi taller".</p>
-                                              <Controller
-                                                  name="goalDescription"
-                                                  control={control}
-                                                  render={({ field }) => <Textarea id="goal-description" rows={4} {...field} />}
-                                              />
-                                              {errors.goalDescription && <p className="text-red-500 text-xs">{errors.goalDescription.message}</p>}
-                                          </div>
-                                      )}
-
                                       <div className="space-y-6">
                                           <div>
                                             <Label className="font-semibold">¿Sobre qué categorías te gustaría recibir propuestas o beneficios?</Label>
@@ -199,6 +186,19 @@ export default function ProfileSetupPage() {
                                             </div>
                                           )}
                                       </div>
+
+                                      {hasDefinedGoal === 'yes' && (
+                                          <div className="space-y-2">
+                                              <Label htmlFor="goal-description" className="font-semibold">Describe tu objetivo (Opcional)</Label>
+                                              <p className="text-sm text-muted-foreground">Ej: "Comprar un auto familiar", "Adelanto para mi primera casa", "Invertir en maquinaria para mi taller".</p>
+                                              <Controller
+                                                  name="goalDescription"
+                                                  control={control}
+                                                  render={({ field }) => <Textarea id="goal-description" rows={4} {...field} />}
+                                              />
+                                              {errors.goalDescription && <p className="text-red-500 text-xs">{errors.goalDescription.message}</p>}
+                                          </div>
+                                      )}
                                     </div>
                                 )}
                                 
