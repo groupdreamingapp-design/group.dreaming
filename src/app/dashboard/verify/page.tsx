@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, CheckCircle, ShieldCheck, User, Building, Phone, Mail, FileUp, Camera, Repeat, Loader2, HeartHandshake } from 'lucide-react';
+import { ArrowLeft, CheckCircle, ShieldCheck, User, Building, Phone, Mail, FileUp, Camera, Repeat, Loader2, HeartHandshake, Info } from 'lucide-react';
 import Link from 'next/link';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
@@ -18,6 +18,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import { useUserNav } from '@/components/app/user-nav';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 const verificationSchema = z.object({
   // User data
@@ -134,6 +135,7 @@ export default function VerificationPage() {
     }
 
     return (
+      <TooltipProvider>
         <form onSubmit={handleSubmit(onSubmit)}>
             <div className="mb-6">
                 <Button asChild variant="ghost" className="mb-2 -ml-4">
@@ -285,7 +287,15 @@ export default function VerificationPage() {
                                 {errors.monthlyIncome && <p className="text-red-500 text-xs">{errors.monthlyIncome.message}</p>}
                             </div>
                             <div className="md:col-span-2 space-y-4">
-                               <Label>¿Eres una Persona Expuesta Políticamente (PEP)?</Label>
+                                <div className="flex items-center gap-2">
+                                    <Label>¿Eres una Persona Expuesta Políticamente (PEP)?</Label>
+                                    <Tooltip>
+                                        <TooltipTrigger type="button"><Info className="h-4 w-4 text-muted-foreground" /></TooltipTrigger>
+                                        <TooltipContent className="max-w-xs">
+                                            <p>Según la Resolución 134/2018 de la UIF, se consideran PEP a quienes desempeñan o han desempeñado funciones públicas destacadas en el país o en el extranjero. Esto incluye a funcionarios, jueces, legisladores, etc. Su declaración es obligatoria.</p>
+                                        </TooltipContent>
+                                    </Tooltip>
+                                </div>
                                <Controller
                                     name="pep"
                                     control={control}
@@ -306,7 +316,15 @@ export default function VerificationPage() {
                                     )}
                                 />
                                <div className="grid gap-1.5 leading-none">
-                                    <Label htmlFor="fundsOrigin">Declaro bajo juramento que los fondos que utilizaré en la plataforma son de origen lícito.</Label>
+                                    <div className="flex items-center gap-2">
+                                        <Label htmlFor="fundsOrigin">Declaro bajo juramento que los fondos que utilizaré son de origen lícito.</Label>
+                                        <Tooltip>
+                                            <TooltipTrigger type="button"><Info className="h-4 w-4 text-muted-foreground" /></TooltipTrigger>
+                                            <TooltipContent className="max-w-xs">
+                                                <p>Esta declaración es un requisito obligatorio bajo las normativas de la UIF (Unidad de Información Financiera) para la prevención del Lavado de Activos y Financiación del Terrorismo.</p>
+                                            </TooltipContent>
+                                        </Tooltip>
+                                    </div>
                                     {errors.fundsOrigin && <p className="text-red-500 text-xs">{errors.fundsOrigin.message}</p>}
                                </div>
                             </div>
@@ -394,6 +412,7 @@ export default function VerificationPage() {
                 </div>
             </div>
         </form>
+      </TooltipProvider>
     );
 }
 
