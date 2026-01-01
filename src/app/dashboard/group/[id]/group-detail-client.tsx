@@ -189,9 +189,11 @@ export default function GroupDetailClient({ groupId }: GroupDetailClientProps) {
     today.setHours(0, 0, 0, 0);
 
     return installments.findIndex(inst => {
-      const dueDate = parseISO(inst.dueDate);
       const isPaid = inst.number <= cuotasPagadas;
-      return !isPaid && !isBefore(dueDate, today);
+      if (isPaid) return false;
+
+      const dueDate = parseISO(inst.dueDate);
+      return !isBefore(dueDate, today);
     });
   }, [installments, cuotasPagadas, isPlanActive]);
 
@@ -407,8 +409,8 @@ export default function GroupDetailClient({ groupId }: GroupDetailClientProps) {
                         const isPaid = inst.number <= cuotasPagadas;
                         if (isBefore(dueDate, today)) {
                             status = isPaid ? 'Pagado' : 'Vencido';
-                        } else {
-                            if (isPaid) { // Future installment paid in advance
+                        } else { // Due date is today or in the future
+                            if (isPaid) { // Paid in advance
                                 status = 'Pagado';
                             } else if (index === pendingInstallmentIndex) {
                                 status = 'Pendiente';
