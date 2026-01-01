@@ -67,19 +67,7 @@ for (const capital of capitalOptions) {
 export const initialGroups: Group[] = generatedGroups;
 
 
-export const transactions: Transaction[] = [
-    { id: "txn-0", date: "2024-01-05T10:00:00Z", type: "Depósito", description: "Depósito inicial vía transferencia", amount: 10000, status: "Completado" },
-    { id: "txn-1", date: "2024-02-15T10:00:00Z", type: "Pago de Cuota", description: "Cuota 1/48, Plan ID-20240115-9998", amount: -345, status: "Completado" },
-    { id: "txn-2", date: "2024-03-15T10:00:00Z", type: "Pago de Cuota", description: "Cuota 2/48, Plan ID-20240115-9998", amount: -345, status: "Completado" },
-    { id: "txn-3", date: "2024-04-10T10:00:00Z", type: "Pago de Cuota", description: "Cuota 1/60, Plan ID-20240510-8888", amount: -370, status: "Completado" },
-    { id: "txn-4", date: "2024-04-15T10:00:00Z", type: "Pago de Cuota", description: "Cuota 3/48, Plan ID-20240115-9998", amount: -345, status: "Completado" },
-    { id: "txn-5", date: "2024-05-10T10:00:00Z", type: "Pago de Cuota", description: "Cuota 2/60, Plan ID-20240510-8888", amount: -370, status: "Completado" },
-    { id: "txn-6", date: "2024-05-15T10:00:00Z", type: "Pago de Cuota", description: "Cuota 4/48, Plan ID-20240115-9998", amount: -345, status: "Completado" },
-    { id: "txn-7", date: "2024-06-15T10:00:00Z", type: "Pago de Cuota", description: "Cuota 5/48, Plan ID-20240115-9998", amount: -345, status: "Completado" },
-    { id: "txn-8", date: "2024-07-15T10:00:00Z", type: "Pago de Cuota", description: "Cuota 6/48, Plan ID-20240115-9998", amount: -345, status: "Completado" },
-    { id: "txn-9", date: "2023-08-01T10:00:00Z", type: "Liquidación", description: "Capital adjudicado del plan ID-20230720-9999", amount: 15000, status: "Completado" },
-    { id: "txn-10", date: "2024-07-20T10:00:00Z", type: "Retiro", description: "Retiro a cuenta bancaria", amount: -10000, status: "Completado" },
-].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+export const transactions: Transaction[] = [];
 
 
 const getFutureDate = (hours: number) => new Date(Date.now() + hours * 60 * 60 * 1000).toISOString();
@@ -173,5 +161,6 @@ export const generateExampleInstallments = (capital: number, plazo: number): Ins
     
 
     
+
 
 
