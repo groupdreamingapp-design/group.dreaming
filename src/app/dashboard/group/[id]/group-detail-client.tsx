@@ -369,7 +369,9 @@ export default function GroupDetailClient({ groupId }: GroupDetailClientProps) {
 
                     let status: Installment['status'];
 
-                    if (inst.number <= cuotasPagadas) {
+                    if (group.userIsAwarded) {
+                        status = isBefore(dueDate, today) ? 'Pagado' : inst.number === cuotasPagadas + 1 ? 'Pendiente' : 'Futuro';
+                    } else if (inst.number <= cuotasPagadas) {
                         status = 'Pagado';
                     } else if (isBefore(dueDate, today)) {
                         status = 'Vencido';
@@ -388,7 +390,7 @@ export default function GroupDetailClient({ groupId }: GroupDetailClientProps) {
                         }
                     }
                     
-                    const isMonthPast = status === 'Pagado' || status === 'Vencido';
+                    const isMonthPast = status === 'Pagado' || status === 'Vencido' || isBefore(dueDate, today);
                     const currentAwards = isMonthPast ? groupAwards[inst.number - 1] : undefined;
                     const awardDate = isMonthPast ? format(addDays(dueDate, 5), 'dd/MM/yyyy') : undefined;
 
