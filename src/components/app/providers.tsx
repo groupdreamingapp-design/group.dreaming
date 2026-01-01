@@ -28,6 +28,7 @@ function generateNewGroup(templateGroup: Group): Group {
       userIsAwarded: false,
       monthsCompleted: 0,
       activationDate: undefined,
+      acquiredInAuction: false,
     };
 }
 
@@ -110,10 +111,15 @@ export function GroupsProvider({ children }: { children: ReactNode }) {
                         const hoursSinceOverdue = differenceInHours(today, secondOverdueDate);
                         
                         if (hoursSinceOverdue > 72) {
-                             // Check if status is not already 'Subastado' to avoid multiple toasts
-                            if (group.status !== 'Subastado') {
-                                return { ...group, status: 'Subastado' as const };
-                            }
+                             if(group.acquiredInAuction) {
+                                if (group.status !== 'Cerrado') {
+                                    return { ...group, status: 'Cerrado' as const, userIsMember: false };
+                                }
+                             } else {
+                                if (group.status !== 'Subastado') {
+                                    return { ...group, status: 'Subastado' as const };
+                                }
+                             }
                         }
                     }
                 }
@@ -151,6 +157,15 @@ export function GroupsProvider({ children }: { children: ReactNode }) {
                 });
             }
         }
+         if (prevGroup && prevGroup.userIsMember && !currentGroup.userIsMember) {
+             if (prevGroup.status === 'Activo' && currentGroup.status === 'Cerrado' && currentGroup.acquiredInAuction) {
+                 toast({
+                    variant: "destructive",
+                    title: "Baja Forzosa del Plan",
+                    description: `Tu plan ${currentGroup.id}, adquirido por subasta, fue dado de baja por incumplimiento de pago.`,
+                });
+             }
+         }
     });
     
     prevGroupsRef.current = groups;
@@ -164,7 +179,7 @@ export function GroupsProvider({ children }: { children: ReactNode }) {
                 const groupExistedAndWasAuctioned = currentGroups.some(g => g.id === groupToSellId && g.userIsMember && g.status === 'Subastado');
 
                 if (groupExistedAndWasAuctioned) {
-                    return currentGroups.map(g => g.id === groupToSellId ? { ...g, userIsMember: false } : g);
+                    return currentGroups.map(g => g.id === groupToSellId ? { ...g, userIsMember: false, acquiredInAuction: true } : g);
                 }
                 return currentGroups;
             });
