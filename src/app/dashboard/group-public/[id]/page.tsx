@@ -17,6 +17,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useState } from 'react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
+import { cn } from '@/lib/utils';
 
 export default function GroupPublicDetailPage() {
   const params = useParams();
@@ -24,6 +25,7 @@ export default function GroupPublicDetailPage() {
   const { groups, joinGroup } = useGroups();
   const { isVerified } = useUserNav();
   const [termsAccepted, setTermsAccepted] = useState(false);
+  const [hasReadContract, setHasReadContract] = useState(false);
   
   const groupId = typeof params.id === 'string' ? params.id : '';
   const group = groups.find(g => g.id === groupId);
@@ -51,6 +53,11 @@ export default function GroupPublicDetailPage() {
     router.push(`/dashboard/group/${group.id}`);
   };
 
+  const resetDialog = () => {
+    setTermsAccepted(false);
+    setHasReadContract(false);
+  }
+
   return (
     <>
       <div className="mb-4">
@@ -63,7 +70,7 @@ export default function GroupPublicDetailPage() {
                 <p className="text-muted-foreground">en {group.plazo} meses (Grupo {group.id})</p>
             </div>
             
-            <Dialog onOpenChange={() => setTermsAccepted(false)}>
+            <Dialog onOpenChange={(open) => !open && resetDialog()}>
                 <DialogTrigger asChild>
                     <Button size="lg">
                         <CheckCircle className="mr-2" /> Unirme a este grupo
@@ -87,11 +94,26 @@ export default function GroupPublicDetailPage() {
                                     Tu cuenta está verificada y lista para operar.
                                 </AlertDescription>
                             </Alert>
-                             <div className="flex items-center space-x-2">
-                                <Checkbox id="terms" checked={termsAccepted} onCheckedChange={(checked) => setTermsAccepted(!!checked)} />
-                                <Label htmlFor="terms" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                                   He leído y acepto el <Button variant="link" className="p-0 h-auto" asChild><Link href="/dashboard/contract" target="_blank">Contrato de Adhesión</Link></Button>.
-                                </Label>
+                             <div className="items-top flex space-x-2 pt-2">
+                                <Checkbox 
+                                  id="terms" 
+                                  checked={termsAccepted} 
+                                  onCheckedChange={(checked) => setTermsAccepted(!!checked)}
+                                  disabled={!hasReadContract}
+                                />
+                                <div className="grid gap-1.5 leading-none">
+                                  <Label 
+                                    htmlFor="terms" 
+                                    className={cn("text-sm font-medium leading-none", !hasReadContract && "text-muted-foreground cursor-not-allowed")}
+                                  >
+                                   He leído y acepto el <Button variant="link" className="p-0 h-auto" asChild><Link href="/dashboard/contract" target="_blank" onClick={() => setHasReadContract(true)}>Contrato de Adhesión</Link></Button>.
+                                  </Label>
+                                  {!hasReadContract && (
+                                    <p className="text-xs text-amber-600 font-semibold">
+                                      Debes hacer clic en 'Contrato de Adhesión' para poder aceptar los términos.
+                                    </p>
+                                  )}
+                                </div>
                             </div>
                         </div>
                     ) : (
@@ -206,3 +228,5 @@ export default function GroupPublicDetailPage() {
     </>
   );
 }
+
+    
