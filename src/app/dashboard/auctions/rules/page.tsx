@@ -1,7 +1,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Landmark, ShieldCheck, FileText, BadgePercent, Users } from "lucide-react";
+import { ArrowLeft, Landmark, ShieldCheck, FileText, BadgePercent, Users, Repeat } from "lucide-react";
 import Link from "next/link";
 
 const rulesConfig = [
@@ -18,25 +18,26 @@ const rulesConfig = [
         title: "Proceso de Oferta y Garantía",
         icon: ShieldCheck,
         points: [
-            "Los compradores realizan ofertas durante el plazo de la subasta. Al ganar, tienen 24hs para integrar el capital ofertado más la comisión de compra (2% + IVA).",
-            "Si el comprador no paga, el plan se vuelve a subastar y el comprador es bloqueado hasta que pague una multa del 10% + IVA sobre su oferta.",
+            "Los compradores realizan ofertas durante el plazo de la subasta. Al ganar, tienen 24hs para integrar el capital ofertado.",
+            "Si el comprador no paga su oferta ganadora, será bloqueado hasta que pague una multa del 10% + IVA sobre el valor de su oferta.",
             "Si un plan no recibe ofertas, la plataforma garantiza su compra al precio base, asegurando una liquidación para el vendedor."
-        ]
-    },
-    {
-        title: "Adjudicaciones y Licitaciones",
-        icon: Landmark,
-        points: [
-            "Los actos de adjudicación (sorteo y licitación) se realizan mensualmente a partir del pago de la segunda cuota de cada miembro.",
-            "Para participar, los miembros deben tener su cuota al día. La mora suspende este derecho.",
         ]
     },
     {
         title: "Para el Comprador",
         icon: Users,
         points: [
-            "Al ganar la subasta, el comprador debe abonar el monto total ofertado más la comisión de compra (2% + IVA) para adquirir el plan.",
-            "Una vez adquirido, el comprador asume los derechos y obligaciones del plan, incluyendo los pagos de cuotas futuras."
+            "Al ganar y pagar la subasta, el comprador asume los derechos y obligaciones del plan, incluyendo los pagos de cuotas futuras.",
+            "La comisión de compra (2% + IVA) se descontará automáticamente del capital que el comprador reciba al momento de su adjudicación.",
+        ]
+    },
+    {
+        title: "Planes Adquiridos por Subasta",
+        icon: Repeat,
+        points: [
+            "Un plan que fue adquirido en el mercado secundario no puede volver a ser puesto en subasta.",
+            "En caso de incumplimiento grave (ej: 2 o más cuotas vencidas), en lugar de una 'Subasta Forzosa', se procederá a una 'Baja Forzosa' del plan.",
+            "En caso de 'Baja Voluntaria' o 'Baja Forzosa', la comisión de compra original se descontará de la liquidación final que se efectúe al cierre del grupo."
         ]
     }
 ];
