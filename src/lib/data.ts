@@ -28,7 +28,6 @@ const plazoOptions = [12, 24, 36, 48, 60, 72, 84];
 const generatedGroups: Group[] = [];
 let groupCounter = 1;
 
-// This date is static and will be the same on server and client
 const todayForId = new Date('2026-01-01T00:00:00Z');
 const year = todayForId.getFullYear();
 const month = String(todayForId.getMonth() + 1).padStart(2, '0');
@@ -48,7 +47,6 @@ for (const capital of capitalOptions) {
             else if (plazo <= 48) totalMembers = 96;
             else totalMembers = 144;
             
-            // Deterministic membersCount to avoid hydration errors
             const membersCount = (groupCounter % (totalMembers -1));
 
             generatedGroups.push({
@@ -66,16 +64,11 @@ for (const capital of capitalOptions) {
     }
 }
 
-
-// Add the active group that started in the past
 const activeGroupCapital = 15000;
 const activeGroupPlazo = 24;
-// We set a fixed past date for activation
-const activeActivationDate = new Date('2025-06-05T00:00:00Z'); 
-// We set a fixed "today" to calculate the completed months
+const activeActivationDate = new Date('2025-06-05T00:00:00.000Z'); 
 const today = new Date('2026-01-01T00:00:00Z');
 const activeMonthsCompleted = differenceInMonths(today, activeActivationDate);
-
 
 generatedGroups.push({
     id: 'ID-20250602-1001',
@@ -97,9 +90,7 @@ export const initialGroups: Group[] = generatedGroups;
 
 export const transactions: Transaction[] = [];
 
-// Static base date to avoid hydration errors with Date.now()
 const staticBaseDate = new Date('2026-01-10T12:00:00Z').getTime();
-const getFutureDate = (hours: number) => new Date(staticBaseDate + hours * 60 * 60 * 1000).toISOString();
 
 
 export let auctions: Omit<Auction, 'precioBase'>[] = [];
@@ -107,8 +98,8 @@ export let auctions: Omit<Auction, 'precioBase'>[] = [];
 export const generateInstallments = (capital: number, plazo: number, activationDate: string): Installment[] => {
     const IVA = 1.21;
     const alicuotaPura = capital / plazo;
-    const gastosAdm = (alicuotaPura * 0.10) * IVA; // 10% + IVA
-    const totalSuscripcion = (capital * 0.03) * IVA; // 3% + IVA
+    const gastosAdm = (alicuotaPura * 0.10) * IVA;
+    const totalSuscripcion = (capital * 0.03) * IVA;
     const mesesFinanciacionSuscripcion = Math.floor(plazo * 0.20);
     const cuotaSuscripcion = mesesFinanciacionSuscripcion > 0 ? totalSuscripcion / mesesFinanciacionSuscripcion : 0;
     
@@ -117,7 +108,7 @@ export const generateInstallments = (capital: number, plazo: number, activationD
 
     return Array.from({ length: plazo }, (_, i) => {
         const saldoCapital = capital - (alicuotaPura * i);
-        const seguroVida = saldoCapital * 0.0009; // 0.09% del saldo de capital
+        const seguroVida = saldoCapital * 0.0009;
         const derechoSuscripcion = i < mesesFinanciacionSuscripcion ? cuotaSuscripcion : 0;
         const totalCuota = alicuotaPura + gastosAdm + seguroVida + derechoSuscripcion;
         
@@ -126,8 +117,9 @@ export const generateInstallments = (capital: number, plazo: number, activationD
         const targetYear = targetMonthDate.getUTCFullYear();
         const targetMonth = targetMonthDate.getUTCMonth();
         
-        const lastDayOfTargetMonth = new Date(Date.UTC(targetYear, targetMonth + 1, 0)).getUTCDate();
-        const dayToSet = Math.min(activationDay, lastDayOfTargetMonth);
+        const lastDayOfTargetMonthInUTC = new Date(Date.UTC(targetYear, targetMonth + 1, 0)).getUTCDate();
+        
+        const dayToSet = Math.min(activationDay, lastDayOfTargetMonthInUTC);
 
         const dueDate = new Date(Date.UTC(targetYear, targetMonth, dayToSet));
 
@@ -186,7 +178,6 @@ function generateNewGroup(templateGroup: Group): Group {
     const newId = `ID-${dateString}-${sequentialNumber}`;
     
     return {
-      // Copy only the template properties, not the state
       ...templateGroup,
       id: newId,
       membersCount: 0,
@@ -207,6 +198,7 @@ function generateNewGroup(templateGroup: Group): Group {
     
 
     
+
 
 
 
