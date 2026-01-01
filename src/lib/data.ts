@@ -97,8 +97,10 @@ export const initialGroups: Group[] = generatedGroups;
 
 export const transactions: Transaction[] = [];
 
+// Static base date to avoid hydration errors with Date.now()
+const staticBaseDate = new Date('2026-01-10T12:00:00Z').getTime();
+const getFutureDate = (hours: number) => new Date(staticBaseDate + hours * 60 * 60 * 1000).toISOString();
 
-const getFutureDate = (hours: number) => new Date(Date.now() + hours * 60 * 60 * 1000).toISOString();
 
 export let auctions: Omit<Auction, 'precioBase'>[] = [
     { id: "auc-1", groupId: "ID-20240210-1138", orderNumber: 15, capital: 30000, plazo: 60, cuotasPagadas: 15, highestBid: 7520, endDate: getFutureDate(48), numberOfBids: 1 },
@@ -210,6 +212,7 @@ function generateNewGroup(templateGroup: Group): Group {
     
 
     
+
 
 
 
