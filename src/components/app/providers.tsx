@@ -31,6 +31,7 @@ function generateNewGroup(templateGroup: Group): Group {
     };
 }
 
+const MAX_CAPITAL = 100000;
 
 export function GroupsProvider({ children }: { children: ReactNode }) {
   const [groups, setGroups] = useState<Group[]>(initialGroups);
@@ -94,18 +95,23 @@ export function GroupsProvider({ children }: { children: ReactNode }) {
                 if (group.userIsMember && group.status === 'Activo' && !group.userIsAwarded && group.activationDate) {
                     const today = new Date();
                     const groupInstallments = generateInstallments(group.capital, group.plazo, group.activationDate);
+                    
                     const overdueInstallments = groupInstallments.filter(inst => {
                         const isPaid = inst.number <= (group.monthsCompleted || 0);
                         const dueDate = parseISO(inst.dueDate);
-                        return !isPaid && dueDate < today;
+                        return !isPaid && isBefore(dueDate, today);
                     });
                     
                     if (overdueInstallments.length >= 2) {
+                        // We check the second overdue installment to see if 72 hours have passed
                         const secondOverdueDate = parseISO(overdueInstallments[1].dueDate);
                         const hoursSinceOverdue = differenceInHours(today, secondOverdueDate);
                         
                         if (hoursSinceOverdue > 72) {
-                            return { ...group, status: 'Subastado' as const };
+                             // Check if status is not already 'Subastado' to avoid multiple toasts
+                            if (group.status !== 'Subastado') {
+                                return { ...group, status: 'Subastado' as const };
+                            }
                         }
                     }
                 }
@@ -115,8 +121,10 @@ export function GroupsProvider({ children }: { children: ReactNode }) {
         });
     };
 
-    const timer = setTimeout(checkOverdue, 3000);
-    return () => clearTimeout(timer);
+    const timer = setInterval(checkOverdue, 1000 * 60 * 60); // Check every hour
+    checkOverdue(); // Initial check
+
+    return () => clearInterval(timer);
 }, [groups]);
 
 
@@ -125,7 +133,7 @@ export function GroupsProvider({ children }: { children: ReactNode }) {
     const prevGroups = prevGroupsRef.current;
     groups.forEach(currentGroup => {
         const prevGroup = prevGroups.find(p => p.id === currentGroup.id);
-        if (prevGroup) {
+        if (prevGroup && prevGroup.userIsMember && currentGroup.userIsMember) {
             if (prevGroup.status === 'Activo' && currentGroup.status === 'Subastado') {
                 toast({
                     variant: "destructive",
@@ -173,7 +181,24 @@ export function GroupsProvider({ children }: { children: ReactNode }) {
 
   const joinGroup = useCallback((groupId: string) => {
     let joinedGroup: Group | null = null;
+
     setGroups(currentGroups => {
+        const groupToJoin = currentGroups.find(g => g.id === groupId);
+        if (!groupToJoin) return currentGroups;
+
+        const subscribedCapital = currentGroups
+            .filter(g => g.userIsMember && (g.status === 'Activo' || g.status === 'Pendiente' || g.status === 'Abierto'))
+            .reduce((acc, g) => acc + g.capital, 0);
+
+        if (subscribedCapital + groupToJoin.capital > MAX_CAPITAL) {
+            toast({
+                variant: "destructive",
+                title: "Límite de Capital Excedido",
+                description: `Has alcanzado tu límite de suscripción de ${MAX_CAPITAL.toLocaleString()} USD. Contacta a la administración para solicitar un aumento.`,
+            });
+            return currentGroups;
+        }
+        
       let newGroups = [...currentGroups];
       const groupIndex = newGroups.findIndex(g => g.id === groupId);
       
@@ -181,25 +206,25 @@ export function GroupsProvider({ children }: { children: ReactNode }) {
         return currentGroups; // Group not found
       }
 
-      const groupToJoin = { ...newGroups[groupIndex] };
+      const updatedGroup = { ...newGroups[groupIndex] };
       
-      if (groupToJoin.status !== 'Abierto' || groupToJoin.userIsMember) {
+      if (updatedGroup.status !== 'Abierto' || updatedGroup.userIsMember) {
         return currentGroups; // Cannot join
       }
       
-      groupToJoin.membersCount++;
-      groupToJoin.userIsMember = true;
+      updatedGroup.membersCount++;
+      updatedGroup.userIsMember = true;
       
-      if (groupToJoin.membersCount === groupToJoin.totalMembers) {
-        groupToJoin.status = 'Pendiente';
-        const newGeneratedGroup = generateNewGroup(groupToJoin);
+      if (updatedGroup.membersCount === updatedGroup.totalMembers) {
+        updatedGroup.status = 'Pendiente';
+        const newGeneratedGroup = generateNewGroup(updatedGroup);
         if (!newGroups.some(g => g.id === newGeneratedGroup.id)) {
             newGroups.push(newGeneratedGroup);
         }
       }
       
-      newGroups[groupIndex] = groupToJoin;
-      joinedGroup = groupToJoin;
+      newGroups[groupIndex] = updatedGroup;
+      joinedGroup = updatedGroup;
       
       return newGroups;
     });
