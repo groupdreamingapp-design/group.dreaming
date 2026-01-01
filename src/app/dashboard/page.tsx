@@ -4,7 +4,6 @@
 import { useMemo } from "react";
 import { user, transactions } from "@/lib/data"
 import { useGroups } from "@/hooks/use-groups";
-import { StatCard } from "@/components/app/stat-card"
 import { Repeat, Wallet, PieChart } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -14,6 +13,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import type { Group } from "@/lib/types";
+import { Separator } from "@/components/ui/separator";
 
 const MAX_CAPITAL = 100000;
 
@@ -73,10 +73,47 @@ export default function DashboardPage() {
   return (
     <>
       <h1 className="text-3xl font-bold font-headline">Hola, {user.name.split(' ')[0]}!</h1>
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <StatCard title="Saldo Disponible" value={formatCurrency(availableBalance)} icon={Wallet} description="+20% que el mes pasado" />
-        <StatCard title="Próxima Cuota" value={formatCurrency(615)} icon={Repeat} description="Vence en 15 días" />
-        <StatCard title="Cupo de Capital" value={formatCurrency(availableToSubscribe)} icon={PieChart} description={`Total: ${formatCurrency(MAX_CAPITAL)}`} />
+      
+       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <Card className="lg:col-span-3">
+          <CardHeader>
+            <CardTitle>Resumen Financiero</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid md:grid-cols-3 gap-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <Wallet className="h-8 w-8 text-muted-foreground" />
+                  <div>
+                    <p className="text-sm text-muted-foreground">Saldo Disponible</p>
+                    <p className="text-2xl font-bold">{formatCurrency(availableBalance)}</p>
+                    <p className="text-xs text-muted-foreground">+20% que el mes pasado</p>
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-center justify-between">
+                 <div className="flex items-center gap-4">
+                  <Repeat className="h-8 w-8 text-muted-foreground" />
+                  <div>
+                    <p className="text-sm text-muted-foreground">Próxima Cuota</p>
+                    <p className="text-2xl font-bold">{formatCurrency(615)}</p>
+                    <p className="text-xs text-muted-foreground">Vence en 15 días</p>
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-center justify-between">
+                 <div className="flex items-center gap-4">
+                  <PieChart className="h-8 w-8 text-muted-foreground" />
+                  <div>
+                    <p className="text-sm text-muted-foreground">Cupo de Capital</p>
+                    <p className="text-2xl font-bold">{formatCurrency(availableToSubscribe)}</p>
+                    <p className="text-xs text-muted-foreground">Total: {formatCurrency(MAX_CAPITAL)}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       <div className="grid gap-4">
