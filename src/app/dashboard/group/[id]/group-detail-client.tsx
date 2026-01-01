@@ -15,7 +15,7 @@ import { ArrowLeft, Users, Clock, Users2, Calendar, Gavel, HandCoins, Ticket, In
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import { useGroups } from '@/hooks/use-groups';
-import { generateInstallments, initialGroups } from '@/lib/data';
+import { generateInstallments, generateExampleInstallments, initialGroups } from '@/lib/data';
 import { useMemo, useState } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from '@/components/ui/separator';
@@ -108,9 +108,15 @@ export default function GroupDetailClient({ groupId }: GroupDetailClientProps) {
   }, [group]);
 
   const installments = useMemo(() => {
-    if (!group || !group.activationDate) return [];
-    return generateInstallments(group.capital, group.plazo, group.activationDate);
-  }, [group?.capital, group?.plazo, group?.activationDate]);
+    if (!group) return [];
+    if (group.status === 'Activo' && group.activationDate) {
+      return generateInstallments(group.capital, group.plazo, group.activationDate);
+    }
+    if (group.status === 'Abierto' || group.status === 'Pendiente') {
+      return generateExampleInstallments(group.capital, group.plazo);
+    }
+    return [];
+  }, [group?.capital, group?.plazo, group?.activationDate, group?.status]);
 
 
   if (!group) {
@@ -131,16 +137,27 @@ export default function GroupDetailClient({ groupId }: GroupDetailClientProps) {
 
   const formatCurrency = (amount: number) => new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'USD' }).format(amount);
   const formatCurrencyNoDecimals = (amount: number) => new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(amount);
-  const formatDate = (dateString: string) => format(parseISO(dateString), 'dd/MM/yyyy');
+  const formatDate = (dateString: string) => {
+    // Check if the date string is just a month reference like "Mes 1"
+    if (dateString.startsWith('Mes')) {
+        return dateString;
+    }
+    return format(parseISO(dateString), 'dd/MM/yyyy');
+  }
   const isMember = group.userIsMember;
   
-  const alicuotaPuraTotal = installments.length > 0 ? installments[0].breakdown.alicuotaPura : 0;
+  const realInstallments = useMemo(() => {
+    if (!group || !group.activationDate) return [];
+    return generateInstallments(group.capital, group.plazo, group.activationDate);
+  }, [group?.capital, group?.plazo, group?.activationDate]);
+  
+  const alicuotaPuraTotal = realInstallments.length > 0 ? realInstallments[0].breakdown.alicuotaPura : (group.capital / group.plazo);
   const capitalAportadoPuro = cuotasPagadas * alicuotaPuraTotal;
 
   const IVA = 1.21;
   const penalidadBaja = capitalAportadoPuro * 0.05 * IVA;
 
-  const totalCuotasEmitidas = installments
+  const totalCuotasEmitidas = realInstallments
     .slice(0, cuotasPagadas)
     .reduce((acc, installment) => acc + installment.total, 0);
 
@@ -148,8 +165,7 @@ export default function GroupDetailClient({ groupId }: GroupDetailClientProps) {
   const comisionVenta = precioBaseSubasta * 0.02 * IVA;
   const liquidacionEstimada = precioBaseSubasta - comisionVenta;
   
-
-  const futureInstallments = installments.slice(cuotasPagadas, group.plazo);
+  const futureInstallments = realInstallments.slice(cuotasPagadas, group.plazo);
 
   const calculateSavings = (cuotasCount: number) => {
     if (cuotasCount <= 0 || cuotasCount > futureInstallments.length) return { totalToPay: 0, totalOriginal: 0, totalSaving: 0 };
@@ -166,14 +182,17 @@ export default function GroupDetailClient({ groupId }: GroupDetailClientProps) {
   const bidSavings = calculateSavings(cuotasToBid);
 
   const nextPendingInstallmentIndex = useMemo(() => {
+    if (group.status !== 'Activo') return -1;
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    return installments.findIndex(inst => {
+    return realInstallments.findIndex(inst => {
       const dueDate = parseISO(inst.dueDate);
       const isPaid = inst.number <= cuotasPagadas;
       return !isPaid && !isBefore(dueDate, today);
     });
-  }, [installments, cuotasPagadas]);
+  }, [realInstallments, cuotasPagadas, group.status]);
+
+  const isPlanActive = group.status === 'Activo';
 
   return (
     <>
@@ -218,7 +237,7 @@ export default function GroupDetailClient({ groupId }: GroupDetailClientProps) {
           </Card>
         </div>
         
-        {isMember && group.status === 'Activo' && (
+        {isMember && (group.status === 'Activo' || group.status === 'Abierto' || group.status === 'Pendiente') && (
            <div className="lg:col-span-3">
              <Card>
                <CardHeader>
@@ -227,7 +246,7 @@ export default function GroupDetailClient({ groupId }: GroupDetailClientProps) {
                </CardHeader>
                <CardContent className="flex flex-wrap gap-2">
                  <Dialog onOpenChange={() => setCuotasToAdvance(0)}>
-                   <DialogTrigger asChild><Button size="sm" variant="secondary"><TrendingUp className="mr-2 h-4 w-4" /> Adelantar</Button></DialogTrigger>
+                   <DialogTrigger asChild><Button size="sm" variant="secondary" disabled={!isPlanActive}><TrendingUp className="mr-2 h-4 w-4" /> Adelantar</Button></DialogTrigger>
                    <DialogContent>
                      <DialogHeader><DialogTitle>Adelantar Cuotas</DialogTitle><DialogDescription>Paga cuotas futuras para acortar tu plan y obtén una bonificación.</DialogDescription></DialogHeader>
                      <div className="space-y-4">
@@ -267,7 +286,7 @@ export default function GroupDetailClient({ groupId }: GroupDetailClientProps) {
                    <>
                      <Dialog onOpenChange={() => setCuotasToBid(0)}>
                        <DialogTrigger asChild>
-                         <Button size="sm" disabled={cuotasPagadas < 2}>
+                         <Button size="sm" disabled={!isPlanActive || cuotasPagadas < 2}>
                            <Gavel className="mr-2 h-4 w-4" /> Licitar
                          </Button>
                        </DialogTrigger>
@@ -312,7 +331,7 @@ export default function GroupDetailClient({ groupId }: GroupDetailClientProps) {
                      </Dialog>
                      <Dialog>
                        <DialogTrigger asChild>
-                         <Button size="sm" variant="secondary" disabled={cuotasPagadas < 3}>
+                         <Button size="sm" variant="secondary" disabled={!isPlanActive || cuotasPagadas < 3}>
                            <Hand className="mr-2 h-4 w-4" /> Subastar
                          </Button>
                        </DialogTrigger>
@@ -334,7 +353,7 @@ export default function GroupDetailClient({ groupId }: GroupDetailClientProps) {
                        </DialogContent>
                      </Dialog>
                      <Dialog>
-                       <DialogTrigger asChild><Button size="sm" variant="destructive"><FileX2 className="mr-2 h-4 w-4" /> Dar de Baja</Button></DialogTrigger>
+                       <DialogTrigger asChild><Button size="sm" variant="destructive" disabled={!isPlanActive}><FileX2 className="mr-2 h-4 w-4" /> Dar de Baja</Button></DialogTrigger>
                        <DialogContent>
                          <DialogHeader><DialogTitle>Dar de Baja el Plan</DialogTitle><DialogDescription>Rescinde tu contrato. Aplica solo para planes no adjudicados.</DialogDescription></DialogHeader>
                          <div className="space-y-4 text-sm">
@@ -358,10 +377,11 @@ export default function GroupDetailClient({ groupId }: GroupDetailClientProps) {
            </div>
          )}
         
+        {(isPlanActive || group.status === 'Abierto' || group.status === 'Pendiente') && (
         <div className="lg:col-span-3">
           <Card>
             <CardHeader>
-              <CardTitle>Plan de Cuotas</CardTitle>
+              <CardTitle>Plan de Cuotas {isPlanActive ? '' : '(Ejemplo)'}</CardTitle>
             </CardHeader>
             <CardContent>
               <Table>
@@ -377,31 +397,30 @@ export default function GroupDetailClient({ groupId }: GroupDetailClientProps) {
                 </TableHeader>
                 <TableBody>
                   {installments.map((inst, index) => {
-                    const today = new Date();
-                    today.setHours(0, 0, 0, 0); 
-                    const dueDate = parseISO(inst.dueDate);
+                    let status: Installment['status'] = 'Futuro';
+                    let dueDate = parseISO(inst.dueDate);
+                    let today = new Date();
+                    today.setHours(0, 0, 0, 0);
 
-                    let status: Installment['status'];
-
-                    if (group.userIsAwarded) {
-                        status = isBefore(dueDate, today) ? 'Pagado' : (index === nextPendingInstallmentIndex ? 'Pendiente' : 'Futuro');
-                    } else if (inst.number <= cuotasPagadas) {
-                        status = 'Pagado';
-                    } else if (isBefore(dueDate, today)) {
-                        status = 'Vencido';
-                    } else if (index === nextPendingInstallmentIndex) {
-                        status = 'Pendiente';
-                    } else {
-                        status = 'Futuro';
+                    if (isPlanActive) {
+                        if (group.userIsAwarded) {
+                            status = isBefore(dueDate, today) ? 'Pagado' : (index === nextPendingInstallmentIndex ? 'Pendiente' : 'Futuro');
+                        } else if (inst.number <= cuotasPagadas) {
+                            status = 'Pagado';
+                        } else if (isBefore(dueDate, today)) {
+                            status = 'Vencido';
+                        } else if (index === nextPendingInstallmentIndex) {
+                            status = 'Pendiente';
+                        }
                     }
-                    
+
                     if (group.status === 'Subastado' && status !== 'Pagado' && status !== 'Vencido') {
                         status = 'Futuro';
                     }
                     
-                    const isMonthPast = isBefore(dueDate, today);
+                    const isMonthPast = isPlanActive && isBefore(dueDate, today);
                     const currentAwards = (isMonthPast && (cuotasPagadas >= inst.number - 1)) ? groupAwards[inst.number - 1] : undefined;
-                    const awardDate = currentAwards ? format(addDays(dueDate, 5), 'dd/MM/yyyy') : undefined;
+                    const awardDate = (isPlanActive && currentAwards) ? format(addDays(dueDate, 5), 'dd/MM/yyyy') : undefined;
 
                     return (
                       <TableRow key={inst.id}>
@@ -463,6 +482,7 @@ export default function GroupDetailClient({ groupId }: GroupDetailClientProps) {
             </CardContent>
           </Card>
         </div>
+        )}
 
         {isMember && (group.status === 'Cerrado' || group.status === 'Subastado') && (
           <div className="lg:col-span-3">
