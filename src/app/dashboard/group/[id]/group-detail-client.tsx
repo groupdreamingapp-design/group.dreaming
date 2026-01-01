@@ -101,6 +101,7 @@ export default function GroupDetailClient({ groupId }: GroupDetailClientProps) {
   const [cuotasToBid, setCuotasToBid] = useState<number>(0);
   const [termsAcceptedAdvance, setTermsAcceptedAdvance] = useState(false);
   const [termsAcceptedBid, setTermsAcceptedBid] = useState(false);
+  const [termsAcceptedAuction, setTermsAcceptedAuction] = useState(false);
 
 
   const group = useMemo(() => groups.find(g => g.id === groupId), [groups, groupId]);
@@ -367,7 +368,7 @@ export default function GroupDetailClient({ groupId }: GroupDetailClientProps) {
                          </DialogFooter>
                        </DialogContent>
                      </Dialog>
-                     <Dialog>
+                     <Dialog onOpenChange={() => setTermsAcceptedAuction(false)}>
                        <DialogTrigger asChild>
                          <Button size="sm" variant="secondary" disabled={!isPlanActive || cuotasPagadas < 3}>
                            <Hand className="mr-2 h-4 w-4" /> Subastar
@@ -384,9 +385,20 @@ export default function GroupDetailClient({ groupId }: GroupDetailClientProps) {
                                 <div className="flex justify-between font-bold border-t pt-2"><span>Liquidación Estimada (al Precio Base):</span><strong>{formatCurrency(liquidacionEstimada)}</strong></div>
                                 <p className="text-xs text-muted-foreground mt-2">El valor final dependerá del precio de venta en la subasta.</p>
                              </Card>
+                             <div className="items-top flex space-x-2 pt-2">
+                               <Switch id="terms-auction" checked={termsAcceptedAuction} onCheckedChange={setTermsAcceptedAuction} />
+                               <div className="grid gap-1.5 leading-none">
+                                <Label htmlFor="terms-auction" className="font-medium">
+                                    Acepto los términos y condiciones de la subasta.
+                                </Label>
+                                <p className="text-xs text-muted-foreground">
+                                    Confirmo que entiendo que el precio base es una estimación y el valor final dependerá de la oferta ganadora.
+                                </p>
+                               </div>
+                             </div>
                          </div>
                          <DialogFooter>
-                             <Button type="submit">Poner en Subasta</Button>
+                             <Button type="submit" disabled={!termsAcceptedAuction}>Poner en Subasta</Button>
                          </DialogFooter>
                        </DialogContent>
                      </Dialog>
