@@ -2,7 +2,7 @@
 
 import type { Group, User, Transaction, Auction, Installment, Award } from './types';
 import { PlaceHolderImages } from './placeholder-images';
-import { format, addMonths, setDate, addDays, parseISO, lastDayOfMonth } from 'date-fns';
+import { format, addMonths, setDate, addDays, parseISO, lastDayOfMonth, differenceInMonths, startOfToday } from 'date-fns';
 import { es } from 'date-fns/locale';
 
 export const user: User = {
@@ -64,21 +64,24 @@ for (const capital of capitalOptions) {
     }
 }
 
-// Add the new completed group
-const completedGroupCapital = 15000;
-const completedGroupPlazo = 24;
+// Add the new active group
+const activeGroupCapital = 15000;
+const activeGroupPlazo = 24;
+const activeGroupActivationDate = new Date('2023-06-05T00:00:00Z');
+const monthsCompleted = differenceInMonths(startOfToday(), activeGroupActivationDate);
+
 generatedGroups.push({
-    id: 'ID-COMPLETED-2025',
-    capital: completedGroupCapital,
-    plazo: completedGroupPlazo,
-    cuotaPromedio: calculateCuotaPromedio(completedGroupCapital, completedGroupPlazo),
+    id: 'ID-ACTIVE-2023',
+    capital: activeGroupCapital,
+    plazo: activeGroupPlazo,
+    cuotaPromedio: calculateCuotaPromedio(activeGroupCapital, activeGroupPlazo),
     membersCount: 48,
     totalMembers: 48,
-    status: 'Cerrado', // A completed plan should have the status "Cerrado"
+    status: 'Activo',
     userIsMember: true,
-    userIsAwarded: true, // Usually a completed plan means the user was awarded
-    monthsCompleted: 24,
-    activationDate: new Date('2025-06-05T00:00:00Z').toISOString(),
+    userIsAwarded: false,
+    monthsCompleted: monthsCompleted > 0 ? monthsCompleted : 0,
+    activationDate: activeGroupActivationDate.toISOString(),
 });
 
 
@@ -179,6 +182,7 @@ export const generateExampleInstallments = (capital: number, plazo: number): Ins
     
 
     
+
 
 
 
