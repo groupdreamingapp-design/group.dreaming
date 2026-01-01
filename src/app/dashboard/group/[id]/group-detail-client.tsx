@@ -136,7 +136,6 @@ export default function GroupDetailClient({ groupId }: GroupDetailClientProps) {
   }
 
   const cuotasPagadas = group.monthsCompleted || 0;
-  const cuotasRestantes = group.plazo - cuotasPagadas;
   
   const isMember = group.userIsMember;
   
@@ -159,37 +158,43 @@ export default function GroupDetailClient({ groupId }: GroupDetailClientProps) {
   const comisionVenta = precioBaseSubasta * 0.02 * IVA;
   const liquidacionEstimada = precioBaseSubasta - comisionVenta;
   
-  const futureInstallmentsOnly = realInstallments.slice(cuotasPagadas, group.plazo);
-
-  const isPlanActive = group.status === 'Activo';
+  const isPlanActive = group.status === 'Activo' || group.status === 'Subastado';
 
   const pendingInstallmentIndex = useMemo(() => {
-    if (!isPlanActive && group.status !== 'Subastado') return -1;
+    if (!isPlanActive) return -1;
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     return installments.findIndex(inst => inst.number > cuotasPagadas && !isBefore(parseISO(inst.dueDate), today));
-  }, [installments, cuotasPagadas, isPlanActive, group.status]);
+  }, [installments, cuotasPagadas, isPlanActive]);
   
   const cuotasFuturas = useMemo(() => {
-    if (pendingInstallmentIndex === -1) return cuotasRestantes;
-    // Count only installments strictly after the pending one.
-    const pendingInstallmentNumber = installments[pendingInstallmentIndex]?.number;
-    if (pendingInstallmentNumber) {
-        return group.plazo - pendingInstallmentNumber;
+    if (!isPlanActive) return group.plazo - cuotasPagadas;
+    
+    // Find the number of the first non-paid, non-overdue installment
+    const firstFutureInstallmentNumber = installments[pendingInstallmentIndex]?.number;
+    
+    if (firstFutureInstallmentNumber) {
+        // The number of installments available to advance/bid is the total minus the number of the next one to pay
+        return group.plazo - firstFutureInstallmentNumber + 1;
     }
-    // If there is no pending installment (e.g. all are paid or overdue), there are no future installments to advance/bid
-    return realInstallments.filter(i => i.number > cuotasPagadas && isBefore(new Date(), parseISO(i.dueDate))).length -1;
-  }, [pendingInstallmentIndex, installments, group.plazo, cuotasRestantes, realInstallments, cuotasPagadas]);
 
+    // If all are paid or overdue, there are no future installments
+    return 0; 
+  }, [pendingInstallmentIndex, installments, group.plazo, isPlanActive, cuotasPagadas]);
+
+  const futureInstallmentsForCalculation = useMemo(() => {
+    if (!isPlanActive) return [];
+    if (pendingInstallmentIndex === -1) return []; // No future installments to calculate
+    return realInstallments.slice(pendingInstallmentIndex);
+  }, [isPlanActive, pendingInstallmentIndex, realInstallments]);
   
   const isAdvanceInputValid = cuotasToAdvance > 0 && cuotasToAdvance <= cuotasFuturas;
   const isBidInputValid = cuotasToBid > 0 && cuotasToBid <= cuotasFuturas;
 
-
   const calculateSavings = (cuotasCount: number) => {
-    if (cuotasCount <= 0 || cuotasCount > futureInstallmentsOnly.length) return { totalToPay: 0, totalOriginal: 0, totalSaving: 0 };
+    if (cuotasCount <= 0 || cuotasCount > futureInstallmentsForCalculation.length) return { totalToPay: 0, totalOriginal: 0, totalSaving: 0 };
     
-    const installmentsToConsider = futureInstallmentsOnly.slice(futureInstallmentsOnly.length - cuotasCount);
+    const installmentsToConsider = futureInstallmentsForCalculation.slice(futureInstallmentsForCalculation.length - cuotasCount);
     const totalToPay = installmentsToConsider.reduce((acc, inst) => acc + inst.breakdown.alicuotaPura, 0);
     const totalOriginal = installmentsToConsider.reduce((acc, inst) => acc + inst.total, 0);
     const totalSaving = totalOriginal - totalToPay;
@@ -252,7 +257,7 @@ export default function GroupDetailClient({ groupId }: GroupDetailClientProps) {
           </Card>
         </div>
         
-         {isMember && group.status === 'Activo' && (
+         {isMember && (isPlanActive) && (
            <div className="lg:col-span-3">
              <Card>
                <CardHeader>
@@ -274,6 +279,7 @@ export default function GroupDetailClient({ groupId }: GroupDetailClientProps) {
                                 value={cuotasToAdvance > 0 ? cuotasToAdvance : ''}
                                 onChange={(e) => setCuotasToAdvance(Number(e.target.value))}
                                 className={cn(cuotasToAdvance > 0 && !isAdvanceInputValid && "border-red-500")}
+                                disabled={cuotasFuturas === 0}
                              />
                              <p className="text-xs text-muted-foreground">Adelantas las últimas cuotas de tu plan. No compite por adjudicación.</p>
                          </div>
@@ -286,7 +292,9 @@ export default function GroupDetailClient({ groupId }: GroupDetailClientProps) {
                                  </CardContent>
                              </Card>
                          ) : (
-                             <p className="text-xs text-muted-foreground">Ingresa un número de cuotas válido para ver el ahorro.</p>
+                            <p className="text-xs text-muted-foreground">
+                                {cuotasFuturas > 0 ? 'Ingresa un número de cuotas válido para ver el ahorro.' : 'No tienes cuotas futuras para adelantar.'}
+                            </p>
                          )}
                           <div className="items-top flex space-x-2 pt-2">
                            <Switch id="terms-advance" checked={termsAcceptedAdvance} onCheckedChange={setTermsAcceptedAdvance} disabled={!isAdvanceInputValid} />
@@ -326,6 +334,7 @@ export default function GroupDetailClient({ groupId }: GroupDetailClientProps) {
                                     value={cuotasToBid > 0 ? cuotasToBid : ''}
                                     onChange={(e) => setCuotasToBid(Number(e.target.value))}
                                     className={cn(cuotasToBid > 0 && !isBidInputValid && "border-red-500")}
+                                    disabled={cuotasFuturas === 0}
                                  />
                                  <p className="text-xs text-muted-foreground">Tu oferta competirá con otros miembros. Si ganas, cancelas las últimas cuotas.</p>
                              </div>
@@ -337,7 +346,9 @@ export default function GroupDetailClient({ groupId }: GroupDetailClientProps) {
                                      </CardContent>
                                  </Card>
                              ) : (
-                                 <p className="text-xs text-muted-foreground">Ingresa un número de cuotas válido para ver el monto.</p>
+                                <p className="text-xs text-muted-foreground">
+                                    {cuotasFuturas > 0 ? 'Ingresa un número de cuotas válido para ver el monto.' : 'No tienes cuotas futuras para licitar.'}
+                                </p>
                              )}
                              <div className="items-top flex space-x-2 pt-2">
                                <Switch id="terms-bid" checked={termsAcceptedBid} onCheckedChange={setTermsAcceptedBid} disabled={!isBidInputValid} />
