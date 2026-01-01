@@ -14,12 +14,16 @@ import Link from 'next/link';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useUserNav } from '@/components/app/user-nav';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { useState } from 'react';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
 
 export default function GroupPublicDetailPage() {
   const params = useParams();
   const router = useRouter();
   const { groups, joinGroup } = useGroups();
   const { isVerified } = useUserNav();
+  const [termsAccepted, setTermsAccepted] = useState(false);
   
   const groupId = typeof params.id === 'string' ? params.id : '';
   const group = groups.find(g => g.id === groupId);
@@ -59,7 +63,7 @@ export default function GroupPublicDetailPage() {
                 <p className="text-muted-foreground">en {group.plazo} meses (Grupo {group.id})</p>
             </div>
             
-            <Dialog>
+            <Dialog onOpenChange={() => setTermsAccepted(false)}>
                 <DialogTrigger asChild>
                     <Button size="lg">
                         <CheckCircle className="mr-2" /> Unirme a este grupo
@@ -72,9 +76,9 @@ export default function GroupPublicDetailPage() {
                     </DialogHeader>
 
                     {isVerified ? (
-                        <div>
-                            <p className="text-sm text-muted-foreground mb-4">
-                                Al confirmar, te comprometes a los términos del contrato de ahorro colectivo. Se generará el débito de la primera cuota en tu método de pago principal.
+                        <div className="space-y-4">
+                            <p className="text-sm text-muted-foreground">
+                                Se generará el débito de la primera cuota en tu método de pago principal.
                             </p>
                             <Alert>
                                 <CheckCircle className="h-4 w-4" />
@@ -83,6 +87,12 @@ export default function GroupPublicDetailPage() {
                                     Tu cuenta está verificada y lista para operar.
                                 </AlertDescription>
                             </Alert>
+                             <div className="flex items-center space-x-2">
+                                <Checkbox id="terms" checked={termsAccepted} onCheckedChange={(checked) => setTermsAccepted(!!checked)} />
+                                <Label htmlFor="terms" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                                   He leído y acepto el <Button variant="link" className="p-0 h-auto" asChild><Link href="/dashboard/contract" target="_blank">Contrato de Adhesión</Link></Button>.
+                                </Label>
+                            </div>
                         </div>
                     ) : (
                          <div>
@@ -102,7 +112,7 @@ export default function GroupPublicDetailPage() {
                     <DialogFooter>
                         <DialogClose asChild><Button variant="ghost">Cancelar</Button></DialogClose>
                         {isVerified ? (
-                            <Button onClick={handleJoinGroup}>Confirmar y Unirme</Button>
+                            <Button onClick={handleJoinGroup} disabled={!termsAccepted}>Confirmar y Unirme</Button>
                         ) : (
                             <Button asChild>
                                 <Link href="/dashboard/verify">Ir a Verificar</Link>
