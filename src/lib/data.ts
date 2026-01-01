@@ -26,19 +26,21 @@ const capitalOptions = [5000, 10000, 15000, 20000, 25000];
 const plazoOptions = [12, 24, 36, 48, 60, 72, 84];
 
 const generatedGroups: Group[] = [];
+let groupCounter = 1;
+
+const todayForId = new Date('2026-01-01T00:00:00Z');
+const year = todayForId.getFullYear();
+const month = String(todayForId.getMonth() + 1).padStart(2, '0');
+const day = String(todayForId.getDate()).padStart(2, '0');
+const dateString = `${year}${month}${day}`;
 
 for (const capital of capitalOptions) {
     for (const plazo of plazoOptions) {
         const cuotaPromedio = calculateCuotaPromedio(capital, plazo);
 
         if (cuotaPromedio <= 1000) {
-            const todayForId = new Date();
-            const year = todayForId.getFullYear();
-            const month = String(todayForId.getMonth() + 1).padStart(2, '0');
-            const day = String(todayForId.getDate()).padStart(2, '0');
-            const dateString = `${year}${month}${day}`;
-            const randomNumbers = String(Math.floor(Math.random() * 10000)).padStart(4, '0');
-            const newId = `ID-${dateString}-${randomNumbers}`;
+            const sequentialNumber = String(groupCounter++).padStart(4, '0');
+            const newId = `ID-${dateString}-${sequentialNumber}`;
 
             let totalMembers;
             if (plazo <= 24) totalMembers = 48;
@@ -72,7 +74,7 @@ const futureMonthsCompleted = differenceInMonths(today, futureActivationDate);
 
 
 generatedGroups.push({
-    id: 'ID-ACTIVE-2025',
+    id: 'ID-20250602-1001',
     capital: futureGroupCapital,
     plazo: futureGroupPlazo,
     cuotaPromedio: calculateCuotaPromedio(futureGroupCapital, futureGroupPlazo),
@@ -120,10 +122,14 @@ export const generateInstallments = (capital: number, plazo: number, activationD
         
         const targetMonthDate = addMonths(startDate, i + 1);
         
-        const lastDayOfTargetMonth = new Date(Date.UTC(targetMonthDate.getUTCFullYear(), targetMonthDate.getUTCMonth() + 1, 0)).getUTCDate();
-        const dayToSet = Math.min(activationDay, lastDayOfTargetMonth);
+        // Use UTC dates to avoid timezone issues
+        const targetYear = targetMonthDate.getUTCFullYear();
+        const targetMonth = targetMonthDate.getUTCMonth();
         
-        const dueDate = new Date(Date.UTC(targetMonthDate.getUTCFullYear(), targetMonthDate.getUTCMonth(), dayToSet));
+        const lastDayOfTargetMonth = new Date(Date.UTC(targetYear, targetMonth + 1, 0)).getUTCDate();
+        const dayToSet = Math.min(activationDay, lastDayOfTargetMonth);
+
+        const dueDate = new Date(Date.UTC(targetYear, targetMonth, dayToSet));
 
         return {
             id: `cuota-${i + 1}`,
@@ -170,6 +176,28 @@ export const generateExampleInstallments = (capital: number, plazo: number): Ins
     });
 };
 
+function generateNewGroup(templateGroup: Group): Group {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    const dateString = `${year}${month}${day}`;
+    const randomNumbers = String(Math.floor(Math.random() * 9000) + 1000); // 4-digit random number
+    const newId = `ID-${dateString}-${randomNumbers}`;
+    
+    return {
+      // Copy only the template properties, not the state
+      ...templateGroup,
+      id: newId,
+      membersCount: 0,
+      status: 'Abierto',
+      userIsMember: false,
+      userIsAwarded: false,
+      monthsCompleted: 0,
+      activationDate: undefined,
+      acquiredInAuction: false,
+    };
+}
     
 
 
@@ -179,6 +207,7 @@ export const generateExampleInstallments = (capital: number, plazo: number): Ins
     
 
     
+
 
 
 
