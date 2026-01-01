@@ -240,7 +240,6 @@ export default function GroupDetailClient({ groupId }: GroupDetailClientProps) {
 
   const advanceSavings = calculateSavings(cuotasToAdvance);
   const bidSavings = calculateSavings(cuotasToBid);
-  const bidQualifiesForBenefit = isBidInputValid && cuotasFuturas > 0 && (cuotasToBid / cuotasFuturas) > 0.5;
 
   const formatCurrency = (amount: number) => new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'USD' }).format(amount);
   const formatCurrencyNoDecimals = (amount: number) => new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(amount);
@@ -423,15 +422,6 @@ export default function GroupDetailClient({ groupId }: GroupDetailClientProps) {
                                              <p className="text-green-600 font-semibold">Ahorro estimado (gastos adm. y seguros): {formatCurrency(bidSavings.totalSaving)}</p>
                                          </CardContent>
                                      </Card>
-                                     {bidQualifiesForBenefit && (
-                                        <Alert variant="default" className="border-green-500 bg-green-500/10 text-green-800">
-                                            <AwardIcon className="h-4 w-4 text-green-600" />
-                                            <AlertTitle>¡Calificas para un Beneficio!</AlertTitle>
-                                            <AlertDescription>
-                                                Tu oferta supera el 50% de las cuotas restantes. Si ganas, obtendrás el beneficio "+ Cubrís + Ganás".
-                                            </AlertDescription>
-                                        </Alert>
-                                     )}
                                 </div>
                              ) : (
                                 <p className="text-xs text-muted-foreground">

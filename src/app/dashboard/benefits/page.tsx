@@ -37,37 +37,6 @@ const benefits = [
                 ]
             }
         ]
-    },
-    {
-        title: "+ Cubrís + Ganás",
-        description: "Un incentivo para quienes apuestan fuerte y aceleran la solidez del grupo.",
-        icon: Award,
-        clauses: [
-            {
-                title: "Funcionamiento del Beneficio",
-                points: [
-                    "Este beneficio premia a los miembros que ganan una licitación realizando una oferta significativa.",
-                    "Se activa si resultas adjudicado por licitación y tu oferta es por más del 50% de las cuotas que te quedaban por pagar.",
-                    "Ejemplo: Si a tu plan le restan 10 cuotas por pagar y ganas la licitación ofertando 6 o más cuotas, el beneficio es tuyo."
-                ]
-            },
-            {
-                title: "La Recompensa",
-                points: [
-                    "Se realizará la devolución del 50% del 'Derecho de Suscripción' abonado en el plan vigente.",
-                    "Se otorgará un descuento del 50% en el 'Derecho de Suscripción' para el próximo plan que el miembro suscriba en la plataforma."
-                ]
-            },
-             {
-                title: "Condiciones para Acceder (Bases)",
-                points: [
-                    "Ser el ganador del acto de licitación con una oferta que cumpla la condición mencionada.",
-                    "No haber registrado cuotas vencidas ni pagado fuera de término durante toda la vigencia del plan.",
-                    "El plan no debe haber sido suscripto utilizando un bono de descuento de un beneficio obtenido anteriormente.",
-                    "Los beneficios no son acumulables. No se pueden obtener ambos beneficios en un mismo grupo."
-                ]
-            }
-        ]
     }
 ];
 
