@@ -19,14 +19,14 @@ export default function MyGroupsPage() {
   const filteredGroups = useMemo(() => {
     if (activeTab === "Todos") {
       return myGroups.sort((a, b) => {
-        const statusOrder = { "Activo": 1, "Abierto": 2, "Pendiente": 3, "Cerrado": 4 };
+        const statusOrder = { "Activo": 1, "Subastado": 2, "Abierto": 3, "Pendiente": 4, "Cerrado": 5 };
         return statusOrder[a.status] - statusOrder[b.status];
       });
     }
     return myGroups.filter(g => g.status === activeTab);
   }, [myGroups, activeTab]);
 
-  const tabs: (GroupStatus | "Todos")[] = ["Todos", "Activo", "Abierto", "Pendiente", "Cerrado"];
+  const tabs: (GroupStatus | "Todos")[] = ["Todos", "Activo", "Subastado", "Abierto", "Pendiente", "Cerrado"];
 
   return (
     <>

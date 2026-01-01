@@ -6,17 +6,9 @@ import type { Group } from "@/lib/types";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { Users, Clock, CheckCircle2, Lock, Hourglass, ArrowRight, Trophy, MoreVertical, Gavel, Hand, FileX2 } from "lucide-react";
+import { Users, Clock, CheckCircle2, Lock, Hourglass, ArrowRight, Trophy, Gavel } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
-import { useRouter } from 'next/navigation';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownMenuSeparator,
-} from "@/components/ui/dropdown-menu"
 
 type GroupCardProps = {
   group: Group;
@@ -28,16 +20,16 @@ const statusConfig = {
   Pendiente: { icon: Hourglass, color: "bg-yellow-500", text: "text-yellow-700" },
   Activo: { icon: CheckCircle2, color: "bg-green-500", text: "text-green-700" },
   Cerrado: { icon: Lock, color: "bg-gray-500", text: "text-gray-500" },
+  Subastado: { icon: Gavel, color: "bg-red-500", text: "text-red-700" },
 };
 
 export function GroupCard({ group, isPublic = false }: GroupCardProps) {
   const { icon: StatusIcon } = statusConfig[group.status];
   const formatCurrency = (amount: number) => new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(amount);
-  const router = useRouter();
 
   const progressValue = group.status === 'Abierto'
     ? (group.membersCount / group.totalMembers) * 100
-    : group.status === 'Activo'
+    : group.status === 'Activo' || group.status === 'Subastado'
     ? ((group.monthsCompleted || 0) / group.plazo) * 100
     : group.status === 'Cerrado'
     ? 100 : (group.status === 'Pendiente' ? 100 : 0);
@@ -46,7 +38,7 @@ export function GroupCard({ group, isPublic = false }: GroupCardProps) {
 
   const progressText = group.status === 'Abierto'
     ? `${group.membersCount} de ${group.totalMembers} miembros`
-    : group.status === 'Activo'
+    : (group.status === 'Activo' || group.status === 'Subastado')
     ? `${group.monthsCompleted} de ${group.plazo} meses`
     : group.status === 'Pendiente'
     ? `Validando (${group.totalMembers}/${group.totalMembers})`
@@ -84,7 +76,8 @@ export function GroupCard({ group, isPublic = false }: GroupCardProps) {
     "border-current",
     group.status === 'Pendiente' && 'bg-yellow-500/20 text-yellow-700 border-yellow-500/30',
     group.status === 'Activo' && 'bg-green-500/20 text-green-700 border-green-500/30',
-    group.status === 'Abierto' && 'bg-blue-500/20 text-blue-700 border-blue-500/30'
+    group.status === 'Abierto' && 'bg-blue-500/20 text-blue-700 border-blue-500/30',
+    group.status === 'Subastado' && 'bg-red-500/20 text-red-700 border-red-500/30'
   );
 
   return (

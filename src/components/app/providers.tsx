@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useCallback, ReactNode, useEffect, useRef } from 'react';
-import { initialGroups } from '@/lib/data';
+import { initialGroups, installments as allInstallments } from '@/lib/data';
 import type { Group } from '@/lib/types';
 import { GroupsContext } from '@/hooks/use-groups';
 import { toast } from '@/hooks/use-toast';
@@ -78,6 +78,56 @@ export function GroupsProvider({ children }: { children: ReactNode }) {
         }
     });
   }, [groups]);
+
+  // Effect to check for overdue payments and force auction
+  useEffect(() => {
+    const checkOverdue = () => {
+        setGroups(currentGroups => {
+            let changed = false;
+            const newGroups = currentGroups.map(group => {
+                if (group.userIsMember && group.status === 'Activo' && !group.userIsAwarded) {
+                    const today = new Date();
+                    const overdueInstallments = allInstallments
+                        .slice(group.monthsCompleted, group.plazo)
+                        .filter(inst => {
+                            const dueDate = new Date(inst.dueDate);
+                            const diffTime = today.getTime() - dueDate.getTime();
+                            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                            // Is overdue if due date has passed
+                            return diffDays > 0;
+                        });
+                    
+                    // The logic here is simplified: if the number of installments with a past due date
+                    // is >= 2, we consider it has 2 overdue installments.
+                    if (overdueInstallments.length >= 2) {
+                        const secondOverdueDate = new Date(overdueInstallments[1].dueDate);
+                        const diffTime = today.getTime() - secondOverdueDate.getTime();
+                        const diffHours = Math.ceil(diffTime / (1000 * 60 * 60));
+                        
+                        if (diffHours > 72) {
+                            changed = true;
+                            toast({
+                                variant: "destructive",
+                                title: "Plan en Subasta Forzosa",
+                                description: `Tu plan ${group.id} ha sido puesto en subasta por tener 2 o más cuotas vencidas.`,
+                            });
+                            return { ...group, status: 'Subastado' };
+                        }
+                    }
+                }
+                return group;
+            });
+
+            if (changed) {
+                return newGroups;
+            }
+            return currentGroups;
+        });
+    };
+
+    const timer = setTimeout(checkOverdue, 3000); // Check 3 seconds after app loads
+    return () => clearTimeout(timer);
+  }, []);
 
   const joinGroup = useCallback((groupId: string) => {
     let joinedGroup: Group | null = null;

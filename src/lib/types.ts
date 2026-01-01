@@ -6,7 +6,7 @@ export type User = {
   avatarUrl: string;
 };
 
-export type GroupStatus = "Abierto" | "Pendiente" | "Activo" | "Cerrado";
+export type GroupStatus = "Abierto" | "Pendiente" | "Activo" | "Cerrado" | "Subastado";
 
 export type Group = {
   id: string;

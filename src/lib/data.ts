@@ -24,6 +24,7 @@ export const initialGroups: Group[] = [
     { id: "ID-20240115-9998", capital: 15000, plazo: 48, cuotaPromedio: 345, membersCount: 96, totalMembers: 96, status: "Activo", monthsCompleted: 12, userIsMember: true, userIsAwarded: true },
     { id: "ID-20230720-9999", capital: 15000, plazo: 36, cuotaPromedio: 455, membersCount: 72, totalMembers: 72, status: "Cerrado", monthsCompleted: 36, userIsMember: true, userIsAwarded: true, },
     { id: "ID-20240510-8888", capital: 20000, plazo: 60, cuotaPromedio: calculateCuotaPromedio(20000, 60), membersCount: 120, totalMembers: 120, status: "Activo", monthsCompleted: 5, userIsMember: true, userIsAwarded: false },
+    { id: "ID-20231101-7777", capital: 10000, plazo: 24, cuotaPromedio: calculateCuotaPromedio(10000, 24), membersCount: 48, totalMembers: 48, status: "Activo", monthsCompleted: 4, userIsMember: true, userIsAwarded: false }, // Overdue group
 
 
     // Grupos Abiertos (Nuevos y variados)
@@ -56,6 +57,7 @@ const getFutureDate = (hours: number) => new Date(Date.now() + hours * 60 * 60 *
 export const auctions: Omit<Auction, 'precioBase'>[] = [
     { id: "auc-1", groupId: "ID-20240210-1138", orderNumber: 15, capital: 30000, plazo: 60, cuotasPagadas: 15, highestBid: 7520, endDate: getFutureDate(48), numberOfBids: 1 },
     { id: "auc-2", groupId: "ID-20240305-4815", orderNumber: 42, capital: 15000, plazo: 36, cuotasPagadas: 20, highestBid: 4166.67, endDate: getFutureDate(24), numberOfBids: 0, isPostAdjudicacion: true },
+    { id: "auc-3", groupId: "ID-20231101-7777", orderNumber: 7, capital: 10000, plazo: 24, cuotasPagadas: 4, highestBid: 833.33, endDate: getFutureDate(72), numberOfBids: 0 },
 ]
 
 const capital = 20000;
@@ -67,16 +69,25 @@ const totalSuscripcion = (capital * 0.03) * IVA; // 3% + IVA
 const mesesFinanciacionSuscripcion = Math.floor(plazo * 0.20);
 const cuotaSuscripcion = mesesFinanciacionSuscripcion > 0 ? totalSuscripcion / mesesFinanciacionSuscripcion : 0;
 
+const generateDueDate = (index: number) => {
+    const today = new Date();
+    const pastDate = new Date(today.setMonth(today.getMonth() - (4 - index)));
+    return pastDate.toISOString().split('T')[0];
+}
+
 export const installments: Installment[] = Array.from({ length: 84 }, (_, i) => { // Increased length to satisfy all plans
     const saldoCapital = capital - (alicuotaPura * i);
     const seguroVida = saldoCapital * 0.0009; // 0.09% del saldo de capital
     const derechoSuscripcion = i < mesesFinanciacionSuscripcion ? cuotaSuscripcion : 0;
     const totalCuota = alicuotaPura + gastosAdm + seguroVida + derechoSuscripcion;
     
+    // Simulate some past due dates for the overdue group example
+    const dueDate = i < 4 ? generateDueDate(i) : `2024-${((i + 7) % 12) + 1}-10`;
+
     return {
         id: `cuota-${i + 1}`,
         number: i + 1,
-        dueDate: `2024-${((i + 7) % 12) + 1}-10`,
+        dueDate: dueDate,
         status: 'Futuro',
         total: totalCuota,
         breakdown: {
