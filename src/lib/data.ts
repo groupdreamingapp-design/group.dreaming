@@ -26,7 +26,7 @@ const capitalOptions = [5000, 10000, 15000, 20000, 25000];
 const plazoOptions = [12, 24, 36, 48, 60, 72, 84];
 
 const generatedGroups: Group[] = [];
-let groupCounter = 2000; // Start counter at a higher number to avoid collisions
+let groupCounter = 2000;
 const todayForId = new Date('2026-01-01T00:00:00Z');
 const year = todayForId.getFullYear();
 const month = String(todayForId.getMonth() + 1).padStart(2, '0');
@@ -73,7 +73,7 @@ const futureMonthsCompleted = differenceInMonths(today, futureActivationDate);
 
 
 generatedGroups.push({
-    id: 'ID-20250605-1100', // Unique ID following the pattern
+    id: 'ID-ACTIVE-2025',
     capital: futureGroupCapital,
     plazo: futureGroupPlazo,
     cuotaPromedio: calculateCuotaPromedio(futureGroupCapital, futureGroupPlazo),
@@ -111,6 +111,7 @@ export const generateInstallments = (capital: number, plazo: number, activationD
     const cuotaSuscripcion = mesesFinanciacionSuscripcion > 0 ? totalSuscripcion / mesesFinanciacionSuscripcion : 0;
     
     const startDate = parseISO(activationDate);
+    const activationDay = startDate.getUTCDate();
 
     return Array.from({ length: plazo }, (_, i) => {
         const saldoCapital = capital - (alicuotaPura * i);
@@ -118,17 +119,14 @@ export const generateInstallments = (capital: number, plazo: number, activationD
         const derechoSuscripcion = i < mesesFinanciacionSuscripcion ? cuotaSuscripcion : 0;
         const totalCuota = alicuotaPura + gastosAdm + seguroVida + derechoSuscripcion;
         
-        const activationDay = startDate.getUTCDate();
-        let dueDate = addMonths(startDate, i + 1);
+        const targetMonthDate = addMonths(startDate, i + 1);
+        const targetYearUTC = targetMonthDate.getUTCFullYear();
+        const targetMonthUTC = targetMonthDate.getUTCMonth();
 
-        const lastDayOfNextMonth = lastDayOfMonth(dueDate).getUTCDate();
-
-        if (activationDay > lastDayOfNextMonth) {
-            dueDate.setUTCDate(lastDayOfNextMonth);
-        } else {
-            dueDate.setUTCDate(activationDay);
-        }
-
+        const lastDayOfTargetMonth = new Date(Date.UTC(targetYearUTC, targetMonthUTC + 1, 0)).getUTCDate();
+        const dayToSet = Math.min(activationDay, lastDayOfTargetMonth);
+        
+        const dueDate = new Date(Date.UTC(targetYearUTC, targetMonthUTC, dayToSet));
 
         return {
             id: `cuota-${i + 1}`,
@@ -184,6 +182,7 @@ export const generateExampleInstallments = (capital: number, plazo: number): Ins
     
 
     
+
 
 
 
