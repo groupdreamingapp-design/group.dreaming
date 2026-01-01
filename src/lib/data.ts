@@ -26,7 +26,7 @@ export const initialGroups: Group[] = [
     { id: "ID-20230720-9999", capital: 15000, plazo: 36, cuotaPromedio: 455, membersCount: 72, totalMembers: 72, status: "Cerrado", monthsCompleted: 36, userIsMember: true, userIsAwarded: true, activationDate: '2023-07-20T12:00:00Z' },
     { id: "ID-20240510-8888", capital: 20000, plazo: 60, cuotaPromedio: calculateCuotaPromedio(20000, 60), membersCount: 120, totalMembers: 120, status: "Activo", monthsCompleted: 1, userIsMember: true, userIsAwarded: false, activationDate: '2024-05-10T12:00:00Z' },
     { id: "ID-20231101-7777", capital: 10000, plazo: 24, cuotaPromedio: calculateCuotaPromedio(10000, 24), membersCount: 48, totalMembers: 48, status: "Subastado", monthsCompleted: 19, userIsMember: true, userIsAwarded: false, activationDate: '2023-11-01T12:00:00Z' },
-    { id: "ID-20240801-1024", capital: 10000, plazo: 24, cuotaPromedio: calculateCuotaPromedio(10000, 24), membersCount: 26, totalMembers: 48, status: "Abierto", userIsMember: true, userIsAwarded: false },
+    { id: "ID-20240801-1024", capital: 10000, plazo: 24, cuotaPromedio: calculateCuotaPromedio(10000, 24), membersCount: 27, totalMembers: 48, status: "Abierto", userIsMember: true, userIsAwarded: false },
 
 
     // Grupos Abiertos (Nuevos y variados)
@@ -133,4 +133,5 @@ export const generateExampleInstallments = (capital: number, plazo: number): Ins
         };
     });
 };
+
 
