@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, CheckCircle, ShieldCheck, User, Building, Phone, Mail, FileUp, Camera, Repeat, Loader2 } from 'lucide-react';
+import { ArrowLeft, CheckCircle, ShieldCheck, User, Building, Phone, Mail, FileUp, Camera, Repeat, Loader2, HeartHandshake } from 'lucide-react';
 import Link from 'next/link';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
@@ -20,20 +20,34 @@ import { useUserNav } from '@/components/app/user-nav';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 const verificationSchema = z.object({
+  // User data
   firstName: z.string().min(2, "El nombre es requerido"),
   lastName: z.string().min(2, "El apellido es requerido"),
   dni: z.string().regex(/^\d{7,8}$/, "DNI inválido"),
   cuit: z.string().regex(/^\d{11}$/, "CUIT/CUIL inválido"),
   birthDate: z.string().min(1, "La fecha de nacimiento es requerida"),
+  
+  // Contact data
   address: z.string().min(5, "La dirección es requerida"),
   city: z.string().min(2, "La ciudad es requerida"),
   province: z.string().min(2, "La provincia es requerida"),
   postalCode: z.string().min(4, "El código postal es requerido"),
   phone: z.string().min(8, "El teléfono es requerido"),
+  email: z.string().email("El correo electrónico no es válido"),
+
+  // Beneficiary data (optional)
+  beneficiaryFullName: z.string().optional(),
+  beneficiaryDni: z.string().optional(),
+  beneficiaryPhone: z.string().optional(),
+  beneficiaryRelationship: z.string().optional(),
+  
+  // Financial data
   employmentStatus: z.string().min(1, "Selecciona una opción"),
   monthlyIncome: z.number().min(1, "Ingresa tu ingreso mensual"),
   pep: z.enum(['true', 'false']),
   fundsOrigin: z.boolean().refine(val => val === true, { message: "Debes aceptar la declaración de fondos" }),
+  
+  // Documents
   dniFront: z.any().refine(file => file.length > 0, 'El frente del DNI es requerido.'),
   dniBack: z.any().refine(file => file.length > 0, 'El dorso del DNI es requerido.'),
 });
@@ -202,6 +216,41 @@ export default function VerificationPage() {
                                 <Input id="phone" {...register("phone")} />
                                 {errors.phone && <p className="text-red-500 text-xs">{errors.phone.message}</p>}
                             </div>
+                            <div className="space-y-2 md:col-span-2">
+                                <Label htmlFor="email">Correo Electrónico</Label>
+                                <Input id="email" type="email" {...register("email")} />
+                                {errors.email && <p className="text-red-500 text-xs">{errors.email.message}</p>}
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                     {/* Beneficiary Data */}
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2"><HeartHandshake className="text-primary" /> Beneficiario del Seguro de Vida</CardTitle>
+                            <CardDescription>Esta persona recibirá el capital en caso de fallecimiento del titular. (Opcional)</CardDescription>
+                        </CardHeader>
+                        <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="space-y-2 md:col-span-2">
+                                <Label htmlFor="beneficiaryFullName">Nombre y Apellido</Label>
+                                <Input id="beneficiaryFullName" {...register("beneficiaryFullName")} />
+                                {errors.beneficiaryFullName && <p className="text-red-500 text-xs">{errors.beneficiaryFullName.message}</p>}
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="beneficiaryDni">DNI</Label>
+                                <Input id="beneficiaryDni" {...register("beneficiaryDni")} />
+                                {errors.beneficiaryDni && <p className="text-red-500 text-xs">{errors.beneficiaryDni.message}</p>}
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="beneficiaryPhone">Teléfono</Label>
+                                <Input id="beneficiaryPhone" {...register("beneficiaryPhone")} />
+                                {errors.beneficiaryPhone && <p className="text-red-500 text-xs">{errors.beneficiaryPhone.message}</p>}
+                            </div>
+                             <div className="space-y-2 md:col-span-2">
+                                <Label htmlFor="beneficiaryRelationship">Parentesco</Label>
+                                <Input id="beneficiaryRelationship" {...register("beneficiaryRelationship")} />
+                                {errors.beneficiaryRelationship && <p className="text-red-500 text-xs">{errors.beneficiaryRelationship.message}</p>}
+                            </div>
                         </CardContent>
                     </Card>
 
@@ -347,3 +396,5 @@ export default function VerificationPage() {
         </form>
     );
 }
+
+    
