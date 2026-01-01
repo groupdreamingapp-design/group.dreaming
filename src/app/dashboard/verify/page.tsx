@@ -147,7 +147,7 @@ export default function VerificationPage() {
                 </Button>
                 <h1 className="text-3xl font-bold font-headline">Verificación de Identidad (KYC)</h1>
                 <p className="text-muted-foreground">
-                    Completa tus datos para operar sin límites. Este es un requisito legal para la seguridad de todos.
+                    Completa tus datos para operar sin límites. Estos se usarán para confeccionar el contrato de adhesión y se toman como válidos bajo declaración jurada. Es un requisito legal para la seguridad de todos.
                 </p>
             </div>
 
