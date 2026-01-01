@@ -3,11 +3,10 @@
 
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Users, Scale, Rows, ShieldCheck, Banknote, PiggyBank, Briefcase, Plus, Minus, ArrowDown } from "lucide-react";
+import { ArrowRight, Users, Scale, Rows, ShieldCheck } from "lucide-react";
 import { Logo } from '@/components/icons';
 import { useState, useEffect } from "react";
 import { user } from "@/lib/data";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 
 export default function WhyUsPage() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -50,8 +49,12 @@ export default function WhyUsPage() {
           <span className="text-xl font-bold text-foreground">Group Dreaming</span>
         </Link>
         <nav className="hidden md:flex items-center gap-4">
+          <Button variant="ghost" asChild><Link href="/">Por qué nosotros</Link></Button>
+          <Button variant="ghost" asChild><Link href="/dashboard/explore">Explorar Grupos</Link></Button>
+          <Button variant="ghost" asChild><Link href="/dashboard/transparency">Transparencia</Link></Button>
+          <div className="w-px h-6 bg-border mx-2"></div>
           {isLoggedIn ? (
-            <Button variant="ghost" asChild>
+            <Button asChild>
               <Link href="/dashboard">Ir a mi Panel</Link>
             </Button>
           ) : (
@@ -115,7 +118,7 @@ export default function WhyUsPage() {
           </div>
         </section>
 
-        <section className="py-24 sm:py-32 bg-secondary">
+        <section className="py-24 sm:py-32 bg-background">
           <div className="container mx-auto px-4 text-center">
             <h2 className="font-headline text-3xl font-bold tracking-tight sm:text-4xl">
               ¿Listo para empezar a soñar en grupo?
@@ -142,5 +145,3 @@ export default function WhyUsPage() {
     </div>
   );
 }
-
-    
