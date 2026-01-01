@@ -22,35 +22,63 @@ const calculateCuotaPromedio = (capital: number, plazo: number): number => {
     return alicuotaPura + gastosAdm + seguroVidaPromedio + derechoSuscripcionPromedio;
 }
 
-export const initialGroups: Group[] = [
-    // Grupos Abiertos (Nuevos y variados)
-    { id: "ID-20240801-5012", capital: 5000, plazo: 12, cuotaPromedio: calculateCuotaPromedio(5000, 12), membersCount: 5, totalMembers: 24, status: "Abierto", userIsMember: false, userIsAwarded: false },
-    { id: "ID-20240801-5024", capital: 5000, plazo: 24, cuotaPromedio: calculateCuotaPromedio(5000, 24), membersCount: 12, totalMembers: 48, status: "Abierto", userIsMember: false, userIsAwarded: false },
-    { id: "ID-20240801-1012", capital: 10000, plazo: 12, cuotaPromedio: calculateCuotaPromedio(10000, 12), membersCount: 2, totalMembers: 24, status: "Abierto", userIsMember: false, userIsAwarded: false },
-    { id: "ID-20240801-1036", capital: 10000, plazo: 36, cuotaPromedio: calculateCuotaPromedio(10000, 36), membersCount: 10, totalMembers: 72, status: "Abierto", userIsMember: false, userIsAwarded: false },
-    { id: "ID-20240801-1524", capital: 15000, plazo: 24, cuotaPromedio: calculateCuotaPromedio(15000, 24), membersCount: 40, totalMembers: 48, status: "Abierto", userIsMember: false, userIsAwarded: false },
-    { id: "ID-20240801-1536", capital: 15000, plazo: 36, cuotaPromedio: calculateCuotaPromedio(15000, 36), membersCount: 30, totalMembers: 72, status: "Abierto", userIsMember: false, userIsAwarded: false },
-    { id: "ID-20240801-1548", capital: 15000, plazo: 48, cuotaPromedio: calculateCuotaPromedio(15000, 48), membersCount: 15, totalMembers: 96, status: "Abierto", userIsMember: false, userIsAwarded: false },
-    { id: "ID-20240801-2036", capital: 20000, plazo: 36, cuotaPromedio: calculateCuotaPromedio(20000, 36), membersCount: 60, totalMembers: 72, status: "Abierto", userIsMember: false, userIsAwarded: false },
-    { id: "ID-20240801-2048", capital: 20000, plazo: 48, cuotaPromedio: calculateCuotaPromedio(20000, 48), membersCount: 80, totalMembers: 96, status: "Abierto", userIsMember: false, userIsAwarded: false },
-    { id: "ID-20240801-2060", capital: 20000, plazo: 60, cuotaPromedio: calculateCuotaPromedio(20000, 60), membersCount: 25, totalMembers: 120, status: "Abierto", userIsMember: false, userIsAwarded: false },
-    { id: "ID-20240801-2548", capital: 25000, plazo: 48, cuotaPromedio: calculateCuotaPromedio(25000, 48), membersCount: 90, totalMembers: 96, status: "Abierto", userIsMember: false, userIsAwarded: false },
-    { id: "ID-20240801-2560", capital: 25000, plazo: 60, cuotaPromedio: calculateCuotaPromedio(25000, 60), membersCount: 110, totalMembers: 120, status: "Abierto", userIsMember: false, userIsAwarded: false },
-    { id: "ID-20240801-2572", capital: 25000, plazo: 72, cuotaPromedio: calculateCuotaPromedio(25000, 72), membersCount: 40, totalMembers: 144, status: "Abierto", userIsMember: false, userIsAwarded: false },
-];
+const capitalOptions = [5000, 10000, 15000, 20000, 25000];
+const plazoOptions = [12, 24, 36, 48, 60, 72, 84];
+
+const generatedGroups: Group[] = [];
+
+let groupCounter = 1;
+
+for (const capital of capitalOptions) {
+    for (const plazo of plazoOptions) {
+        const cuotaPromedio = calculateCuotaPromedio(capital, plazo);
+
+        if (cuotaPromedio <= 1000) {
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = String(today.getMonth() + 1).padStart(2, '0');
+            const day = String(today.getDate()).padStart(2, '0');
+            const dateString = `${year}${month}${day}`;
+            const randomNumbers = String(Math.floor(Math.random() * 9000) + 1000).padStart(4, '0');
+            const newId = `ID-${dateString}-${randomNumbers}-${groupCounter++}`;
+
+            let totalMembers;
+            if (plazo <= 24) totalMembers = 48;
+            else if (plazo <= 48) totalMembers = 96;
+            else totalMembers = 144;
+            
+            const membersCount = Math.floor(Math.random() * (totalMembers - 1));
+
+            generatedGroups.push({
+                id: newId,
+                capital,
+                plazo,
+                cuotaPromedio,
+                membersCount,
+                totalMembers,
+                status: 'Abierto',
+                userIsMember: false,
+                userIsAwarded: false,
+            });
+        }
+    }
+}
+
+export const initialGroups: Group[] = generatedGroups;
+
 
 export const transactions: Transaction[] = [
-    { id: "txn-1", date: "2024-01-10T10:00:00Z", type: "Depósito", description: "Depósito inicial vía transferencia", amount: 5000, status: "Completado" },
-    { id: "txn-2", date: "2024-02-15T10:00:00Z", type: "Pago de Cuota", description: "Cuota 1/48, Plan ID-20240115-9998", amount: -345, status: "Completado" },
-    { id: "txn-3", date: "2024-03-15T10:00:00Z", type: "Pago de Cuota", description: "Cuota 2/48, Plan ID-20240115-9998", amount: -345, status: "Completado" },
-    { id: "txn-4", date: "2024-04-10T10:00:00Z", type: "Pago de Cuota", description: "Cuota 1/60, Plan ID-20240510-8888", amount: -370, status: "Completado" },
-    { id: "txn-5", date: "2024-04-15T10:00:00Z", type: "Pago de Cuota", description: "Cuota 3/48, Plan ID-20240115-9998", amount: -345, status: "Completado" },
-    { id: "txn-6", date: "2024-05-10T10:00:00Z", type: "Pago de Cuota", description: "Cuota 2/60, Plan ID-20240510-8888", amount: -370, status: "Completado" },
-    { id: "txn-7", date: "2024-05-15T10:00:00Z", type: "Pago de Cuota", description: "Cuota 4/48, Plan ID-20240115-9998", amount: -345, status: "Completado" },
-    { id: "txn-8", date: "2023-08-01T10:00:00Z", type: "Liquidación", description: "Capital adjudicado del plan ID-20230720-9999", amount: 15000, status: "Completado" },
-    { id: "txn-9", date: "2024-06-15T10:00:00Z", type: "Pago de Cuota", description: "Cuota 5/48, Plan ID-20240115-9998", amount: -345, status: "Completado" },
-    { id: "txn-10", date: "2024-07-15T10:00:00Z", type: "Pago de Cuota", description: "Cuota 6/48, Plan ID-20240115-9998", amount: -345, status: "Completado" },
-    { id: "txn-11", date: "2024-07-20T10:00:00Z", type: "Retiro", description: "Retiro a cuenta bancaria", amount: -10000, status: "Completado" },
+    { id: "txn-0", date: "2024-01-05T10:00:00Z", type: "Depósito", description: "Depósito inicial vía transferencia", amount: 10000, status: "Completado" },
+    { id: "txn-1", date: "2024-02-15T10:00:00Z", type: "Pago de Cuota", description: "Cuota 1/48, Plan ID-20240115-9998", amount: -345, status: "Completado" },
+    { id: "txn-2", date: "2024-03-15T10:00:00Z", type: "Pago de Cuota", description: "Cuota 2/48, Plan ID-20240115-9998", amount: -345, status: "Completado" },
+    { id: "txn-3", date: "2024-04-10T10:00:00Z", type: "Pago de Cuota", description: "Cuota 1/60, Plan ID-20240510-8888", amount: -370, status: "Completado" },
+    { id: "txn-4", date: "2024-04-15T10:00:00Z", type: "Pago de Cuota", description: "Cuota 3/48, Plan ID-20240115-9998", amount: -345, status: "Completado" },
+    { id: "txn-5", date: "2024-05-10T10:00:00Z", type: "Pago de Cuota", description: "Cuota 2/60, Plan ID-20240510-8888", amount: -370, status: "Completado" },
+    { id: "txn-6", date: "2024-05-15T10:00:00Z", type: "Pago de Cuota", description: "Cuota 4/48, Plan ID-20240115-9998", amount: -345, status: "Completado" },
+    { id: "txn-7", date: "2024-06-15T10:00:00Z", type: "Pago de Cuota", description: "Cuota 5/48, Plan ID-20240115-9998", amount: -345, status: "Completado" },
+    { id: "txn-8", date: "2024-07-15T10:00:00Z", type: "Pago de Cuota", description: "Cuota 6/48, Plan ID-20240115-9998", amount: -345, status: "Completado" },
+    { id: "txn-9", date: "2023-08-01T10:00:00Z", type: "Liquidación", description: "Capital adjudicado del plan ID-20230720-9999", amount: 15000, status: "Completado" },
+    { id: "txn-10", date: "2024-07-20T10:00:00Z", type: "Retiro", description: "Retiro a cuenta bancaria", amount: -10000, status: "Completado" },
 ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
 
@@ -145,4 +173,5 @@ export const generateExampleInstallments = (capital: number, plazo: number): Ins
     
 
     
+
 
