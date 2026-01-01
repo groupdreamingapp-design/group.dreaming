@@ -24,7 +24,7 @@ const calculateCuotaPromedio = (capital: number, plazo: number): number => {
 export const initialGroups: Group[] = [
     { id: "ID-20240115-9998", capital: 15000, plazo: 48, cuotaPromedio: 345, membersCount: 96, totalMembers: 96, status: "Activo", monthsCompleted: 23, userIsMember: true, userIsAwarded: false, activationDate: '2024-01-15T12:00:00Z' },
     { id: "ID-20230720-9999", capital: 15000, plazo: 36, cuotaPromedio: 455, membersCount: 72, totalMembers: 72, status: "Cerrado", monthsCompleted: 36, userIsMember: true, userIsAwarded: true, activationDate: '2023-07-20T12:00:00Z' },
-    { id: "ID-20240510-8888", capital: 20000, plazo: 60, cuotaPromedio: calculateCuotaPromedio(20000, 60), membersCount: 120, totalMembers: 120, status: "Subastado", monthsCompleted: 5, userIsMember: true, userIsAwarded: false, activationDate: '2023-11-15T12:00:00Z' },
+    { id: "ID-20240510-8888", capital: 20000, plazo: 60, cuotaPromedio: calculateCuotaPromedio(20000, 60), membersCount: 120, totalMembers: 120, status: "Subastado", monthsCompleted: 5, userIsMember: true, userIsAwarded: false, activationDate: '2024-05-15T12:00:00Z' },
     { id: "ID-20231101-7777", capital: 10000, plazo: 24, cuotaPromedio: calculateCuotaPromedio(10000, 24), membersCount: 48, totalMembers: 48, status: "Subastado", monthsCompleted: 19, userIsMember: true, userIsAwarded: false, activationDate: '2023-11-01T12:00:00Z' },
     { id: "ID-20240801-1024", capital: 10000, plazo: 24, cuotaPromedio: calculateCuotaPromedio(10000, 24), membersCount: 29, totalMembers: 48, status: "Abierto", userIsMember: true, userIsAwarded: false },
 
