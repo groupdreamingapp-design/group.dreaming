@@ -75,78 +75,6 @@ export default function AuctionsPage() {
   const formatCurrency = (amount: number) => new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'USD' }).format(amount);
   const formatCurrencyNoDecimals = (amount: number) => new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(amount);
   
-  const validateOffer = (auction: (typeof auctions)[0], startBid: number) => {
-    const minBidIncrement = startBid * 0.03;
-    const nextMinBid = startBid + minBidIncrement;
-
-    if (autoBidEnabled) {
-      const maxBidNum = Number(maxBid);
-      const autoIncrementNum = Number(autoIncrement);
-      if (!maxBid || !autoIncrement) {
-          toast({
-              variant: "destructive",
-              title: "Error en la oferta automática",
-              description: "Debes completar la oferta máxima y el monto de incremento.",
-          });
-          return false;
-      }
-      if (maxBidNum <= startBid) {
-         toast({
-            variant: "destructive",
-            title: "Oferta máxima inválida",
-            description: `Tu oferta máxima debe superar la puja actual de ${formatCurrency(startBid)}.`,
-        });
-        return false;
-      }
-      if (autoIncrementNum < minBidIncrement) {
-        toast({
-            variant: "destructive",
-            title: "Incremento inválido",
-            description: `El incremento por puja debe ser de al menos ${formatCurrency(minBidIncrement)}.`,
-        });
-        return false;
-      }
-    } else {
-      const offerAmountNum = Number(offerAmount);
-      if (!offerAmount) {
-          toast({
-              variant: "destructive",
-              title: "Error en la oferta",
-              description: "Por favor, ingresa un monto para tu oferta.",
-          });
-          return false;
-      }
-      if (offerAmountNum < nextMinBid) {
-        toast({
-            variant: "destructive",
-            title: "Oferta muy baja",
-            description: `Tu oferta debe ser igual o mayor a la próxima puja mínima de ${formatCurrency(nextMinBid)}.`,
-        });
-        return false;
-      }
-    }
-    return true;
-  }
-
-  const handleAcceptTerms = (checked: boolean, auction: (typeof auctions)[0], startBid: number) => {
-    if (checked) {
-        if (!isVerified) {
-             toast({
-                variant: "destructive",
-                title: "Verificación Requerida",
-                description: "Debes verificar tu identidad para aceptar los términos.",
-            });
-            return;
-        }
-        const isValid = validateOffer(auction, startBid);
-        if (isValid) {
-            setTermsAccepted(true);
-        }
-    } else {
-        setTermsAccepted(false);
-    }
-  };
-
   const handleConfirmOffer = (auction: (typeof auctions)[0]) => {
     if (!termsAccepted) {
         toast({
@@ -221,6 +149,10 @@ export default function AuctionsPage() {
           const isManualOfferInvalid = !autoBidEnabled && (!offerAmount || Number(offerAmount) < nextMinBid);
           const isMaxBidInvalid = autoBidEnabled && (!maxBid || Number(maxBid) <= startBid);
           const isAutoIncrementInvalid = autoBidEnabled && (!autoIncrement || Number(autoIncrement) < minBidIncrement);
+          
+          const isOfferValid = autoBidEnabled
+            ? !isMaxBidInvalid && !isAutoIncrementInvalid
+            : !isManualOfferInvalid && !!offerAmount;
           
           return (
             <Card key={auction.id} className="flex flex-col">
@@ -373,9 +305,9 @@ export default function AuctionsPage() {
                             )}
                           
                            <div className="items-top flex space-x-2 pt-2">
-                               <Switch id="terms" checked={termsAccepted} onCheckedChange={(checked) => handleAcceptTerms(checked, auction, startBid)} disabled={!hasReadRules} />
+                               <Switch id="terms" checked={termsAccepted} onCheckedChange={setTermsAccepted} disabled={!isOfferValid || !hasReadRules} />
                               <div className="grid gap-1.5 leading-none">
-                                <Label htmlFor="terms" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 flex items-center gap-2">
+                                <Label htmlFor="terms" className={cn("text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 flex items-center gap-2", (!isOfferValid || !hasReadRules) && "text-muted-foreground")}>
                                   Acepto los términos y condiciones
                                   <Button variant="link" size="sm" className="p-0 h-auto" asChild>
                                     <Link href="/dashboard/auctions/rules" target="_blank" onClick={() => setHasReadRules(true)}>
@@ -391,6 +323,11 @@ export default function AuctionsPage() {
                                     Debes hacer clic en 'Ver Reglamento' para poder aceptar los términos.
                                     </p>
                                 )}
+                                {hasReadRules && !isOfferValid && (
+                                     <p className="text-xs text-amber-600 font-semibold">
+                                        Debes ingresar una oferta válida para poder aceptar los términos.
+                                    </p>
+                                )}
                               </div>
                             </div>
                            
@@ -401,7 +338,7 @@ export default function AuctionsPage() {
                                 <Button 
                                     type="button" 
                                     onClick={() => handleConfirmOffer(auction)}
-                                    disabled={!termsAccepted}
+                                    disabled={!termsAccepted || !isOfferValid}
                                 >
                                     Confirmar Oferta
                                 </Button>
@@ -419,3 +356,5 @@ export default function AuctionsPage() {
     </>
   );
 }
+
+    
