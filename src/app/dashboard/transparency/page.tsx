@@ -32,72 +32,72 @@ export default function TransparencyPage() {
                         <div className="hidden md:block absolute top-1/2 left-1/2 h-12 w-[2px] bg-border -translate-y-full"></div>
                         <div className="hidden md:block absolute top-1/2 right-1/4 h-12 w-[2px] bg-border -translate-y-full"></div>
 
-                        <div className="z-10">
+                        <div className="z-10 flex flex-col items-center">
                             <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/50 mb-2">
                                 <Banknote className="h-6 w-6 text-blue-600 dark:text-blue-400" />
                             </div>
                             <h3 className="text-center text-lg font-semibold">1. Fondo General del Grupo</h3>
                             <p className="text-center text-sm text-muted-foreground">Capital para adjudicaciones</p>
-                             <ul className="mt-4 space-y-2 text-sm">
+                             <ul className="mt-4 space-y-2 text-sm text-left w-full">
                                 <li className="flex items-center gap-2">
-                                    <Plus className="h-4 w-4 text-green-500" />
+                                    <Plus className="h-4 w-4 text-green-500 shrink-0" />
                                     <span>Alícuotas Puras</span>
                                 </li>
                                 <li className="flex items-center gap-2">
-                                    <Plus className="h-4 w-4 text-green-500" />
+                                    <Plus className="h-4 w-4 text-green-500 shrink-0" />
                                     <span>Capital de Licitaciones</span>
                                 </li>
                                 <li className="flex items-center gap-2">
-                                    <Plus className="h-4 w-4 text-green-500" />
+                                    <Plus className="h-4 w-4 text-green-500 shrink-0" />
                                     <span>Adelanto de Cuotas (valor puro)</span>
                                 </li>
                             </ul>
                         </div>
 
-                        <div className="z-10">
+                        <div className="z-10 flex flex-col items-center">
                              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-yellow-100 dark:bg-yellow-900/50 mb-2">
                                 <PiggyBank className="h-6 w-6 text-yellow-600 dark:text-yellow-400" />
                             </div>
                             <h3 className="text-center text-lg font-semibold">2. Fondo de Reserva</h3>
                             <p className="text-center text-sm text-muted-foreground">Garantía y solvencia del grupo</p>
-                            <ul className="mt-4 space-y-2 text-sm">
+                            <ul className="mt-4 space-y-2 text-sm text-left w-full">
                                 <li className="flex items-center gap-2">
-                                    <Plus className="h-4 w-4 text-green-500" />
+                                    <Plus className="h-4 w-4 text-green-500 shrink-0" />
                                     <span>50% de Gastos Administrativos</span>
                                 </li>
                                 <li className="flex items-center gap-2">
-                                    <Plus className="h-4 w-4 text-green-500" />
+                                    <Plus className="h-4 w-4 text-green-500 shrink-0" />
                                     <span>50% de Derechos de Suscripción</span>
                                 </li>
                                  <li className="flex items-center gap-2">
-                                    <Plus className="h-4 w-4 text-green-500" />
+                                    <Plus className="h-4 w-4 text-green-500 shrink-0" />
                                     <span>Multas e intereses</span>
                                 </li>
                             </ul>
                              <p className="text-xs text-muted-foreground text-center mt-4 border-t pt-2">Cubre incumplimientos y garantiza la compra en subastas. El remanente se transfiere a la plataforma al finalizar el grupo.</p>
                         </div>
 
-                        <div className="z-10">
+                        <div className="z-10 flex flex-col items-center">
                             <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/50 mb-2">
                                 <Briefcase className="h-6 w-6 text-green-600 dark:text-green-400" />
                             </div>
                             <h3 className="text-center text-lg font-semibold">3. Ingresos de la Plataforma</h3>
                             <p className="text-center text-sm text-muted-foreground">Sostenibilidad del servicio</p>
-                             <ul className="mt-4 space-y-2 text-sm">
+                             <ul className="mt-4 space-y-2 text-sm text-left w-full">
                                 <li className="flex items-center gap-2">
-                                    <Plus className="h-4 w-4 text-green-500" />
+                                    <Plus className="h-4 w-4 text-green-500 shrink-0" />
                                     <span>50% de Gastos Administrativos</span>
                                 </li>
                                 <li className="flex items-center gap-2">
-                                    <Plus className="h-4 w-4 text-green-500" />
+                                    <Plus className="h-4 w-4 text-green-500 shrink-0" />
                                     <span>50% de Derechos de Suscripción</span>
                                 </li>
                                 <li className="flex items-center gap-2">
-                                    <Plus className="h-4 w-4 text-green-500" />
+                                    <Plus className="h-4 w-4 text-green-500 shrink-0" />
                                     <span>Comisiones del Mercado Secundario</span>
                                 </li>
                                 <li className="flex items-center gap-2">
-                                    <Plus className="h-4 w-4 text-green-500" />
+                                    <Plus className="h-4 w-4 text-green-500 shrink-0" />
                                     <span>Remanente del Fondo de Reserva</span>
                                 </li>
                             </ul>
@@ -169,14 +169,14 @@ export default function TransparencyPage() {
                                 </CardHeader>
                                 <CardContent>
                                     <p className="text-sm text-muted-foreground text-center mb-4">Con el pago de la segunda cuota, el Fondo General tiene suficiente para las primeras adjudicaciones.</p>
-                                    <div className="grid grid-cols-2 gap-4 text-sm">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                                         <div>
                                             <h4 className="font-semibold">Adjudicación por Sorteo</h4>
                                             <p>Un número de orden (1-24) sale sorteado. El miembro recibe $12.000.</p>
                                         </div>
                                          <div>
                                             <h4 className="font-semibold">Adjudicación por Licitación</h4>
-                                            <p>El miembro que ofrece adelantar más cuotas, gana y recibe $12.000.</p>
+                                            <p>El miembro que ofrece adelantar más cuotas, gana y recibe $12.000. El capital de su oferta se integra al Fondo General.</p>
                                         </div>
                                     </div>
                                 </CardContent>
@@ -223,5 +223,3 @@ export default function TransparencyPage() {
         </>
     );
 }
-
-    
