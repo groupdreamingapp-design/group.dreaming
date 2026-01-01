@@ -15,7 +15,7 @@ const contractClauses = [
     },
     {
         title: "TERCERA: FUNCIONAMIENTO DEL SISTEMA",
-        content: "EL SUSCRIPTOR se integra a un grupo con un número determinado de miembros, un plazo y un capital definidos. Mensualmente, abonará una cuota compuesta por: a) Alícuota (parte del capital), b) Gastos Administrativos, c) Seguro de Vida sobre saldo deudor. Las adjudicaciones se realizan mensualmente, una por sorteo y otra por licitación, entre los miembros con cuotas al día."
+        content: "EL SUSCRIPTOR se integra a un grupo con un número determinado de miembros, un plazo y un capital definidos. Mensualmente, abonará una cuota compuesta por: a) Alícuota (parte del capital), b) Gastos Administrativos, c) Seguro de Vida sobre saldo deudor. Las adjudicaciones se realizan mensualmente, una por sorteo y otra por licitación, entre los miembros con cuotas al día. EL SUSCRIPTOR declara bajo juramento gozar de buena salud, y que tiene pleno conocimiento de que el seguro de vida contratado en forma colectiva por LA ADMINISTRADORA no cubre siniestros ocurridos a consecuencia de enfermedades preexistentes a la fecha de suscripción del presente contrato."
     },
     {
         title: "CUARTA: DERECHOS Y OBLIGACIONES DE LA ADMINISTRADORA",
