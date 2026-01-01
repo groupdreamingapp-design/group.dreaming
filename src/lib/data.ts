@@ -32,7 +32,7 @@ export const initialGroups: Group[] = [
     { id: "ID-20240801-5012", capital: 5000, plazo: 12, cuotaPromedio: calculateCuotaPromedio(5000, 12), membersCount: 5, totalMembers: 24, status: "Abierto", userIsMember: false, userIsAwarded: false },
     { id: "ID-20240801-5024", capital: 5000, plazo: 24, cuotaPromedio: calculateCuotaPromedio(5000, 24), membersCount: 12, totalMembers: 48, status: "Abierto", userIsMember: false, userIsAwarded: false },
     { id: "ID-20240801-1012", capital: 10000, plazo: 12, cuotaPromedio: calculateCuotaPromedio(10000, 12), membersCount: 2, totalMembers: 24, status: "Abierto", userIsMember: false, userIsAwarded: false },
-    { id: "ID-20240801-1024", capital: 10000, plazo: 24, cuotaPromedio: calculateCuotaPromedio(10000, 24), membersCount: 22, totalMembers: 48, status: "Abierto", userIsMember: false, userIsAwarded: false },
+    { id: "ID-20240801-1024", capital: 10000, plazo: 24, cuotaPromedio: calculateCuotaPromedio(10000, 24), membersCount: 23, totalMembers: 48, status: "Abierto", userIsMember: true, userIsAwarded: false },
     { id: "ID-20240801-1036", capital: 10000, plazo: 36, cuotaPromedio: calculateCuotaPromedio(10000, 36), membersCount: 10, totalMembers: 72, status: "Abierto", userIsMember: false, userIsAwarded: false },
     { id: "ID-20240801-1524", capital: 15000, plazo: 24, cuotaPromedio: calculateCuotaPromedio(15000, 24), membersCount: 40, totalMembers: 48, status: "Abierto", userIsMember: false, userIsAwarded: false },
     { id: "ID-20240801-1536", capital: 15000, plazo: 36, cuotaPromedio: calculateCuotaPromedio(15000, 36), membersCount: 30, totalMembers: 72, status: "Abierto", userIsMember: false, userIsAwarded: false },
