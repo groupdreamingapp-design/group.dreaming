@@ -30,7 +30,7 @@ const profileSchema = z.object({
   }).optional(),
   otherInterest: z.string().optional(),
 }).refine(data => {
-    if (data.hasDefinedGoal === 'no') {
+    if (data.hasDefinedGoal === 'yes') { // Only require interests if goal is defined
         return Object.values(data.interests || {}).some(val => val === true);
     }
     return true;
