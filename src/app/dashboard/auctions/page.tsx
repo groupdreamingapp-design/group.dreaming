@@ -70,9 +70,9 @@ export default function AuctionsPage() {
   const formatCurrency = (amount: number) => new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'USD' }).format(amount);
   const formatCurrencyNoDecimals = (amount: number) => new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(amount);
   
-  const validateOffer = (auction: (typeof auctions)[0], precioBase: number) => {
-    const minBidIncrement = precioBase * 0.03;
-    const nextMinBid = auction.highestBid + minBidIncrement;
+  const validateOffer = (auction: (typeof auctions)[0], startBid: number) => {
+    const minBidIncrement = startBid * 0.03;
+    const nextMinBid = startBid + minBidIncrement;
 
     if (autoBidEnabled) {
       const maxBidNum = Number(maxBid);
@@ -85,11 +85,11 @@ export default function AuctionsPage() {
           });
           return false;
       }
-      if (maxBidNum <= auction.highestBid) {
+      if (maxBidNum <= startBid) {
          toast({
             variant: "destructive",
             title: "Oferta máxima inválida",
-            description: `Tu oferta máxima debe superar la mejor oferta actual de ${formatCurrency(auction.highestBid)}.`,
+            description: `Tu oferta máxima debe superar la puja actual de ${formatCurrency(startBid)}.`,
         });
         return false;
       }
@@ -123,9 +123,9 @@ export default function AuctionsPage() {
     return true;
   }
 
-  const handleAcceptTerms = (checked: boolean, auction: (typeof auctions)[0], precioBase: number) => {
+  const handleAcceptTerms = (checked: boolean, auction: (typeof auctions)[0], startBid: number) => {
     if (checked) {
-        const isValid = validateOffer(auction, precioBase);
+        const isValid = validateOffer(auction, startBid);
         if (isValid) {
             setTermsAccepted(true);
         }
@@ -195,13 +195,14 @@ export default function AuctionsPage() {
             .slice(0, auction.cuotasPagadas)
             .reduce((acc, installment) => acc + installment.total, 0);
 
-          const precioBase = Math.max(totalCuotasEmitidas * 0.5, auction.highestBid);
+          const precioBase = totalCuotasEmitidas * 0.5;
+          const startBid = Math.max(precioBase, auction.highestBid);
 
-          const minBidIncrement = precioBase * 0.03;
-          const nextMinBid = auction.highestBid + minBidIncrement;
+          const minBidIncrement = startBid * 0.03;
+          const nextMinBid = startBid + minBidIncrement;
 
           const isManualOfferInvalid = !autoBidEnabled && (!offerAmount || Number(offerAmount) < nextMinBid);
-          const isMaxBidInvalid = autoBidEnabled && (!maxBid || Number(maxBid) <= auction.highestBid);
+          const isMaxBidInvalid = autoBidEnabled && (!maxBid || Number(maxBid) <= startBid);
           const isAutoIncrementInvalid = autoBidEnabled && (!autoIncrement || Number(autoIncrement) < minBidIncrement);
           
           return (
@@ -255,8 +256,8 @@ export default function AuctionsPage() {
                     </DialogHeader>
                     <div className="space-y-4">
                       <div className="grid grid-cols-2 gap-4 text-sm">
-                        <div className="font-medium">Mejor Oferta Actual:</div>
-                        <div className="text-right font-bold">{formatCurrency(auction.highestBid)}</div>
+                        <div className="font-medium">Puja Actual:</div>
+                        <div className="text-right font-bold">{formatCurrency(startBid)}</div>
                         <div className="font-medium">Próxima Puja Mínima:</div>
                         <div className="text-right font-bold">{formatCurrency(nextMinBid)}</div>
                       </div>
@@ -280,7 +281,7 @@ export default function AuctionsPage() {
                                     <Input 
                                         id="max-bid" 
                                         type="number" 
-                                        placeholder={`> ${formatCurrency(auction.highestBid)}`}
+                                        placeholder={`> ${formatCurrency(startBid)}`}
                                         value={maxBid}
                                         onChange={(e) => setMaxBid(e.target.value)}
                                         className={cn(Number(maxBid) > 0 && isMaxBidInvalid && "border-red-500")}
@@ -317,7 +318,7 @@ export default function AuctionsPage() {
                         )}
                       
                        <div className="items-top flex space-x-2 pt-2">
-                           <Switch id="terms" checked={termsAccepted} onCheckedChange={(checked) => handleAcceptTerms(checked, auction, precioBase)} disabled={!hasReadRules} />
+                           <Switch id="terms" checked={termsAccepted} onCheckedChange={(checked) => handleAcceptTerms(checked, auction, startBid)} disabled={!hasReadRules} />
                           <div className="grid gap-1.5 leading-none">
                             <Label htmlFor="terms" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 flex items-center gap-2">
                               Acepto los términos y condiciones
