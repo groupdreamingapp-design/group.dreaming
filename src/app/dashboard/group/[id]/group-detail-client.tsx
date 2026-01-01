@@ -124,8 +124,15 @@ export default function GroupDetailClient({ groupId }: GroupDetailClientProps) {
 
   const IVA = 1.21;
   const penalidadBaja = capitalAportadoPuro * 0.05 * IVA;
-  const comisionVenta = capitalAportadoPuro * 0.02 * IVA;
-  const liquidacionMinima = capitalAportadoPuro - comisionVenta;
+
+  const totalCuotasEmitidas = allInstallments
+    .slice(0, cuotasPagadas)
+    .reduce((acc, installment) => acc + installment.total, 0);
+
+  const precioBaseSubasta = totalCuotasEmitidas * 0.5;
+  const comisionVenta = precioBaseSubasta * 0.02 * IVA;
+  const liquidacionEstimada = precioBaseSubasta - comisionVenta;
+  
 
   const futureInstallments = installments.slice(cuotasPagadas, group.plazo);
 
@@ -186,7 +193,7 @@ export default function GroupDetailClient({ groupId }: GroupDetailClientProps) {
           </Card>
         </div>
         
-        {isMember && group.status === 'Activo' && (
+         {isMember && group.status === 'Activo' && (
           <div className="lg:col-span-3">
             <Card>
               <CardHeader>
@@ -194,6 +201,43 @@ export default function GroupDetailClient({ groupId }: GroupDetailClientProps) {
                 <CardDescription>Opciones disponibles para tu plan.</CardDescription>
               </CardHeader>
               <CardContent className="flex flex-wrap gap-2">
+                <Dialog>
+                  <DialogTrigger asChild><Button size="sm" variant="secondary"><TrendingUp className="mr-2 h-4 w-4" /> Adelantar</Button></DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader><DialogTitle>Adelantar Cuotas</DialogTitle><DialogDescription>Paga cuotas futuras para acortar tu plan y obtén una bonificación.</DialogDescription></DialogHeader>
+                    <div className="space-y-4">
+                        <p className="text-sm text-muted-foreground">No compite por adjudicación, pero reduce el costo final de tu plan.</p>
+                        <div className="grid w-full max-w-sm items-center gap-1.5">
+                            <Label htmlFor="cuotas-adelantar">Cantidad de cuotas a adelantar</Label>
+                             <Select onValueChange={(value) => setCuotasToAdvance(Number(value))}>
+                                <SelectTrigger id="cuotas-adelantar">
+                                    <SelectValue placeholder="Selecciona la cantidad de cuotas" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {Array.from({ length: cuotasRestantes }, (_, i) => i + 1).map(num => (
+                                        <SelectItem key={num} value={String(num)}>{num} cuota{num > 1 && 's'}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        {cuotasToAdvance > 0 ? (
+                            <Card className="bg-muted/50">
+                                <CardContent className="p-4 text-sm space-y-1">
+                                    <p>Pagarías (valor puro): <strong>{formatCurrency(advanceSavings.totalToPay)}</strong></p>
+                                    <p>En lugar de (valor final): <span className='line-through'>{formatCurrency(advanceSavings.totalOriginal)}</span></p>
+                                    <p className="text-green-600 font-semibold">¡Ahorras {formatCurrency(advanceSavings.totalSaving)} en gastos y seguros!</p>
+                                </CardContent>
+                            </Card>
+                        ) : (
+                            <p className="text-xs text-muted-foreground">Selecciona una cantidad de cuotas para ver el ahorro.</p>
+                        )}
+                    </div>
+                    <DialogFooter>
+                        <Button type="submit">Adelantar Cuotas</Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+
                 {!group.userIsAwarded && (
                   <>
                     <Dialog>
@@ -237,59 +281,18 @@ export default function GroupDetailClient({ groupId }: GroupDetailClientProps) {
                         </DialogFooter>
                       </DialogContent>
                     </Dialog>
-                  </>
-                )}
-                
-                <Dialog>
-                  <DialogTrigger asChild><Button size="sm" variant="secondary"><TrendingUp className="mr-2 h-4 w-4" /> Adelantar</Button></DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader><DialogTitle>Adelantar Cuotas</DialogTitle><DialogDescription>Paga cuotas futuras para acortar tu plan y obtén una bonificación.</DialogDescription></DialogHeader>
-                    <div className="space-y-4">
-                        <p className="text-sm text-muted-foreground">No compite por adjudicación, pero reduce el costo final de tu plan.</p>
-                        <div className="grid w-full max-w-sm items-center gap-1.5">
-                            <Label htmlFor="cuotas-adelantar">Cantidad de cuotas a adelantar</Label>
-                             <Select onValueChange={(value) => setCuotasToAdvance(Number(value))}>
-                                <SelectTrigger id="cuotas-adelantar">
-                                    <SelectValue placeholder="Selecciona la cantidad de cuotas" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {Array.from({ length: cuotasRestantes }, (_, i) => i + 1).map(num => (
-                                        <SelectItem key={num} value={String(num)}>{num} cuota{num > 1 && 's'}</SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                        </div>
-                        {cuotasToAdvance > 0 ? (
-                            <Card className="bg-muted/50">
-                                <CardContent className="p-4 text-sm space-y-1">
-                                    <p>Pagarías (valor puro): <strong>{formatCurrency(advanceSavings.totalToPay)}</strong></p>
-                                    <p>En lugar de (valor final): <span className='line-through'>{formatCurrency(advanceSavings.totalOriginal)}</span></p>
-                                    <p className="text-green-600 font-semibold">¡Ahorras {formatCurrency(advanceSavings.totalSaving)} en gastos y seguros!</p>
-                                </CardContent>
-                            </Card>
-                        ) : (
-                            <p className="text-xs text-muted-foreground">Selecciona una cantidad de cuotas para ver el ahorro.</p>
-                        )}
-                    </div>
-                    <DialogFooter>
-                        <Button type="submit">Adelantar Cuotas</Button>
-                    </DialogFooter>
-                  </DialogContent>
-                </Dialog>
-
-                {!group.userIsAwarded && (
-                  <>
                     <Dialog>
                       <DialogTrigger asChild><Button size="sm" variant="secondary"><Hand className="mr-2 h-4 w-4" /> Subastar</Button></DialogTrigger>
-                      <DialogContent>
+                       <DialogContent>
                         <DialogHeader><DialogTitle>Subastar Plan (Vender)</DialogTitle><DialogDescription>Ofrece tu plan en el mercado secundario a otros inversores.</DialogDescription></DialogHeader>
                          <div className="space-y-4 text-sm">
                             <p>Esta es tu vía de salida flexible. A continuación un ejemplo del cálculo del precio base y lo que recibirías.</p>
                             <Card className="bg-muted/50 p-4 space-y-2">
-                               <div className="flex justify-between"><span>Capital Aportado (Puro):</span><strong>{formatCurrency(capitalAportadoPuro)}</strong></div>
+                               <div className="flex justify-between"><span>Total Cuotas Emitidas:</span><strong>{formatCurrency(totalCuotasEmitidas)}</strong></div>
+                               <div className="flex justify-between"><span>Precio Base Subasta (50%):</span><strong>{formatCurrency(precioBaseSubasta)}</strong></div>
                                <div className="flex justify-between text-red-600"><span>Comisión por Venta (2% + IVA):</span><strong>-{formatCurrency(comisionVenta)}</strong></div>
-                               <div className="flex justify-between font-bold border-t pt-2"><span>Liquidación Estimada (Precio Base):</span><strong>{formatCurrency(liquidacionMinima)}</strong></div>
-                               <p className="text-xs text-muted-foreground">El valor final dependerá del precio de venta en la subasta.</p>
+                               <div className="flex justify-between font-bold border-t pt-2"><span>Liquidación Estimada (al Precio Base):</span><strong>{formatCurrency(liquidacionEstimada)}</strong></div>
+                               <p className="text-xs text-muted-foreground mt-2">El valor final dependerá del precio de venta en la subasta.</p>
                             </Card>
                         </div>
                         <DialogFooter>
@@ -418,3 +421,5 @@ export default function GroupDetailClient({ groupId }: GroupDetailClientProps) {
     </>
   );
 }
+
+    
