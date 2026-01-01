@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import type { Group, Installment, Award } from '@/lib/types';
@@ -353,9 +354,11 @@ export default function GroupDetailClient({ groupId }: GroupDetailClientProps) {
                     
                     if (inst.number <= cuotasPagadas) {
                       status = 'Pagado';
-                    } else if (dueDate < today && group.status !== 'Subastado') {
+                    } else if (group.status === 'Subastado') {
+                        status = dueDate < today ? 'Vencido' : 'Futuro';
+                    } else if (dueDate < today) {
                         status = 'Vencido';
-                    } else if (group.status === 'Activo' && inst.number === cuotasPagadas + 1) {
+                    } else if (inst.number === cuotasPagadas + 1) {
                       status = 'Pendiente';
                     } else {
                       status = 'Futuro';

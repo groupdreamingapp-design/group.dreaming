@@ -7,7 +7,7 @@ import { initialGroups, installments as allInstallments } from '@/lib/data';
 import type { Group } from '@/lib/types';
 import { GroupsContext } from '@/hooks/use-groups';
 import { toast } from '@/hooks/use-toast';
-import { format, parseISO } from 'date-fns';
+import { parseISO, differenceInHours } from 'date-fns';
 
 function generateNewGroup(templateGroup: Group): Group {
     const today = new Date();
@@ -53,7 +53,6 @@ export function GroupsProvider({ children }: { children: ReactNode }) {
     const pendingGroups = groups.filter(g => g.status === 'Pendiente');
 
     pendingGroups.forEach(pendingGroup => {
-        // Find if this group was just made pending
         if(pendingGroup.membersCount === pendingGroup.totalMembers) {
              const timer = setTimeout(() => {
                 setGroups(currentGroups => {
@@ -79,7 +78,7 @@ export function GroupsProvider({ children }: { children: ReactNode }) {
 
                     return newGroups;
                 });
-            }, 5000); // Simulate 5 second processing time
+            }, 5000); 
 
             return () => clearTimeout(timer);
         }
@@ -87,47 +86,38 @@ export function GroupsProvider({ children }: { children: ReactNode }) {
   }, [groups]);
 
   // Effect to check for overdue payments and force auction
-  useEffect(() => {
+ useEffect(() => {
     const checkOverdue = () => {
         setGroups(currentGroups => {
-            let changed = false;
-            const newGroups = currentGroups.map(group => {
+            const groupsToUpdate = currentGroups.map(group => {
                 if (group.userIsMember && group.status === 'Activo' && !group.userIsAwarded) {
                     const today = new Date();
-                    const overdueInstallments = allInstallments
-                        .slice(0, group.plazo)
-                        .filter(inst => {
-                            if (inst.number <= (group.monthsCompleted || 0)) return false; // Already paid
-                            const dueDate = parseISO(inst.dueDate);
-                            const diffTime = today.getTime() - dueDate.getTime();
-                            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                            return diffDays > 0; // Is overdue if due date has passed
-                        });
+                    const groupInstallments = allInstallments.slice(0, group.plazo);
+                    const overdueInstallments = groupInstallments.filter(inst => {
+                        const isPaid = inst.number <= (group.monthsCompleted || 0);
+                        const dueDate = parseISO(inst.dueDate);
+                        return !isPaid && dueDate < today;
+                    });
                     
                     if (overdueInstallments.length >= 2) {
                         const secondOverdueDate = parseISO(overdueInstallments[1].dueDate);
-                        const diffTime = today.getTime() - secondOverdueDate.getTime();
-                        const diffHours = Math.ceil(diffTime / (1000 * 60 * 60));
+                        const hoursSinceOverdue = differenceInHours(today, secondOverdueDate);
                         
-                        if (diffHours > 72) {
-                            changed = true;
-                            return { ...group, status: 'Subastado' };
+                        if (hoursSinceOverdue > 72) {
+                            return { ...group, status: 'Subastado' as const };
                         }
                     }
                 }
                 return group;
             });
-
-            if (changed) {
-                return newGroups;
-            }
-            return currentGroups;
+            return groupsToUpdate;
         });
     };
 
-    const timer = setTimeout(checkOverdue, 3000); // Check 3 seconds after app loads
+    const timer = setTimeout(checkOverdue, 3000);
     return () => clearTimeout(timer);
-  }, []);
+}, []);
+
 
   // Effect to show toast when a group is auctioned
   useEffect(() => {
@@ -145,6 +135,28 @@ export function GroupsProvider({ children }: { children: ReactNode }) {
     
     prevGroupsRef.current = groups;
   }, [groups]);
+  
+    // Effect to simulate a sold auction
+    useEffect(() => {
+        const soldAuctionSimulator = setTimeout(() => {
+            setGroups(currentGroups => {
+                const groupToSellId = 'ID-20231101-7777';
+                const groupExistedAndWasAuctioned = currentGroups.some(g => g.id === groupToSellId && g.userIsMember && g.status === 'Subastado');
+
+                if (groupExistedAndWasAuctioned) {
+                    toast({
+                        title: "¡Subasta Finalizada!",
+                        description: `Tu plan ${groupToSellId} ha sido vendido con éxito en el mercado secundario.`,
+                    });
+                    return currentGroups.map(g => g.id === groupToSellId ? { ...g, userIsMember: false } : g);
+                }
+                return currentGroups;
+            });
+        }, 15000); // Simulate selling after 15 seconds
+
+        return () => clearTimeout(soldAuctionSimulator);
+    }, [groups]);
+
 
   const joinGroup = useCallback((groupId: string) => {
     let joinedGroup: Group | null = null;
@@ -165,11 +177,9 @@ export function GroupsProvider({ children }: { children: ReactNode }) {
       groupToJoin.membersCount++;
       groupToJoin.userIsMember = true;
       
-      // If group is now full, change its status and create a new one.
       if (groupToJoin.membersCount === groupToJoin.totalMembers) {
         groupToJoin.status = 'Pendiente';
         const newGeneratedGroup = generateNewGroup(groupToJoin);
-        // Add the new group, but first check if a group with this ID already exists
         if (!newGroups.some(g => g.id === newGeneratedGroup.id)) {
             newGroups.push(newGeneratedGroup);
         }
