@@ -78,10 +78,10 @@ export default function Page() {
             </Button>
           ) : (
             <AuthDialog open={isAuthDialogOpen} onOpenChange={setIsAuthDialogOpen}>
-              <>
+              <div className="flex gap-2">
                  <Button variant="ghost" onClick={() => setIsAuthDialogOpen(true)}>Ingresar</Button>
                  <Button onClick={() => setIsAuthDialogOpen(true)}>Comenzar Ahora</Button>
-              </>
+              </div>
             </AuthDialog>
           )}
         </nav>
