@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useUser } from '@/firebase';
+import { useUser } from '@/firebase/auth/use-user';
 import { Button } from '@/components/ui/button';
 import { Logo } from '@/components/icons';
 import Link from 'next/link';
