@@ -116,6 +116,24 @@ generatedGroups.push({
     isImmediateActivation: false,
 });
 
+// New group for auction example
+generatedGroups.push({
+    id: 'ID-20250108-AUCTION',
+    capital: 25000,
+    plazo: 48,
+    cuotaPromedio: calculateCuotaPromedio(25000, 48),
+    membersCount: 96,
+    totalMembers: 96,
+    status: 'Subastado',
+    userIsMember: true,
+    userAwardStatus: "No Adjudicado",
+    monthsCompleted: 12,
+    activationDate: '2025-01-08T00:00:00.000Z',
+    auctionStartDate: '2026-01-02T14:00:00.000Z',
+    acquiredInAuction: false,
+    isImmediateActivation: false,
+});
+
 
 export const initialGroups: Group[] = generatedGroups;
 
