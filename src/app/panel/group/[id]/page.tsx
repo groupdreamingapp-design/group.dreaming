@@ -745,6 +745,9 @@ export default function GroupDetail() {
       {selectedReceipt && group && (
           <Dialog open={!!selectedReceipt} onOpenChange={(open) => !open && setSelectedReceipt(null)}>
             <DialogContent className="max-w-3xl">
+                <DialogHeader>
+                  <DialogTitle className="sr-only">Recibo de Cuota</DialogTitle>
+                </DialogHeader>
                 <InstallmentReceipt 
                     installment={selectedReceipt}
                     group={group}
