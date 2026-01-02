@@ -36,7 +36,14 @@ const generateStaticAwards = (group: Group): Award[][] => {
     };
 
     const memberOrderNumbers = Array.from({ length: group.totalMembers }, (_, i) => i + 1);
-    const userOrderNumber = 42; 
+    
+    // Generate a consistent user order number based on group ID
+    let userOrderNumberSeed = 0;
+    for (let i = 0; i < group.id.length; i++) {
+      userOrderNumberSeed += group.id.charCodeAt(i);
+    }
+    const userOrderNumber = (userOrderNumberSeed % group.totalMembers) + 1;
+
 
     // Fisher-Yates shuffle
     const shuffle = (array: number[]) => {
@@ -63,16 +70,18 @@ const generateStaticAwards = (group: Group): Award[][] => {
         // Ensure the award is not placed in the first month
         const safeAwardMonthIndex = Math.max(1, awardMonthIndex);
         
-        awards[safeAwardMonthIndex].push({ type: 'sorteo', orderNumber: userOrderNumber });
+        if (!awards[safeAwardMonthIndex].some(a => a.orderNumber === userOrderNumber)) {
+           awards[safeAwardMonthIndex].push({ type: 'sorteo', orderNumber: userOrderNumber });
+        }
     }
 
     let winnerPool = [...potentialWinners];
     let desertedLicitaciones = 0;
 
     // Start awarding from the second month (index 1) up to the second to last month
-    for (let i = 1; i < group.plazo -1; i++) {
+    for (let i = 1; i < group.plazo - 1; i++) {
         
-        const alreadyAwardedInMonth = awards[i].map(a => a.orderNumber);
+        let alreadyAwardedInMonth = awards[i].map(a => a.orderNumber);
         const hasSorteo = awards[i].some(a => a.type === 'sorteo');
         const hasLicitacion = awards[i].some(a => a.type === 'licitacion');
         
@@ -87,6 +96,7 @@ const generateStaticAwards = (group: Group): Award[][] => {
             }
         }
 
+        alreadyAwardedInMonth = awards[i].map(a => a.orderNumber);
         // Add Licitacion winner if not present and pool is not empty
         if (!hasLicitacion && winnerPool.length > 0) {
             // Specific logic for the test group
@@ -96,11 +106,10 @@ const generateStaticAwards = (group: Group): Award[][] => {
                 const isDeserted = customRandom() < 0.15 && desertedLicitaciones < 3; // 15% chance, max 3
                 if (!isDeserted) {
                     if (winnerPool.length > 0) {
-                        const winner = winnerPool.shift()!;
-                         if (!alreadyAwardedInMonth.includes(winner)) {
+                        const winnerIndex = winnerPool.findIndex(w => !alreadyAwardedInMonth.includes(w));
+                        if(winnerIndex > -1){
+                            const winner = winnerPool.splice(winnerIndex, 1)[0];
                             awards[i].push({ type: 'licitacion', orderNumber: winner });
-                        } else {
-                            winnerPool.push(winner); // put it back
                         }
                     }
                 } else {
@@ -173,6 +182,15 @@ export default function GroupDetail() {
     return [];
   }, [group]);
 
+  const userOrderNumber = useMemo(() => {
+    if (!group) return 0;
+    let seed = 0;
+    for (let i = 0; i < group.id.length; i++) {
+      seed += group.id.charCodeAt(i);
+    }
+    return (seed % group.totalMembers) + 1;
+  }, [group]);
+
 
   if (!group) {
     return (
@@ -199,7 +217,7 @@ export default function GroupDetail() {
   const userAwardInfo = useMemo(() => {
     if (!group) return undefined;
     for (let i = 0; i < groupAwards.length; i++) {
-      const monthAward = groupAwards[i].find(a => a.orderNumber === 42);
+      const monthAward = groupAwards[i].find(a => a.orderNumber === userOrderNumber);
       if (monthAward) {
         return {
           month: i + 1,
@@ -208,7 +226,7 @@ export default function GroupDetail() {
       }
     }
     return undefined;
-  }, [groupAwards, group]);
+  }, [groupAwards, group, userOrderNumber]);
 
   const awardMonth = userAwardInfo?.month;
   const benefitThresholdMonth = Math.floor(group.plazo * 0.8);
@@ -314,7 +332,7 @@ export default function GroupDetail() {
                 <CardDescription>Tu estado personal dentro del grupo.</CardDescription>
               </CardHeader>
               <CardContent className="grid grid-cols-2 gap-4 text-sm flex-grow">
-                <div className="flex items-center gap-2"><Info className="h-4 w-4 text-primary" /><span>N° de Orden: <strong>42</strong></span></div>
+                <div className="flex items-center gap-2"><Info className="h-4 w-4 text-primary" /><span>N° de Orden: <strong>{userOrderNumber}</strong></span></div>
                 <div className="flex items-center gap-2"><TrendingUp className="h-4 w-4 text-primary" /><span>Cuotas Pagadas: <strong>{cuotasPagadas}/{group.plazo}</strong></span></div>
                 <div className="flex items-center gap-2"><HandCoins className="h-4 w-4 text-primary" /><span>Capital Aportado (Puro): <strong>{formatCurrency(capitalAportadoPuro)}</strong></span></div>
                 <div className="flex items-center gap-2">
@@ -652,7 +670,7 @@ export default function GroupDetail() {
                                       {award.type === 'sorteo' && <Ticket className="h-4 w-4 text-blue-500" />}
                                       {award.type === 'licitacion' && <HandCoins className="h-4 w-4 text-orange-500" />}
                                       {award.type === 'sorteo-especial' && <Gift className="h-4 w-4 text-fuchsia-500" />}
-                                      <span className={cn(award.orderNumber === 42 && "font-bold text-primary")}>#{award.orderNumber > 0 ? award.orderNumber : '??'}</span>
+                                      <span className={cn(award.orderNumber === userOrderNumber && "font-bold text-primary")}>#{award.orderNumber > 0 ? award.orderNumber : '??'}</span>
                                     </div>
                                   ))}
                                 </div>
