@@ -50,6 +50,7 @@ export function GroupsProvider({ children }: { children: ReactNode }) {
   const lastJoinedGroupRef = useRef<Group | null>(null);
   const prevGroupsRef = useRef<Group[]>(groups);
   const userInitiatedAuctionRef = useRef<string | null>(null);
+  const processedImmediateActivationGroups = useRef<Set<string>>(new Set());
 
 
   useEffect(() => {
@@ -63,42 +64,91 @@ export function GroupsProvider({ children }: { children: ReactNode }) {
     myGroupsCountRef.current = currentMyGroups.length;
   }, [groups, toast]);
 
-  // Effect to simulate group activation
+  // Effect to handle group state transitions (Activation, Absorption)
   useEffect(() => {
-    const pendingGroups = groups.filter(g => g.status === 'Pendiente');
+    const timer = setTimeout(() => {
+      setGroups(currentGroups => {
+        let newGroups = [...currentGroups];
+        let stateChanged = false;
 
-    pendingGroups.forEach(pendingGroup => {
-        if(pendingGroup.membersCount === pendingGroup.totalMembers) {
-             // Simulate a 5-second validation period before activation
-             const timer = setTimeout(() => {
-                setGroups(currentGroups => {
-                    let wasActivated = false;
-                    const newGroups = currentGroups.map(g => {
-                        if (g.id === pendingGroup.id) {
-                            wasActivated = true;
-                            return { 
-                                ...g, 
-                                status: 'Activo',
-                                activationDate: new Date().toISOString()
-                            };
-                        }
-                        return g;
-                    });
-                    
-                    if (wasActivated) {
+        // --- Logic for Pending -> Active ---
+        const pendingGroups = newGroups.filter(g => g.status === 'Pendiente' && g.membersCount === g.totalMembers);
+        pendingGroups.forEach(pendingGroup => {
+          newGroups = newGroups.map(g => {
+            if (g.id === pendingGroup.id) {
+              stateChanged = true;
+              return { ...g, status: 'Activo', activationDate: new Date().toISOString() };
+            }
+            return g;
+          });
+          toast({
+            title: "¡Grupo Activado!",
+            description: `El grupo ${pendingGroup.id} ha completado sus validaciones y ya está activo.`,
+          });
+        });
+
+        // --- Logic for Immediate Activation Absorption ---
+        const immediateActivationGroups = newGroups.filter(g => g.isImmediateActivation && g.status === 'Abierto' && g.membersCount < g.totalMembers);
+
+        immediateActivationGroups.forEach(priorityGroup => {
+            if (processedImmediateActivationGroups.current.has(priorityGroup.id)) return;
+
+            const neededMembers = priorityGroup.totalMembers - priorityGroup.membersCount;
+            
+            // Find the newest "donor" group that has members
+            const donorGroup = newGroups
+                .filter(g => 
+                    !g.isImmediateActivation &&
+                    g.status === 'Abierto' &&
+                    g.capital === priorityGroup.capital &&
+                    g.plazo === priorityGroup.plazo &&
+                    g.membersCount > 0
+                )
+                .sort((a, b) => b.id.localeCompare(a.id))[0]; // Get the one with the latest ID
+
+            if (donorGroup && neededMembers > 0) {
+                const membersToMove = Math.min(neededMembers, donorGroup.membersCount);
+                
+                let tempPriorityGroup: Group | undefined;
+                
+                newGroups = newGroups.map(g => {
+                    if (g.id === priorityGroup.id) {
+                        tempPriorityGroup = { ...g, membersCount: g.membersCount + membersToMove };
+                        return tempPriorityGroup;
+                    }
+                    if (g.id === donorGroup.id) {
+                        return { ...g, membersCount: g.membersCount - membersToMove };
+                    }
+                    return g;
+                });
+
+                if (tempPriorityGroup) {
+                    // Check if the priority group is now full
+                    if (tempPriorityGroup.membersCount === tempPriorityGroup.totalMembers) {
+                        newGroups = newGroups.map(g => g.id === tempPriorityGroup!.id ? { ...g, status: 'Pendiente' } : g);
+                        processedImmediateActivationGroups.current.add(priorityGroup.id); // Mark as processed
                          toast({
-                            title: "¡Grupo Activado!",
-                            description: `El grupo ${pendingGroup.id} ha completado sus validaciones y ya está activo.`,
+                            title: `¡Grupo ${priorityGroup.id} Lleno!`,
+                            description: `Se absorbieron ${membersToMove} miembros. El grupo está listo para activarse.`,
+                            className: 'bg-green-100 border-green-500 text-green-700'
+                        });
+                    } else {
+                         toast({
+                            title: `Nuevos Miembros en ${priorityGroup.id}`,
+                            description: `Se absorbieron ${membersToMove} miembros para acelerar la activación.`,
+                            className: 'bg-blue-100 border-blue-500 text-blue-700'
                         });
                     }
+                }
+                stateChanged = true;
+            }
+        });
 
-                    return newGroups;
-                });
-            }, 5000); 
+        return stateChanged ? newGroups : currentGroups;
+      });
+    }, 5000); // This timeout simulates processing time for activations and absorptions
 
-            return () => clearTimeout(timer);
-        }
-    });
+    return () => clearTimeout(timer);
   }, [groups, toast]);
 
 
@@ -173,10 +223,12 @@ export function GroupsProvider({ children }: { children: ReactNode }) {
       if (updatedGroup.membersCount === updatedGroup.totalMembers) {
         updatedGroup.status = 'Pendiente';
         
-        // Create a new group with the same configuration
-        const newGroup = generateNewGroup(updatedGroup);
-        newGroups.push(newGroup);
-        newGroupWasCreated = true;
+        // Create a new group with the same configuration only if the joined group is not an "immediate activation" one
+        if (!updatedGroup.isImmediateActivation) {
+            const newGroup = generateNewGroup(updatedGroup);
+            newGroups.push(newGroup);
+            newGroupWasCreated = true;
+        }
       }
       
       newGroups[groupIndex] = updatedGroup;
