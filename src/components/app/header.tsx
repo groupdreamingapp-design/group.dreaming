@@ -1,24 +1,18 @@
 
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { MainNav } from "./main-nav"
-import { Menu, Info } from "lucide-react"
+import { Menu, PieChart, Gift, Landmark, HelpCircle } from "lucide-react"
 import { Logo } from "../icons"
 import Link from "next/link"
 import { UserNav } from "./user-nav"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 import { Button } from "../ui/button"
 
 export function Header() {
   const infoLinks = [
-    { href: "/panel/transparency", label: "Transparencia" },
-    { href: "/panel/benefits", label: "Beneficios" },
-    { href: "/panel/rules", label: "Reglamento" },
-    { href: "/panel/faq", label: "Preguntas Frecuentes" },
+    { href: "/panel/transparency", label: "Transparencia", icon: PieChart },
+    { href: "/panel/benefits", label: "Beneficios", icon: Gift },
+    { href: "/panel/rules", label: "Reglamento", icon: Landmark },
+    { href: "/panel/faq", label: "Preguntas Frecuentes", icon: HelpCircle },
   ];
 
   return (
@@ -43,22 +37,18 @@ export function Header() {
           </nav>
         </SheetContent>
       </Sheet>
-      <div className="flex w-full items-center justify-end gap-4 md:ml-auto md:gap-2 lg:gap-4">
-         <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon">
-                <Info className="h-5 w-5" />
-                <span className="sr-only">Información</span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              {infoLinks.map(link => (
-                 <DropdownMenuItem key={link.href} asChild>
-                    <Link href={link.href}>{link.label}</Link>
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
+      <div className="flex w-full items-center justify-end gap-2">
+         <div className="flex-1" />
+         <div className="hidden md:flex items-center gap-1">
+            {infoLinks.map(link => (
+                <Button key={link.href} variant="ghost" asChild size="sm">
+                    <Link href={link.href}>
+                        <link.icon className="mr-2 h-4 w-4" />
+                        {link.label}
+                    </Link>
+                </Button>
+            ))}
+         </div>
         <UserNav />
       </div>
     </header>

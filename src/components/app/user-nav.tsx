@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, createContext, useContext, ReactNode, useEffect } from "react";
@@ -14,7 +15,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { useUser } from "@/firebase";
 import Link from "next/link";
-import { CheckCircle, ChevronUp, Shield, User } from "lucide-react";
+import { CheckCircle, Shield, User } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/firebase/provider";
 import { signOut } from "firebase/auth";
@@ -70,18 +71,11 @@ export function UserNav() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="flex justify-between w-full h-auto p-2">
-            <div className="flex items-center gap-3">
-                 <Avatar className="h-9 w-9">
-                    {user.photoURL && <AvatarImage src={user.photoURL} alt={user.displayName || user.email || 'User'} />}
-                    <AvatarFallback>{userInitials}</AvatarFallback>
-                </Avatar>
-                <div className="flex flex-col items-start">
-                    <span className="text-sm font-medium">{user.displayName || 'Usuario'}</span>
-                    <span className="text-xs text-muted-foreground">{user.email}</span>
-                </div>
-            </div>
-            <ChevronUp className="h-4 w-4" />
+        <Button variant="ghost" className="relative h-9 w-9 rounded-full">
+            <Avatar className="h-9 w-9">
+                {user.photoURL && <AvatarImage src={user.photoURL} alt={user.displayName || user.email || 'User'} />}
+                <AvatarFallback>{userInitials}</AvatarFallback>
+            </Avatar>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56" align="end" forceMount>
