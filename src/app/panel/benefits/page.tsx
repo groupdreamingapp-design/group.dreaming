@@ -62,6 +62,9 @@ const benefits = [
                 title: "Condiciones para Acceder (Bases)",
                 points: [
                     "Resultar ganador en una de las adjudicaciones por 'Sorteo Especial' que se realizan en la última cuota del plan.",
+                    "No haber registrado cuotas vencidas ni pagado fuera de término durante toda la vigencia del plan.",
+                    "No haber realizado adelanto de cuotas durante la vigencia del plan.",
+                    "No haber rechazado un acto de adjudicación previo en el mismo plan.",
                     "Este beneficio es el único que puede acumularse con otros beneficios, como 'Los últimos serán los primeros', si se cumplen las condiciones de ambos."
                 ]
             }
