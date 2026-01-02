@@ -45,6 +45,7 @@ for (const capital of capitalOptions) {
             const newId = `ID-${dateString}-${sequentialNumber}`;
             
             const totalMembers = plazo <= 24 ? 48 : plazo <= 48 ? 96 : 144;
+            const randomMembersCount = Math.floor(Math.random() * (totalMembers * 0.9));
             
             groupCounter++;
 
@@ -53,13 +54,28 @@ for (const capital of capitalOptions) {
                 capital,
                 plazo,
                 cuotaPromedio,
-                membersCount: 0,
+                membersCount: randomMembersCount,
                 totalMembers,
                 status: 'Abierto',
                 userIsMember: false,
                 userAwardStatus: "No Adjudicado",
                 isImmediateActivation: false,
             });
+        }
+    }
+}
+
+// Select 3 random groups to be almost full
+const openGroups = generatedGroups.filter(g => g.status === 'Abierto');
+for (let i = 0; i < 3; i++) {
+    if (openGroups.length > i) {
+        const randomIndex = Math.floor(Math.random() * openGroups.length);
+        const groupToUpdate = openGroups[randomIndex];
+        if (groupToUpdate) {
+          groupToUpdate.membersCount = groupToUpdate.totalMembers - 1;
+          groupToUpdate.isImmediateActivation = true;
+          // Remove it from the pool so we don't select it again
+          openGroups.splice(randomIndex, 1);
         }
     }
 }
