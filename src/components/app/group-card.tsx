@@ -65,13 +65,15 @@ export function GroupCard({ group, isPublic = false }: GroupCardProps) {
     ? `Validando (${group.totalMembers}/${group.totalMembers})`
     : 'Grupo finalizado';
     
-  const cardLink = group.userIsMember ? `/panel/group/${group.id}` : (isPublic ? `/explore` : `/panel/group-public/${group.id}`);
+  const cardLink = group.userIsMember ? `/panel/group/${group.id}` : (isPublic ? `/explore/group/${group.id}` : `/panel/group-public/${group.id}`);
 
   const renderAction = () => {
     if (isPublic) {
       return (
-        <Button asChild>
-          <Link href="/register">Registrarse</Link>
+        <Button asChild variant="secondary" size="sm">
+          <Link href={cardLink}>
+            Ver Detalles <ArrowRight className="ml-2 h-4 w-4" />
+          </Link>
         </Button>
       );
     }
