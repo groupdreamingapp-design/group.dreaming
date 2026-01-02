@@ -14,7 +14,7 @@ import { ArrowLeft, Users, Clock, Users2, Calendar, Gavel, HandCoins, Ticket, In
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import { useGroups } from '@/hooks/use-groups';
-import { generateInstallments, generateExampleInstallments } from '@/lib/data';
+import { generateInstallments, generateExampleInstallments, user as mockUser } from '@/lib/data';
 import { useMemo, useState, useEffect } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from '@/components/ui/separator';
@@ -24,6 +24,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useParams } from 'next/navigation';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { InstallmentReceipt } from '@/components/app/receipt';
 
 
 const generateStaticAwards = (group: Group): Award[][] => {
@@ -164,6 +165,7 @@ export default function GroupDetail() {
   const [termsAcceptedAuction, setTermsAcceptedAuction] = useState(false);
   const [termsAcceptedBaja, setTermsAcceptedBaja] = useState(false);
   const [selectedInstallment, setSelectedInstallment] = useState<Installment | null>(null);
+  const [selectedReceipt, setSelectedReceipt] = useState<Installment | null>(null);
 
 
   const group = useMemo(() => groups.find(g => g.id === groupId), [groups, groupId]);
@@ -569,7 +571,7 @@ export default function GroupDetail() {
                              <Card className="bg-muted/50 p-4 space-y-2">
                                 <div className="flex justify-between"><span>Capital Aportado (Puro):</span><strong>{formatCurrency(capitalAportadoPuro)}</strong></div>
                                 <div className="flex justify-between text-red-600"><span>Penalidad (5% + IVA):</span><strong>-{formatCurrency(penalidadBaja)}</strong></div>
-                                <div className="flex justify-between font-bold border-t pt-2"><span>Monto a Devolver (al final):</span><strong>{formatCurrency(capitalAportadoPuro - penalidadBaja)}</strong></div>
+                                <div className="flex justify-between font-bold border-t pt-2 mt-2"><span>Monto a Devolver (al final):</span><strong>{formatCurrency(capitalAportadoPuro - penalidadBaja)}</strong></div>
                              </Card>
                               <p className="text-xs text-muted-foreground">La devolución se efectuará una vez finalizado el plazo original del grupo para no afectar al resto de los miembros.</p>
                               <div className="items-top flex space-x-2 pt-2">
@@ -700,9 +702,15 @@ export default function GroupDetail() {
                           </TableCell>
                           <TableCell className="text-right font-mono">{formatCurrency(inst.total)}</TableCell>
                           <TableCell className="text-center">
-                            <Button variant="outline" size="sm" onClick={() => setSelectedInstallment(inst)}>
-                              Ver Detalle
-                            </Button>
+                            {currentStatus === 'Pagado' ? (
+                                <Button variant="outline" size="sm" onClick={() => setSelectedReceipt(inst)}>
+                                Ver Recibo
+                                </Button>
+                            ) : (
+                                <Button variant="outline" size="sm" onClick={() => setSelectedInstallment(inst)}>
+                                Ver Detalle
+                                </Button>
+                            )}
                           </TableCell>
                         </TableRow>
                       )
@@ -731,6 +739,19 @@ export default function GroupDetail() {
                 <div className="flex justify-between font-bold text-base border-t pt-2 mt-2"><span>Total:</span><span>{formatCurrency(selectedInstallment.total)}</span></div>
             </div>
           </DialogContent>
+        </Dialog>
+      )}
+
+      {selectedReceipt && group && (
+          <Dialog open={!!selectedReceipt} onOpenChange={(open) => !open && setSelectedReceipt(null)}>
+            <DialogContent className="max-w-3xl">
+                <InstallmentReceipt 
+                    installment={selectedReceipt}
+                    group={group}
+                    user={mockUser}
+                    awards={groupAwards[selectedReceipt.number - 1] || []}
+                />
+            </DialogContent>
         </Dialog>
       )}
     </TooltipProvider>

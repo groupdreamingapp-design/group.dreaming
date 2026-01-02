@@ -5,6 +5,8 @@ export type User = {
   name: string;
   email: string;
   avatarUrl: string;
+  dni: string;
+  cuit: string;
 };
 
 export type GroupStatus = "Abierto" | "Pendiente" | "Activo" | "Cerrado" | "Subastado";

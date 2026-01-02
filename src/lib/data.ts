@@ -1,5 +1,4 @@
 
-
 import type { Group, User, Transaction, Auction, Installment, Award } from './types';
 import { PlaceHolderImages } from './placeholder-images';
 import { format, addMonths, setDate, addDays, parseISO, lastDayOfMonth, differenceInMonths, startOfToday } from 'date-fns';
@@ -10,6 +9,8 @@ export const user: User = {
   name: 'Juan Perez',
   email: 'juan.perez@example.com',
   avatarUrl: PlaceHolderImages.find(img => img.id === 'user-avatar-1')?.imageUrl || '',
+  dni: '30.123.456',
+  cuit: '20-30123456-7',
 };
 
 const IVA = 1.21;
@@ -236,6 +237,7 @@ function generateNewGroup(templateGroup: Group): Group {
 
 
     
+
 
 
 
