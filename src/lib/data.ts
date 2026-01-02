@@ -72,7 +72,7 @@ generatedGroups.push({
     capital: 15000,
     plazo: 24,
     cuotaPromedio: calculateCuotaPromedio(15000, 24),
-    membersCount: 45, // Simulate 3 members failed payment
+    membersCount: 47, // Simulate only 1 member is missing
     totalMembers: 48,
     status: 'Abierto', // It's open again to fill the remaining slots
     userIsMember: false, // The current user is NOT a member so it shows in public explore
@@ -236,6 +236,7 @@ function generateNewGroup(templateGroup: Group): Group {
 
 
     
+
 
 
 

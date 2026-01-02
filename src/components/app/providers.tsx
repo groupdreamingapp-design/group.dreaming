@@ -55,10 +55,12 @@ export function GroupsProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const currentMyGroups = groups.filter(g => g.userIsMember);
     if (currentMyGroups.length > myGroupsCountRef.current && lastJoinedGroupRef.current) {
-      toast({
-        title: "¡Felicitaciones!",
-        description: `Te has unido al grupo ${lastJoinedGroupRef.current.id}.`,
-      });
+        if (!lastJoinedGroupRef.current.isImmediateActivation) {
+             toast({
+                title: "¡Felicitaciones!",
+                description: `Te has unido al grupo ${lastJoinedGroupRef.current.id}.`,
+            });
+        }
     }
     myGroupsCountRef.current = currentMyGroups.length;
   }, [groups, toast]);
@@ -68,115 +70,105 @@ export function GroupsProvider({ children }: { children: ReactNode }) {
     const timer = setTimeout(() => {
       const toastsToShow: { title: string; description: string; className?: string }[] = [];
   
-      setGroups(currentGroups => {
-        let newGroups = [...currentGroups];
-        let stateChanged = false;
-  
-        // --- Logic for Pending -> Active ---
-        const pendingGroups = newGroups.filter(g => g.status === 'Pendiente' && g.membersCount === g.totalMembers);
-        pendingGroups.forEach(pendingGroup => {
-          newGroups = newGroups.map(g => {
-            if (g.id === pendingGroup.id) {
-              stateChanged = true;
-              return { ...g, status: 'Activo', activationDate: new Date().toISOString() };
-            }
-            return g;
-          });
-          toastsToShow.push({
-            title: "¡Grupo Activado!",
-            description: `El grupo ${pendingGroup.id} ha completado sus validaciones y ya está activo.`,
-          });
-        });
-  
-        // --- Logic for Immediate Activation Absorption ---
-        const immediateActivationGroups = newGroups.filter(g => g.isImmediateActivation && g.status === 'Abierto' && g.membersCount < g.totalMembers);
-  
-        immediateActivationGroups.forEach(priorityGroup => {
-          if (processedImmediateActivationGroups.current.has(priorityGroup.id)) return;
-  
-          const neededMembers = priorityGroup.totalMembers - priorityGroup.membersCount;
-          
-          const donorGroup = newGroups
-            .filter(g => 
-                !g.isImmediateActivation &&
-                g.status === 'Abierto' &&
-                g.capital === priorityGroup.capital &&
-                g.plazo === priorityGroup.plazo &&
-                g.membersCount > 0
-            )
-            .sort((a, b) => b.id.localeCompare(a.id))[0];
-  
-          if (donorGroup && neededMembers > 0) {
-            const membersToMove = Math.min(neededMembers, donorGroup.membersCount);
-            let userWasMoved = false;
-            
-            let tempPriorityGroup: Group | undefined;
-            let tempDonorGroup: Group | undefined;
+      const updatedGroups = [...groups];
+      let stateChanged = false;
 
-            newGroups = newGroups.map(g => {
-              if (g.id === priorityGroup.id) {
-                tempPriorityGroup = { ...g, membersCount: g.membersCount + membersToMove };
-                return tempPriorityGroup;
-              }
-              if (g.id === donorGroup.id) {
-                 // Check if the current user is in the donor group before reducing members
-                if (g.userIsMember) {
-                    userWasMoved = true;
-                }
-                tempDonorGroup = { ...g, membersCount: g.membersCount - membersToMove };
-                return tempDonorGroup;
-              }
-              return g;
-            });
-  
-            if (tempPriorityGroup) {
-              if (userWasMoved) {
-                 newGroups = newGroups.map(g => {
-                    if (g.id === priorityGroup.id) return { ...g, userIsMember: true };
-                    if (g.id === donorGroup.id) return { ...g, userIsMember: false };
-                    return g;
-                });
-              }
-
-              if (tempPriorityGroup.membersCount === tempPriorityGroup.totalMembers) {
-                newGroups = newGroups.map(g => g.id === tempPriorityGroup!.id ? { ...g, status: 'Pendiente' } : g);
-                processedImmediateActivationGroups.current.add(priorityGroup.id);
-                 if (userWasMoved) {
-                    toastsToShow.push({
-                        title: "¡Movimiento de Grupo!",
-                        description: `Para acelerar la activación, fuiste transferido del grupo ${donorGroup.id.split('-').pop()} al grupo ${priorityGroup.id.split('-').pop()}.`,
-                        className: 'bg-blue-100 border-blue-500 text-blue-700'
-                    });
-                } else {
-                    toastsToShow.push({
-                      title: `¡Grupo ${priorityGroup.id} Lleno!`,
-                      description: `Se absorbieron ${membersToMove} miembros. El grupo está listo para activarse.`,
-                      className: 'bg-green-100 border-green-500 text-green-700'
-                    });
-                }
-              } else {
-                 if (userWasMoved) {
-                     toastsToShow.push({
-                        title: "¡Movimiento de Grupo!",
-                        description: `Para acelerar la activación, fuiste transferido del grupo ${donorGroup.id.split('-').pop()} al grupo de activación inmediata ${priorityGroup.id.split('-').pop()}.`,
-                        className: 'bg-blue-100 border-blue-500 text-blue-700'
-                    });
-                } else {
-                    toastsToShow.push({
-                      title: `Nuevos Miembros en ${priorityGroup.id}`,
-                      description: `Se absorbieron ${membersToMove} miembros para acelerar la activación.`,
-                    });
-                }
-              }
-            }
+      // --- Logic for Pending -> Active ---
+      const pendingGroups = updatedGroups.filter(g => g.status === 'Pendiente' && g.membersCount === g.totalMembers);
+      pendingGroups.forEach(pendingGroup => {
+        const groupIndex = updatedGroups.findIndex(g => g.id === pendingGroup.id);
+        if (groupIndex !== -1) {
+            updatedGroups[groupIndex] = { ...updatedGroups[groupIndex], status: 'Activo', activationDate: new Date().toISOString() };
             stateChanged = true;
-          }
-        });
-  
-        if (stateChanged) return newGroups;
-        return currentGroups;
+            toastsToShow.push({
+                title: "¡Grupo Activado!",
+                description: `El grupo ${pendingGroup.id} ha completado sus validaciones y ya está activo.`,
+            });
+        }
       });
   
+      // --- Logic for Immediate Activation Absorption ---
+      const immediateActivationGroups = updatedGroups.filter(g => g.isImmediateActivation && g.status === 'Abierto' && g.membersCount < g.totalMembers);
+  
+      immediateActivationGroups.forEach(priorityGroup => {
+        if (processedImmediateActivationGroups.current.has(priorityGroup.id)) return;
+  
+        const neededMembers = priorityGroup.totalMembers - priorityGroup.membersCount;
+        
+        const donorGroup = updatedGroups
+          .filter(g => 
+              !g.isImmediateActivation &&
+              g.status === 'Abierto' &&
+              g.capital === priorityGroup.capital &&
+              g.plazo === priorityGroup.plazo &&
+              g.membersCount > 0
+          )
+          .sort((a, b) => b.id.localeCompare(a.id))[0];
+  
+        if (donorGroup && neededMembers > 0) {
+          const membersToMove = Math.min(neededMembers, donorGroup.membersCount);
+          let userWasMoved = false;
+          
+          let tempPriorityGroup: Group | undefined;
+          
+          const priorityGroupIndex = updatedGroups.findIndex(g => g.id === priorityGroup.id);
+          const donorGroupIndex = updatedGroups.findIndex(g => g.id === donorGroup.id);
+
+          if (priorityGroupIndex !== -1 && donorGroupIndex !== -1) {
+              const currentDonorGroup = updatedGroups[donorGroupIndex];
+              if (currentDonorGroup.userIsMember) {
+                  userWasMoved = true;
+              }
+
+              updatedGroups[priorityGroupIndex].membersCount += membersToMove;
+              if (userWasMoved) {
+                  updatedGroups[priorityGroupIndex].userIsMember = true;
+              }
+              tempPriorityGroup = updatedGroups[priorityGroupIndex];
+
+              updatedGroups[donorGroupIndex].membersCount -= membersToMove;
+              if (userWasMoved) {
+                  updatedGroups[donorGroupIndex].userIsMember = false;
+              }
+              
+              if (tempPriorityGroup.membersCount === tempPriorityGroup.totalMembers) {
+                  updatedGroups[priorityGroupIndex].status = 'Pendiente';
+                  processedImmediateActivationGroups.current.add(priorityGroup.id);
+                   if (userWasMoved) {
+                      toastsToShow.push({
+                          title: "¡Movimiento de Grupo!",
+                          description: `Para acelerar la activación, fuiste transferido del grupo ${donorGroup.id.split('-').pop()} al grupo ${priorityGroup.id.split('-').pop()}.`,
+                          className: 'bg-blue-100 border-blue-500 text-blue-700'
+                      });
+                  } else {
+                      toastsToShow.push({
+                        title: `¡Grupo ${priorityGroup.id} Lleno!`,
+                        description: `Se absorbieron ${membersToMove} miembros. El grupo está listo para activarse.`,
+                        className: 'bg-green-100 border-green-500 text-green-700'
+                      });
+                  }
+              } else {
+                   if (userWasMoved) {
+                       toastsToShow.push({
+                          title: "¡Movimiento de Grupo!",
+                          description: `Para acelerar la activación, fuiste transferido del grupo ${donorGroup.id.split('-').pop()} al grupo de activación inmediata ${priorityGroup.id.split('-').pop()}.`,
+                          className: 'bg-blue-100 border-blue-500 text-blue-700'
+                      });
+                  } else {
+                      toastsToShow.push({
+                        title: `Nuevos Miembros en ${priorityGroup.id}`,
+                        description: `Se absorbieron ${membersToMove} miembros para acelerar la activación.`,
+                      });
+                  }
+              }
+              stateChanged = true;
+            }
+        }
+      });
+      
+      if (stateChanged) {
+        setGroups(updatedGroups);
+      }
       // Show toasts after the state update
       toastsToShow.forEach(t => toast(t));
   
@@ -224,6 +216,7 @@ export function GroupsProvider({ children }: { children: ReactNode }) {
   const joinGroup = useCallback((groupId: string) => {
     let joinedGroup: Group | null = null;
     let newGroupWasCreated = false;
+    let immediateActivation = false;
 
     setGroups(currentGroups => {
         const groupToJoin = currentGroups.find(g => g.id === groupId);
@@ -255,7 +248,13 @@ export function GroupsProvider({ children }: { children: ReactNode }) {
       updatedGroup.userIsMember = true;
       
       if (updatedGroup.membersCount === updatedGroup.totalMembers) {
-        updatedGroup.status = 'Pendiente';
+         if (updatedGroup.isImmediateActivation) {
+            updatedGroup.status = 'Activo';
+            updatedGroup.activationDate = new Date().toISOString();
+            immediateActivation = true;
+        } else {
+            updatedGroup.status = 'Pendiente';
+        }
         
         const newGroup = generateNewGroup(updatedGroup);
         newGroups.push(newGroup);
@@ -271,7 +270,14 @@ export function GroupsProvider({ children }: { children: ReactNode }) {
     if (joinedGroup) {
         lastJoinedGroupRef.current = joinedGroup;
     }
-     if (newGroupWasCreated) {
+    
+    if (immediateActivation) {
+        toast({
+            title: "¡Activación Inmediata!",
+            description: `¡Te has unido y el grupo ${joinedGroup?.id} se ha activado instantáneamente!`,
+            className: 'bg-green-100 border-green-500 text-green-700'
+        });
+    } else if (newGroupWasCreated) {
       toast({
         title: "¡Grupo Completo!",
         description: `El grupo ${joinedGroup?.id} está lleno. Se ha creado un nuevo grupo con la misma configuración.`,
