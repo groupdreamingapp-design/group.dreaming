@@ -1,4 +1,3 @@
-
 'use client';
 
 import Link from "next/link"
@@ -39,11 +38,6 @@ export function MainNav({ isMobile = false }: MainNavProps) {
       href: "/panel/wallet",
       label: "Billetera",
       icon: Wallet,
-    },
-    {
-      href: "/panel/admin",
-      label: "Admin",
-      icon: Shield,
     },
   ];
 

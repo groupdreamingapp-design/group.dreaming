@@ -179,9 +179,7 @@ service cloud.firestore {
     match /roles_admin/{userId} {
       allow get: if isAdmin();
       allow list: if isAdmin();
-      // TEMPORARILY allow any signed-in user to create an admin for dev purposes.
-      // In production, this should be: if isAdmin();
-      allow create: if isSignedIn();
+      allow create: if isAdmin();
       allow update: if isAdmin() && resource != null;
       allow delete: if isAdmin() && resource != null;
     }
