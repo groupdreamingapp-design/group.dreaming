@@ -126,39 +126,6 @@ export function GroupsProvider({ children }: { children: ReactNode }) {
     prevGroupsRef.current = groups;
   }, [groups, toast]);
   
-    // Effect to simulate a sold auction and show toast
-    useEffect(() => {
-        const soldAuctionSimulator = setTimeout(() => {
-            setGroups(currentGroups => {
-                const groupToSellId = 'auc-3'; // Corresponds to the auction with isMine: true
-                const auction = initialGroups.find(g => g.id === 'ID-20231101-7777');
-                
-                const groupExistedAndWasAuctioned = currentGroups.some(g => g.id === 'ID-20231101-7777' && g.userIsMember && g.status === 'Subastado');
-
-                if (groupExistedAndWasAuctioned) {
-                    return currentGroups.map(g => g.id === 'ID-20231101-7777' ? { ...g, userIsMember: false, acquiredInAuction: true } : g);
-                }
-                return currentGroups;
-            });
-        }, 15000); // Simulate selling after 15 seconds
-
-        return () => clearTimeout(soldAuctionSimulator);
-    }, []);
-
-    useEffect(() => {
-        const prevGroups = prevGroupsRef.current;
-        groups.forEach(currentGroup => {
-            const prevGroup = prevGroups.find(p => p.id === currentGroup.id);
-            if (prevGroup && prevGroup.userIsMember && !currentGroup.userIsMember && prevGroup.status === 'Subastado') {
-                toast({
-                    title: "¡Subasta Finalizada!",
-                    description: `Tu plan ${currentGroup.id} ha sido vendido con éxito en el mercado secundario.`,
-                });
-            }
-        });
-        prevGroupsRef.current = groups;
-    }, [groups, toast]);
-
 
   const joinGroup = useCallback((groupId: string) => {
     let joinedGroup: Group | null = null;
