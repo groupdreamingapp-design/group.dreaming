@@ -16,6 +16,7 @@ import { Logo } from '@/components/icons';
 import Link from 'next/link';
 import { Separator } from '@/components/ui/separator';
 import { FirebaseError } from 'firebase/app';
+import { ArrowLeft } from 'lucide-react';
 
 const loginSchema = z.object({
   email: z.string().email('Por favor, introduce un email válido.'),
@@ -119,8 +120,14 @@ export default function LoginPage() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-secondary p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
+      <Card className="w-full max-w-md relative">
+        <Button variant="ghost" size="sm" className="absolute top-4 left-4" asChild>
+            <Link href="/">
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Volver al inicio
+            </Link>
+        </Button>
+        <CardHeader className="text-center pt-16">
             <div className="flex justify-center mb-4">
                 <Logo className="h-12 w-12 text-primary" />
             </div>
