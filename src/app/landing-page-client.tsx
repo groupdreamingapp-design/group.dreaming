@@ -105,10 +105,10 @@ export default function LandingPageClient() {
             <div className="flex flex-col items-center space-y-4 text-center">
               <div className="space-y-4">
                 <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl/none">
-                  El impulso para lo que de verdad importa.
+                  El poder de la comunidad para construir tus sueños.
                 </h1>
                 <p className="mx-auto max-w-[700px] text-muted-foreground md:text-xl">
-                  Group Dreaming transforma el ahorro en una experiencia colectiva y poderosa. Únete a un grupo, aporta tu parte y mira cómo tus sueños se hacen realidad antes de lo que imaginas.
+                  Group Dreaming es una plataforma de ahorro colectivo basada en la confianza y la ayuda mutua. Representamos la alternativa solidaria a los sistemas financieros tradicionales, brindando una solución transparente y accesible para que puedas alcanzar tus metas económicas, desde tu primer auto hasta tu propia casa, impulsado por la fuerza del grupo.
                 </p>
               </div>
               <div className="space-x-4">
