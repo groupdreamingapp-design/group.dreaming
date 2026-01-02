@@ -44,7 +44,8 @@ for (const capital of capitalOptions) {
             
             const totalMembers = plazo <= 24 ? 48 : plazo <= 48 ? 96 : 144;
             
-            const membersCount = (groupCounter % (totalMembers -1));
+            // Deterministic membersCount based on the sequential number to avoid hydration errors
+            const membersCount = (groupCounter % totalMembers);
             groupCounter++;
 
 
@@ -235,6 +236,7 @@ function generateNewGroup(templateGroup: Group): Group {
 
 
     
+
 
 
 
