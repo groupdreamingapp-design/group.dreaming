@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useState, useCallback, ReactNode, useEffect, useRef } from 'react';
@@ -109,35 +108,65 @@ export function GroupsProvider({ children }: { children: ReactNode }) {
   
           if (donorGroup && neededMembers > 0) {
             const membersToMove = Math.min(neededMembers, donorGroup.membersCount);
+            let userWasMoved = false;
             
             let tempPriorityGroup: Group | undefined;
-            
+            let tempDonorGroup: Group | undefined;
+
             newGroups = newGroups.map(g => {
               if (g.id === priorityGroup.id) {
                 tempPriorityGroup = { ...g, membersCount: g.membersCount + membersToMove };
                 return tempPriorityGroup;
               }
               if (g.id === donorGroup.id) {
-                return { ...g, membersCount: g.membersCount - membersToMove };
+                 // Check if the current user is in the donor group before reducing members
+                if (g.userIsMember) {
+                    userWasMoved = true;
+                }
+                tempDonorGroup = { ...g, membersCount: g.membersCount - membersToMove };
+                return tempDonorGroup;
               }
               return g;
             });
   
             if (tempPriorityGroup) {
+              if (userWasMoved) {
+                 newGroups = newGroups.map(g => {
+                    if (g.id === priorityGroup.id) return { ...g, userIsMember: true };
+                    if (g.id === donorGroup.id) return { ...g, userIsMember: false };
+                    return g;
+                });
+              }
+
               if (tempPriorityGroup.membersCount === tempPriorityGroup.totalMembers) {
                 newGroups = newGroups.map(g => g.id === tempPriorityGroup!.id ? { ...g, status: 'Pendiente' } : g);
                 processedImmediateActivationGroups.current.add(priorityGroup.id);
-                toastsToShow.push({
-                  title: `¡Grupo ${priorityGroup.id} Lleno!`,
-                  description: `Se absorbieron ${membersToMove} miembros. El grupo está listo para activarse.`,
-                  className: 'bg-green-100 border-green-500 text-green-700'
-                });
+                 if (userWasMoved) {
+                    toastsToShow.push({
+                        title: "¡Movimiento de Grupo!",
+                        description: `Para acelerar la activación, fuiste transferido del grupo ${donorGroup.id.split('-').pop()} al grupo ${priorityGroup.id.split('-').pop()}.`,
+                        className: 'bg-blue-100 border-blue-500 text-blue-700'
+                    });
+                } else {
+                    toastsToShow.push({
+                      title: `¡Grupo ${priorityGroup.id} Lleno!`,
+                      description: `Se absorbieron ${membersToMove} miembros. El grupo está listo para activarse.`,
+                      className: 'bg-green-100 border-green-500 text-green-700'
+                    });
+                }
               } else {
-                toastsToShow.push({
-                  title: `Nuevos Miembros en ${priorityGroup.id}`,
-                  description: `Se absorbieron ${membersToMove} miembros para acelerar la activación.`,
-                  className: 'bg-blue-100 border-blue-500 text-blue-700'
-                });
+                 if (userWasMoved) {
+                     toastsToShow.push({
+                        title: "¡Movimiento de Grupo!",
+                        description: `Para acelerar la activación, fuiste transferido del grupo ${donorGroup.id.split('-').pop()} al grupo de activación inmediata ${priorityGroup.id.split('-').pop()}.`,
+                        className: 'bg-blue-100 border-blue-500 text-blue-700'
+                    });
+                } else {
+                    toastsToShow.push({
+                      title: `Nuevos Miembros en ${priorityGroup.id}`,
+                      description: `Se absorbieron ${membersToMove} miembros para acelerar la activación.`,
+                    });
+                }
               }
             }
             stateChanged = true;
