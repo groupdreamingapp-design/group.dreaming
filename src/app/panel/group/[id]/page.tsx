@@ -1,3 +1,4 @@
+
 'use client';
 
 import type { Group, Installment, Award } from '@/lib/types';
@@ -22,6 +23,7 @@ import { es } from 'date-fns/locale';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useParams } from 'next/navigation';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 
 const generateStaticAwards = (group: Group): Award[][] => {
@@ -321,7 +323,7 @@ export default function GroupDetail() {
   };
 
   return (
-    <>
+    <TooltipProvider>
       <div className="mb-4">
         <Link href="/panel/my-groups" className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary mb-2">
           <ArrowLeft className="h-4 w-4" /> Volver a Mis Grupos
@@ -680,7 +682,16 @@ export default function GroupDetail() {
                                     <div key={`${award.type}-${award.orderNumber}`} className="flex items-center gap-1">
                                       {award.type === 'sorteo' && <Ticket className="h-4 w-4 text-blue-500" />}
                                       {award.type === 'licitacion' && <HandCoins className="h-4 w-4 text-orange-500" />}
-                                      {award.type === 'sorteo-especial' && <Gift className="h-4 w-4 text-fuchsia-500" />}
+                                      {award.type === 'sorteo-especial' && (
+                                        <Tooltip>
+                                          <TooltipTrigger>
+                                            <Gift className="h-4 w-4 text-fuchsia-500" />
+                                          </TooltipTrigger>
+                                          <TooltipContent>
+                                            <p>¡Premio Sorpresa!</p>
+                                          </TooltipContent>
+                                        </Tooltip>
+                                      )}
                                       <span className={cn(award.orderNumber === userOrderNumber && "font-bold text-primary")}>#{award.orderNumber > 0 ? award.orderNumber : '??'}</span>
                                     </div>
                                   ))}
@@ -722,6 +733,6 @@ export default function GroupDetail() {
           </DialogContent>
         </Dialog>
       )}
-    </>
+    </TooltipProvider>
   );
 }

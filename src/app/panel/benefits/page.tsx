@@ -34,7 +34,35 @@ const benefits = [
                     "El beneficio aplica únicamente a adjudicaciones por sorteo, no por licitación.",
                     "El plan no debe haber sido adquirido a través de una subasta en el mercado secundario.",
                     "El plan no debe haber sido suscripto utilizando un bono de descuento de un beneficio obtenido anteriormente.",
-                    "Los beneficios no son acumulables. No se pueden obtener ambos beneficios en un mismo grupo."
+                    "Los beneficios no son acumulables. Solo puede combinarse con el 'Beneficio Sorteo Especial'."
+                ]
+            }
+        ]
+    },
+    {
+        title: "Beneficio Sorteo Especial",
+        description: "Una recompensa extra para los adjudicados en el gran sorteo final del grupo.",
+        icon: Award,
+        clauses: [
+            {
+                title: "Funcionamiento del Beneficio",
+                points: [
+                    "Se otorga a todos los miembros que resultan adjudicados en la última cuota del plan a través del 'Sorteo Especial'.",
+                    "Los 'Sorteos Especiales' se realizan para distribuir los cupos de adjudicación que pudieron haber quedado vacantes durante el plan (ej: por licitaciones desiertas)."
+                ]
+            },
+            {
+                title: "La Recompensa",
+                points: [
+                    "Además de la adjudicación de su capital, cada ganador del Sorteo Especial recibirá un Premio Sorpresa.",
+                    "El premio es una bonificación adicional y varía según el grupo y las condiciones promocionales vigentes."
+                ]
+            },
+            {
+                title: "Condiciones para Acceder (Bases)",
+                points: [
+                    "Resultar ganador en una de las adjudicaciones por 'Sorteo Especial' que se realizan en la última cuota del plan.",
+                    "Este beneficio es el único que puede acumularse con otros beneficios, como 'Los últimos serán los primeros', si se cumplen las condiciones de ambos."
                 ]
             }
         ]
