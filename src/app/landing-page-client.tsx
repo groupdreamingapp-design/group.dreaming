@@ -5,7 +5,7 @@ import { Logo } from '@/components/icons';
 import Link from 'next/link';
 import Image from 'next/image';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
-import { ArrowRight, CheckCircle, Clock, Home, LayoutDashboard, PiggyBank, Users } from 'lucide-react';
+import { ArrowRight, CheckCircle, Clock, Home, LayoutDashboard, PieChart, PiggyBank, Users } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useUser } from '@/firebase';
 
@@ -112,10 +112,11 @@ export default function LandingPageClient() {
                 </p>
               </div>
               <div className="space-x-4">
-                <Button size="lg" asChild>
-                  <Link href="/register">
-                    Únete Ahora <ArrowRight className="ml-2 h-4 w-4" />
-                  </Link>
+                <Button size="lg" variant="secondary" asChild>
+                   <Link href="/panel/transparency">
+                      <PieChart className="mr-2 h-4 w-4" />
+                      Ver Transparencia
+                    </Link>
                 </Button>
                 <Button size="lg" variant="outline" asChild>
                    <Link href="/panel/explore">Explorar Grupos</Link>
