@@ -1,4 +1,5 @@
 
+
 import type { Group, User, Transaction, Auction, Installment, Award } from './types';
 import { PlaceHolderImages } from './placeholder-images';
 import { format, addMonths, setDate, addDays, parseISO, lastDayOfMonth, differenceInMonths, startOfToday } from 'date-fns';
@@ -65,25 +66,23 @@ for (const capital of capitalOptions) {
     }
 }
 
-const activeGroupCapital = 15000;
-const activeGroupPlazo = 24;
-const activeActivationDate = new Date('2025-05-06T00:00:00.000Z');
-const today = new Date('2026-01-01T00:00:00Z');
-const activeMonthsCompleted = differenceInMonths(today, activeActivationDate);
-
+// This group simulates one that was filled, had payment failures, and is now back in "Abierto" state
+// with a few slots open for immediate activation.
 generatedGroups.push({
     id: 'ID-20250602-1001',
-    capital: activeGroupCapital,
-    plazo: activeGroupPlazo,
-    cuotaPromedio: calculateCuotaPromedio(activeGroupCapital, activeGroupPlazo),
-    membersCount: 48,
+    capital: 15000,
+    plazo: 24,
+    cuotaPromedio: calculateCuotaPromedio(15000, 24),
+    membersCount: 45, // Simulate 3 members failed payment
     totalMembers: 48,
-    status: 'Activo',
-    userIsMember: true,
+    status: 'Abierto', // It's open again to fill the remaining slots
+    userIsMember: true, // The current user is one of the confirmed members
     userIsAwarded: false,
-    monthsCompleted: activeMonthsCompleted > 0 ? activeMonthsCompleted : 0,
-    activationDate: activeActivationDate.toISOString(),
+    monthsCompleted: 0,
+    activationDate: undefined, // Not active yet
+    isImmediateActivation: true, // Special flag for UI
 });
+
 
 generatedGroups.push({
     id: 'ID-20230504-9876',
@@ -200,6 +199,7 @@ function generateNewGroup(templateGroup: Group): Group {
       monthsCompleted: 0,
       activationDate: undefined,
       acquiredInAuction: false,
+      isImmediateActivation: false,
     };
 }
     
@@ -237,6 +237,7 @@ function generateNewGroup(templateGroup: Group): Group {
 
 
     
+
 
 
 

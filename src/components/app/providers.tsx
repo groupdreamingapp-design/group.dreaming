@@ -9,19 +9,27 @@ import { GroupsContext } from '@/hooks/use-groups';
 import { useToast } from '@/hooks/use-toast';
 import { parseISO, differenceInHours, isBefore } from 'date-fns';
 
+let groupCounter = 1;
+
 function generateNewGroup(templateGroup: Group): Group {
     const today = new Date();
     const year = today.getFullYear();
     const month = String(today.getMonth() + 1).padStart(2, '0');
     const day = String(today.getDate()).padStart(2, '0');
     const dateString = `${year}${month}${day}`;
-    const randomNumbers = String(Math.floor(Math.random() * 10000)).padStart(4, '0');
+    
+    // This counter ensures unique IDs for newly created groups during the session
+    const randomNumbers = String(Math.floor(Math.random() * 1000) + groupCounter++).padStart(4, '0');
     const newId = `ID-${dateString}-${randomNumbers}`;
     
     return {
-      // Copy only the template properties, not the state
-      ...templateGroup,
+      // Copy only the template properties, not the dynamic state
       id: newId,
+      capital: templateGroup.capital,
+      plazo: templateGroup.plazo,
+      cuotaPromedio: templateGroup.cuotaPromedio,
+      totalMembers: templateGroup.totalMembers,
+      // Reset dynamic state for the new group
       membersCount: 0,
       status: 'Abierto',
       userIsMember: false,
@@ -29,6 +37,7 @@ function generateNewGroup(templateGroup: Group): Group {
       monthsCompleted: 0,
       activationDate: undefined,
       acquiredInAuction: false,
+      isImmediateActivation: false,
     };
 }
 
@@ -60,10 +69,13 @@ export function GroupsProvider({ children }: { children: ReactNode }) {
 
     pendingGroups.forEach(pendingGroup => {
         if(pendingGroup.membersCount === pendingGroup.totalMembers) {
+             // Simulate a 5-second validation period before activation
              const timer = setTimeout(() => {
                 setGroups(currentGroups => {
+                    let wasActivated = false;
                     const newGroups = currentGroups.map(g => {
                         if (g.id === pendingGroup.id) {
+                            wasActivated = true;
                             return { 
                                 ...g, 
                                 status: 'Activo',
@@ -73,9 +85,7 @@ export function GroupsProvider({ children }: { children: ReactNode }) {
                         return g;
                     });
                     
-                    const groupExists = newGroups.some(g => g.id === pendingGroup.id && g.status === 'Activo');
-                    
-                    if (groupExists) {
+                    if (wasActivated) {
                          toast({
                             title: "¡Grupo Activado!",
                             description: `El grupo ${pendingGroup.id} ha completado sus validaciones y ya está activo.`,
@@ -129,6 +139,7 @@ export function GroupsProvider({ children }: { children: ReactNode }) {
 
   const joinGroup = useCallback((groupId: string) => {
     let joinedGroup: Group | null = null;
+    let newGroupWasCreated = false;
 
     setGroups(currentGroups => {
         const groupToJoin = currentGroups.find(g => g.id === groupId);
@@ -150,23 +161,22 @@ export function GroupsProvider({ children }: { children: ReactNode }) {
       let newGroups = [...currentGroups];
       const groupIndex = newGroups.findIndex(g => g.id === groupId);
       
-      if (groupIndex === -1) {
-        return currentGroups; // Group not found
-      }
+      if (groupIndex === -1) return currentGroups;
 
       const updatedGroup = { ...newGroups[groupIndex] };
       
-      if (updatedGroup.status !== 'Abierto' || updatedGroup.userIsMember) {
-        return currentGroups; // Cannot join
-      }
+      if (updatedGroup.status !== 'Abierto' || updatedGroup.userIsMember) return currentGroups;
       
       updatedGroup.membersCount++;
       updatedGroup.userIsMember = true;
       
       if (updatedGroup.membersCount === updatedGroup.totalMembers) {
         updatedGroup.status = 'Pendiente';
-        // Logic to create a new group is removed as per user clarification.
-        // The group will now transition from Pending to Active via the useEffect.
+        
+        // Create a new group with the same configuration
+        const newGroup = generateNewGroup(updatedGroup);
+        newGroups.push(newGroup);
+        newGroupWasCreated = true;
       }
       
       newGroups[groupIndex] = updatedGroup;
@@ -177,6 +187,13 @@ export function GroupsProvider({ children }: { children: ReactNode }) {
 
     if (joinedGroup) {
         lastJoinedGroupRef.current = joinedGroup;
+    }
+     if (newGroupWasCreated) {
+      toast({
+        title: "¡Grupo Completo!",
+        description: `El grupo ${joinedGroup?.id} está lleno. Se ha creado un nuevo grupo con la misma configuración.`,
+        className: 'bg-blue-100 border-blue-500 text-blue-700'
+      });
     }
   }, [toast]);
   

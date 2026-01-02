@@ -25,6 +25,7 @@ export type Group = {
   activationDate?: string;
   acquiredInAuction?: boolean;
   auctionStartDate?: string;
+  isImmediateActivation?: boolean;
 };
 
 export type TransactionType = "Depósito" | "Retiro" | "Pago de Cuota" | "Licitación" | "Subasta" | "Liquidación";
