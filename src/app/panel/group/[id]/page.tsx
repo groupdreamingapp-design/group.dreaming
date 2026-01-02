@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { ArrowLeft, Users, Clock, Users2, Calendar, Gavel, HandCoins, Ticket, Info, Trophy, FileX2, TrendingUp, Hand, Scale, CalendarCheck, Gift, Check, X, Award as AwardIcon, Sparkles } from 'lucide-react';
+import { ArrowLeft, Users, Clock, Users2, Calendar, Gavel, HandCoins, Ticket, Info, Trophy, FileX2, TrendingUp, Hand, Scale, CalendarCheck, Gift, Check, X, Award as AwardIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import { useGroups } from '@/hooks/use-groups';
@@ -84,12 +84,12 @@ const generateStaticAwards = (group: Group): Award[][] => {
             const remainingToAdjudicate = winnerPool.filter(w => !adjudicatedThisMonth.includes(w));
             
             remainingToAdjudicate.forEach(winner => {
-                 awards[i].push({ type: 'sorteo-extra', orderNumber: winner });
+                 awards[i].push({ type: 'sorteo-especial', orderNumber: winner });
             });
 
             // Add deserted licitaciones as extra sorteos
             for(let j=0; j < desertedLicitaciones; j++) {
-                awards[i].push({ type: 'sorteo-extra', orderNumber: 0 - (j + 1) }); // Use negative numbers for placeholder
+                awards[i].push({ type: 'sorteo-especial', orderNumber: 0 - (j + 1) }); // Use negative numbers for placeholder
             }
 
         } else {
@@ -210,7 +210,7 @@ export default function GroupDetail() {
 
   const awardMonth = userAwardInfo?.month;
   const benefitThresholdMonth = Math.floor(group.plazo * 0.8);
-  const isEligibleForBenefit = group.userIsAwarded && awardMonth && awardMonth > benefitThresholdMonth && (userAwardInfo?.type === 'sorteo' || userAwardInfo?.type === 'sorteo-extra');
+  const isEligibleForBenefit = group.userIsAwarded && awardMonth && awardMonth > benefitThresholdMonth && (userAwardInfo?.type === 'sorteo' || userAwardInfo?.type === 'sorteo-especial');
 
   const hasNoOverduePayments = useMemo(() => {
       if(!group.activationDate) return true;
@@ -649,7 +649,7 @@ export default function GroupDetail() {
                                     <div key={`${award.type}-${award.orderNumber}`} className="flex items-center gap-1">
                                       {award.type === 'sorteo' && <Ticket className="h-4 w-4 text-blue-500" />}
                                       {award.type === 'licitacion' && <HandCoins className="h-4 w-4 text-orange-500" />}
-                                      {award.type === 'sorteo-extra' && <Sparkles className="h-4 w-4 text-fuchsia-500" />}
+                                      {award.type === 'sorteo-especial' && <Gift className="h-4 w-4 text-fuchsia-500" />}
                                       <span className={cn(award.orderNumber === 42 && "font-bold text-primary")}>#{award.orderNumber > 0 ? award.orderNumber : '??'}</span>
                                     </div>
                                   ))}

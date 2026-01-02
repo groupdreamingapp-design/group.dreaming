@@ -53,7 +53,7 @@ export type Auction = {
 
 export type InstallmentStatus = "Pagado" | "Pendiente" | "Vencido" | "Futuro";
 
-export type AwardType = "sorteo" | "licitacion" | "sorteo-extra";
+export type AwardType = "sorteo" | "licitacion" | "sorteo-especial";
 
 export type Award = {
   type: AwardType;
