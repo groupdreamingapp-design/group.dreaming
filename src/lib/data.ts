@@ -83,7 +83,6 @@ generatedGroups.push({
     activationDate: activeActivationDate.toISOString(),
 });
 
-const closedGroupActivationDate = new Date('2023-05-04T00:00:00.000Z');
 generatedGroups.push({
     id: 'ID-20230504-9876',
     capital: 10000,
@@ -95,7 +94,7 @@ generatedGroups.push({
     userIsMember: true,
     userIsAwarded: true, // Let's assume the user was awarded in this old plan
     monthsCompleted: 12,
-    activationDate: closedGroupActivationDate.toISOString(),
+    activationDate: '2023-05-04T00:00:00.000Z',
 });
 
 
@@ -236,6 +235,7 @@ function generateNewGroup(templateGroup: Group): Group {
 
 
     
+
 
 
 
