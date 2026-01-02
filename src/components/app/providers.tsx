@@ -165,10 +165,8 @@ export function GroupsProvider({ children }: { children: ReactNode }) {
       
       if (updatedGroup.membersCount === updatedGroup.totalMembers) {
         updatedGroup.status = 'Pendiente';
-        const newGeneratedGroup = generateNewGroup(updatedGroup);
-        if (!newGroups.some(g => g.id === newGeneratedGroup.id)) {
-            newGroups.push(newGeneratedGroup);
-        }
+        // Logic to create a new group is removed as per user clarification.
+        // The group will now transition from Pending to Active via the useEffect.
       }
       
       newGroups[groupIndex] = updatedGroup;
