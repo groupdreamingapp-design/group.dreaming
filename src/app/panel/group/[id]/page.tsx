@@ -50,18 +50,14 @@ const generateStaticAwards = (group: Group): Award[][] => {
     // Create a pool of potential winners and shuffle it
     let potentialWinners = shuffle([...memberOrderNumbers]);
     
-    // If the user is already awarded, remove them from the main pool to avoid duplicates
+    const awards: Award[][] = Array.from({ length: group.plazo }, () => []);
+    
+    // If the user is already awarded, remove them from the main pool and place their award
     if (group.userIsAwarded) {
         const userIndex = potentialWinners.indexOf(userOrderNumber);
         if (userIndex > -1) {
             potentialWinners.splice(userIndex, 1);
         }
-    }
-
-    const awards: Award[][] = Array.from({ length: group.plazo }, () => []);
-    
-    // Special handling if the user is awarded: place their award in a specific month
-    if (group.userIsAwarded) {
         // Example: place the user's award in the last 20% of the plan
         const awardMonthIndex = Math.floor(group.plazo * 0.85); 
         // Ensure the award is not placed in the first month
@@ -73,50 +69,56 @@ const generateStaticAwards = (group: Group): Award[][] => {
     let winnerPool = [...potentialWinners];
     let desertedLicitaciones = 0;
 
-    // Start awarding from the second month (index 1)
-    for (let i = 1; i < group.plazo; i++) {
-        const remainingMonths = group.plazo - i;
-        const remainingWinners = winnerPool.length - awards.flat().filter(a => winnerPool.includes(a.orderNumber)).length;
+    // Start awarding from the second month (index 1) up to the second to last month
+    for (let i = 1; i < group.plazo -1; i++) {
         
-        // Handle last month: adjudicate everyone left
-        if (i === group.plazo - 1) {
-            const adjudicatedThisMonth = awards[i].map(a => a.orderNumber);
-            const remainingToAdjudicate = winnerPool.filter(w => !adjudicatedThisMonth.includes(w));
-            
-            remainingToAdjudicate.forEach(winner => {
-                 awards[i].push({ type: 'sorteo-especial', orderNumber: winner });
-            });
-
-            // Add deserted licitaciones as extra sorteos
-            for(let j=0; j < desertedLicitaciones; j++) {
-                awards[i].push({ type: 'sorteo-especial', orderNumber: 0 - (j + 1) }); // Use negative numbers for placeholder
+        const alreadyAwardedInMonth = awards[i].map(a => a.orderNumber);
+        const hasSorteo = awards[i].some(a => a.type === 'sorteo');
+        const hasLicitacion = awards[i].some(a => a.type === 'licitacion');
+        
+        // Add Sorteo winner if not present and pool is not empty
+        if (!hasSorteo && winnerPool.length > 0) {
+            const winner = winnerPool.shift()!;
+            if (!alreadyAwardedInMonth.includes(winner)) {
+                 awards[i].push({ type: 'sorteo', orderNumber: winner });
+                 alreadyAwardedInMonth.push(winner);
+            } else {
+                 winnerPool.push(winner); // put it back if already awarded
             }
-
-        } else {
-             // Regular month logic
-            
-            // Add Sorteo winner if pool is not empty and not already awarded this month
-            if (winnerPool.length > 0 && !awards[i].some(a => a.orderNumber === winnerPool[0])) {
-                awards[i].push({ type: 'sorteo', orderNumber: winnerPool.shift()! });
-            }
-
-            // Add Licitacion winner if pool is not empty and not already awarded this month
-             if (winnerPool.length > 0) {
-                 // Specific logic for the test group
-                 if (group.id === 'ID-20230504-CLOSED' && i === 3) { // Month 4 is index 3
-                    desertedLicitaciones++;
-                 } else {
-                    const isDeserted = customRandom() < 0.15 && desertedLicitaciones < 3; // 15% chance, max 3
-                    if (!isDeserted) {
-                        if (winnerPool.length > 0 && !awards[i].some(a => a.orderNumber === winnerPool[0])) {
-                            awards[i].push({ type: 'licitacion', orderNumber: winnerPool.shift()! });
-                        }
-                    } else {
-                        desertedLicitaciones++;
-                    }
-                 }
-             }
         }
+
+        // Add Licitacion winner if not present and pool is not empty
+        if (!hasLicitacion && winnerPool.length > 0) {
+            // Specific logic for the test group
+            if (group.id === 'ID-20230504-CLOSED' && i === 3) { // Month 4 is index 3
+                desertedLicitaciones++;
+            } else {
+                const isDeserted = customRandom() < 0.15 && desertedLicitaciones < 3; // 15% chance, max 3
+                if (!isDeserted) {
+                    if (winnerPool.length > 0) {
+                        const winner = winnerPool.shift()!;
+                         if (!alreadyAwardedInMonth.includes(winner)) {
+                            awards[i].push({ type: 'licitacion', orderNumber: winner });
+                        } else {
+                            winnerPool.push(winner); // put it back
+                        }
+                    }
+                } else {
+                    desertedLicitaciones++;
+                }
+            }
+        }
+    }
+    
+    // Final month adjudication
+    const lastMonthIndex = group.plazo - 1;
+    winnerPool.forEach(winner => {
+        awards[lastMonthIndex].push({ type: 'sorteo-especial', orderNumber: winner });
+    });
+    
+    // Add deserted licitaciones as extra sorteos especiales in the last month
+    for(let j=0; j < desertedLicitaciones; j++) {
+        awards[lastMonthIndex].push({ type: 'sorteo-especial', orderNumber: 0 - (j + 1) }); // Use negative numbers for placeholder
     }
     
     return awards;
@@ -620,7 +622,7 @@ export default function GroupDetail() {
                       
                       const currentAwards = groupAwards[inst.number - 1] || [];
                       const awardDateString = (isPlanActive || group.status === 'Cerrado') && currentAwards.length > 0 && inst.dueDate && !inst.dueDate.startsWith('Mes') ? addDays(parseISO(inst.dueDate), 5).toISOString() : undefined;
-                      const showAdjudicationInfo = currentStatus === 'Pagado';
+                      const showAdjudicationInfo = currentStatus === 'Pagado' && (group.status === 'Activo' || group.status === 'Cerrado' || group.status === 'Subastado');
 
 
                       return (
