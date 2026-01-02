@@ -14,7 +14,7 @@ export default function PanelLayout({
       <div className="hidden border-r bg-muted/40 md:block">
         <div className="flex h-full max-h-screen flex-col gap-2">
           <div className="flex h-16 items-center border-b px-6">
-            <Link href="/panel" className="flex items-center gap-2 font-semibold">
+            <Link href="/" className="flex items-center gap-2 font-semibold">
               <Logo className="h-8 w-8 text-primary" />
               <span className="text-xl">Group Dreaming</span>
             </Link>
