@@ -44,8 +44,11 @@ export default function LandingPageClient() {
   const { user, loading } = useUser();
 
   const renderAuthButtons = () => {
+    // Wait until the auth state is fully resolved
     if (loading) {
-      return null; // Don't render anything while loading to prevent hydration mismatch
+      return (
+        <div className="h-10 w-[210px]"></div> // Placeholder to prevent layout shift
+      );
     }
 
     if (user) {
