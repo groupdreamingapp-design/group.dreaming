@@ -21,7 +21,32 @@ export function InstallmentReceipt({ installment, group, user, awards }: Receipt
     const formatCurrency = (amount: number) => new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'USD' }).format(amount);
 
     const handlePrint = () => {
-        window.print();
+        const printContent = receiptRef.current;
+        if (printContent) {
+            const printWindow = window.open('', '', 'height=800,width=800');
+            if (printWindow) {
+                printWindow.document.write('<html><head><title>Recibo</title>');
+                // Manually link the stylesheet
+                const styles = Array.from(document.styleSheets)
+                    .map(styleSheet => {
+                        try {
+                            return Array.from(styleSheet.cssRules)
+                                .map(rule => rule.cssText)
+                                .join('');
+                        } catch (e) {
+                            return `<link rel="stylesheet" href="${styleSheet.href}">`;
+                        }
+                    }).join('');
+
+                printWindow.document.write(`<style>${styles}</style></head><body>`);
+                printWindow.document.write(printContent.innerHTML);
+                printWindow.document.write('</body></html>');
+                printWindow.document.close();
+                setTimeout(() => { // Wait for content to load
+                    printWindow.print();
+                }, 500);
+            }
+        }
     };
     
     const companyData = {
@@ -34,28 +59,8 @@ export function InstallmentReceipt({ installment, group, user, awards }: Receipt
     const paymentDate = new Date(); // Simulate payment date as today
 
     return (
-        <div className="bg-white text-black p-4 md:p-8" ref={receiptRef}>
-            <style jsx global>{`
-                @media print {
-                    body * {
-                        visibility: hidden;
-                    }
-                    .printable-area, .printable-area * {
-                        visibility: visible;
-                    }
-                    .printable-area {
-                        position: absolute;
-                        left: 0;
-                        top: 0;
-                        width: 100%;
-                    }
-                    .no-print {
-                        display: none;
-                    }
-                }
-            `}</style>
-            
-             <div className="printable-area max-w-2xl mx-auto border bg-background text-foreground rounded-lg p-8 shadow-lg">
+        <div className="bg-background text-foreground p-4 md:p-8">
+             <div ref={receiptRef} className="max-w-2xl mx-auto border bg-background text-foreground rounded-lg p-8 shadow-lg">
                 <header className="flex justify-between items-start pb-4 border-b">
                     <div>
                         <h2 className="text-lg font-bold">{companyData.name}</h2>
@@ -164,7 +169,7 @@ export function InstallmentReceipt({ installment, group, user, awards }: Receipt
                     <p>Este es un comprobante de pago no fiscal. Válido para uso interno.</p>
                 </footer>
             </div>
-             <div className="flex justify-end mt-4 no-print">
+             <div className="flex justify-end mt-4">
                 <Button onClick={handlePrint}>
                     <Printer className="mr-2 h-4 w-4" />
                     Imprimir Recibo

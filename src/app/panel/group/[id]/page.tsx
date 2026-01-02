@@ -744,16 +744,18 @@ export default function GroupDetail() {
 
       {selectedReceipt && group && (
           <Dialog open={!!selectedReceipt} onOpenChange={(open) => !open && setSelectedReceipt(null)}>
-            <DialogContent className="max-w-3xl">
+            <DialogContent className="max-w-3xl h-[80vh] flex flex-col">
                 <DialogHeader>
                   <DialogTitle className="sr-only">Recibo de Cuota</DialogTitle>
                 </DialogHeader>
-                <InstallmentReceipt 
-                    installment={selectedReceipt}
-                    group={group}
-                    user={mockUser}
-                    awards={groupAwards[selectedReceipt.number - 1] || []}
-                />
+                <div className="flex-grow overflow-y-auto">
+                    <InstallmentReceipt 
+                        installment={selectedReceipt}
+                        group={group}
+                        user={mockUser}
+                        awards={groupAwards[selectedReceipt.number - 1] || []}
+                    />
+                </div>
             </DialogContent>
         </Dialog>
       )}
