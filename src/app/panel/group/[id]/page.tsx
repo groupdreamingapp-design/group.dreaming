@@ -155,7 +155,7 @@ function ClientFormattedDate({ dateString, formatString }: { dateString: string,
 export default function GroupDetail() {
   const params = useParams();
   const groupId = typeof params.id === 'string' ? params.id : '';
-  const { groups, joinGroup, auctionGroup, acceptAward } = useGroups();
+  const { groups, joinGroup, auctionGroup, acceptAward, approveAward } = useGroups();
   const { toast } = useToast();
   const [cuotasToAdvance, setCuotasToAdvance] = useState<number>(0);
   const [cuotasToBid, setCuotasToBid] = useState<number>(0);
@@ -329,6 +329,11 @@ export default function GroupDetail() {
     if (!group) return;
     acceptAward(group.id);
   };
+  
+  const handleApproveAward = () => {
+    if (!group) return;
+    approveAward(group.id);
+  }
 
   const awardStatusText: Record<UserAwardStatus, string> = {
     "No Adjudicado": "Pendiente",
@@ -507,7 +512,9 @@ export default function GroupDetail() {
                                 </div>
                             </div>
                             <DialogFooter>
-                                <Button type="submit">Enviar Documentación</Button>
+                                <DialogClose asChild>
+                                    <Button type="button" onClick={handleApproveAward}>Enviar Documentación</Button>
+                                </DialogClose>
                             </DialogFooter>
                         </DialogContent>
                     </Dialog>

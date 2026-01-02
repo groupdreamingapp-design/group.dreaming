@@ -9,7 +9,6 @@ import { GroupsContext } from '@/hooks/use-groups';
 import { useToast } from '@/hooks/use-toast';
 import { parseISO, differenceInHours, isBefore } from 'date-fns';
 
-let groupCounter = 1;
 
 function generateNewGroup(templateGroup: Group): Group {
     const today = new Date();
@@ -157,10 +156,25 @@ export function GroupsProvider({ children }: { children: ReactNode }) {
     });
   }, [toast]);
 
+  const approveAward = useCallback((groupId: string) => {
+    setGroups(currentGroups => {
+      return currentGroups.map(g => 
+        (g.id === groupId && g.userAwardStatus === 'Adjudicado - Pendiente Garantías') 
+          ? { ...g, userAwardStatus: 'Adjudicado - Aprobado' } 
+          : g
+      );
+    });
+    toast({
+        title: "¡Adjudicación Aprobada!",
+        description: `Felicitaciones, el capital ha sido adjudicado a tu cuenta.`,
+        className: 'bg-green-100 border-green-500 text-green-700'
+    });
+  }, [toast]);
+
   const formatCurrency = (amount: number) => new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(amount);
 
   return (
-    <GroupsContext.Provider value={{ groups, joinGroup, auctionGroup, acceptAward }}>
+    <GroupsContext.Provider value={{ groups, joinGroup, auctionGroup, acceptAward, approveAward }}>
       {children}
     </GroupsContext.Provider>
   );

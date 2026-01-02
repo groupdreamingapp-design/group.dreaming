@@ -12,6 +12,7 @@ interface GroupsContextType {
   joinGroup: (groupId: string) => void;
   auctionGroup: (groupId: string) => void;
   acceptAward: (groupId: string) => void;
+  approveAward: (groupId: string) => void;
 }
 
 // 2. Create the context with an initial undefined value
