@@ -97,7 +97,7 @@ export default function LandingPageClient() {
                 <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl/none text-white [text-shadow:2px_2px_4px_rgba(0,0,0,0.7)]">
                   El poder de la comunidad para construir tus sueños.
                 </h1>
-                <p className="mx-auto max-w-[700px] text-white/90 md:text-xl [text-shadow:1px_1px_3px_rgba(0,0,0,0.6)]">
+                <p className="mx-auto max-w-[700px] text-white/90 md:text-xl [text-shadow:2px_2px_8px_rgba(0,0,0,0.8)]">
                   Group Dreaming es una plataforma de ahorro colectivo basada en la confianza y la ayuda mutua. Representamos la alternativa solidaria a los sistemas financieros tradicionales, brindando una solución transparente y accesible para que puedas alcanzar tus metas económicas, desde tu primer auto hasta tu propia casa, impulsado por la fuerza del grupo.
                 </p>
               </div>
