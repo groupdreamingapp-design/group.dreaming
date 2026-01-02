@@ -6,7 +6,7 @@ import { Logo } from '@/components/icons';
 import Link from 'next/link';
 import Image from 'next/image';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
-import { ArrowRight, CheckCircle, Clock, Home, LayoutDashboard, PieChart, PiggyBank, Users } from 'lucide-react';
+import { ArrowRight, CheckCircle, Clock, FileText, Home, LayoutDashboard, PieChart, PiggyBank, Users } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useUser } from '@/firebase';
 
@@ -106,6 +106,12 @@ export default function LandingPageClient() {
                       Ver Transparencia
                     </Link>
                 </Button>
+                <Button size="lg" asChild className="shadow-lg">
+                   <Link href="/rules">
+                      <FileText className="mr-2 h-4 w-4" />
+                      Ver Reglamento
+                    </Link>
+                </Button>
                 <Button size="lg" variant="secondary" asChild className="shadow-lg">
                    <Link href="/explore">Explorar Grupos</Link>
                 </Button>
@@ -175,7 +181,7 @@ export default function LandingPageClient() {
         <p className="text-xs text-muted-foreground">&copy; 2024 Group Dreaming. Todos los derechos reservados.</p>
         <nav className="sm:ml-auto flex gap-4 sm:gap-6">
           <Link href="/rules" className="text-xs hover:underline underline-offset-4">Reglamento</Link>
-          <Link href="#" className="text-xs hover:underline underline-offset-4">Privacidad</Link>
+          <Link href="/#" className="text-xs hover:underline underline-offset-4">Privacidad</Link>
         </nav>
       </footer>
     </div>
