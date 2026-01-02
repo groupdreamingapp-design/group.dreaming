@@ -90,13 +90,13 @@ export default function LandingPageClient() {
               </div>
               <div className="space-x-4">
                 <Button size="lg" asChild>
-                   <Link href="/panel/transparency">
+                   <Link href="/transparency">
                       <PieChart className="mr-2 h-4 w-4" />
                       Ver Transparencia
                     </Link>
                 </Button>
                 <Button size="lg" variant="outline" asChild>
-                   <Link href="/panel/explore">Explorar Grupos</Link>
+                   <Link href="/explore">Explorar Grupos</Link>
                 </Button>
               </div>
             </div>
@@ -125,7 +125,7 @@ export default function LandingPageClient() {
                 </li>
               </ul>
                <Button asChild size="lg">
-                  <Link href="/panel/explore">
+                  <Link href="/explore">
                     Ver Grupos Disponibles
                   </Link>
                 </Button>
