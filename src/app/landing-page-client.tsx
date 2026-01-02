@@ -41,7 +41,35 @@ const goals = [
 
 export default function LandingPageClient() {
   const heroImage = PlaceHolderImages.find(img => img.id === 'hero-family');
-  const { user } = useUser();
+  const { user, loading } = useUser();
+
+  const renderAuthButtons = () => {
+    if (loading) {
+      return null; // Don't render anything while loading to prevent hydration mismatch
+    }
+
+    if (user) {
+      return (
+        <Button asChild>
+          <Link href="/panel">
+            <LayoutDashboard className="mr-2 h-4 w-4" />
+            Ir a Mi Panel
+          </Link>
+        </Button>
+      );
+    }
+
+    return (
+      <>
+        <Button variant="ghost" asChild>
+          <Link href="/panel">Ingresar</Link>
+        </Button>
+        <Button asChild>
+          <Link href="/panel">Comenzar Ahora</Link>
+        </Button>
+      </>
+    );
+  };
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -52,23 +80,7 @@ export default function LandingPageClient() {
         </Link>
         <nav className="ml-auto flex items-center gap-4 sm:gap-6">
           <div className="flex gap-2">
-            {user ? (
-                <Button asChild>
-                  <Link href="/panel">
-                    <LayoutDashboard className="mr-2 h-4 w-4" />
-                    Ir a Mi Panel
-                  </Link>
-                </Button>
-            ) : (
-              <>
-                <Button variant="ghost" asChild>
-                  <Link href="/panel">Ingresar</Link>
-                </Button>
-                <Button asChild>
-                  <Link href="/panel">Comenzar Ahora</Link>
-                </Button>
-              </>
-            )}
+            {renderAuthButtons()}
           </div>
         </nav>
       </header>
