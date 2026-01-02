@@ -35,7 +35,7 @@ export default function PublicPagesLayout({
         <p className="text-xs text-muted-foreground">&copy; 2024 Group Dreaming. Todos los derechos reservados.</p>
         <nav className="sm:ml-auto flex gap-4 sm:gap-6">
           <Link href="/faq" className="text-xs hover:underline underline-offset-4">Preguntas Frecuentes</Link>
-          <Link href="#" className="text-xs hover:underline underline-offset-4">Privacidad</Link>
+          <Link href="/#" className="text-xs hover:underline underline-offset-4">Privacidad</Link>
         </nav>
       </footer>
     </div>
