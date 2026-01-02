@@ -18,8 +18,7 @@ function generateNewGroup(templateGroup: Group): Group {
     const day = String(today.getDate()).padStart(2, '0');
     const dateString = `${year}${month}${day}`;
     
-    // This counter ensures unique IDs for newly created groups during the session
-    const randomNumbers = String(Math.floor(Math.random() * 1000) + groupCounter++).padStart(4, '0');
+    const randomNumbers = String(Math.floor(Math.random() * 10000)).padStart(4, '0');
     const newId = `ID-${dateString}-${randomNumbers}`;
     
     return {
@@ -69,10 +68,11 @@ export function GroupsProvider({ children }: { children: ReactNode }) {
   // Effect to handle group state transitions (Activation, Absorption)
   useEffect(() => {
     const timer = setTimeout(() => {
+        let stateChanged = false;
+        const toastsToShow: { title: string; description: string; className?: string }[] = [];
+        
         setGroups(currentGroups => {
-            const toastsToShow: { title: string; description: string; className?: string }[] = [];
             const updatedGroups = [...currentGroups];
-            let stateChanged = false;
 
             // --- Logic for Pending -> Active ---
             const pendingGroups = updatedGroups.filter(g => g.status === 'Pendiente' && g.membersCount === g.totalMembers);
@@ -94,9 +94,9 @@ export function GroupsProvider({ children }: { children: ReactNode }) {
             immediateActivationGroups.forEach(priorityGroup => {
                 if (processedImmediateActivationGroups.current.has(priorityGroup.id)) return;
 
-                const neededMembers = priorityGroup.totalMembers - priorityGroup.membersCount;
+                let neededMembers = priorityGroup.totalMembers - priorityGroup.membersCount;
                 
-                const donorGroup = updatedGroups
+                const donorGroups = updatedGroups
                     .filter(g => 
                         !g.isImmediateActivation &&
                         g.status === 'Abierto' &&
@@ -104,9 +104,11 @@ export function GroupsProvider({ children }: { children: ReactNode }) {
                         g.plazo === priorityGroup.plazo &&
                         g.membersCount > 0
                     )
-                    .sort((a, b) => b.id.localeCompare(a.id))[0];
+                    .sort((a, b) => b.id.localeCompare(a.id));
 
-                if (donorGroup && neededMembers > 0) {
+                for (const donorGroup of donorGroups) {
+                    if (neededMembers <= 0) break;
+
                     const membersToMove = Math.min(neededMembers, donorGroup.membersCount);
                     let userWasMoved = false;
                     
@@ -128,21 +130,29 @@ export function GroupsProvider({ children }: { children: ReactNode }) {
                         if (userWasMoved) {
                             updatedGroups[donorGroupIndex].userIsMember = false;
                         }
+
+                        neededMembers -= membersToMove;
                         
                         const tempPriorityGroup = updatedGroups[priorityGroupIndex];
                         if (tempPriorityGroup.membersCount === tempPriorityGroup.totalMembers) {
-                            updatedGroups[priorityGroupIndex].status = 'Pendiente';
+                             if (tempPriorityGroup.isImmediateActivation) {
+                                updatedGroups[priorityGroupIndex].status = 'Activo';
+                                updatedGroups[priorityGroupIndex].activationDate = new Date().toISOString();
+                             } else {
+                                updatedGroups[priorityGroupIndex].status = 'Pendiente';
+                             }
+                            
                             processedImmediateActivationGroups.current.add(priorityGroup.id);
-                            if (userWasMoved) {
+                             if (userWasMoved) {
                                 toastsToShow.push({
                                     title: "¡Movimiento de Grupo!",
-                                    description: `Para acelerar la activación, fuiste transferido del grupo ${donorGroup.id.split('-').pop()} al grupo ${priorityGroup.id.split('-').pop()}.`,
+                                    description: `Para acelerar, fuiste transferido del grupo ${donorGroup.id.split('-').pop()} al ${priorityGroup.id.split('-').pop()}.`,
                                     className: 'bg-blue-100 border-blue-500 text-blue-700'
                                 });
                             } else {
                                 toastsToShow.push({
                                     title: `¡Grupo ${priorityGroup.id} Lleno!`,
-                                    description: `Se absorbieron ${membersToMove} miembros. El grupo está listo para activarse.`,
+                                    description: `Se absorbieron ${membersToMove} miembros. El grupo está listo.`,
                                     className: 'bg-green-100 border-green-500 text-green-700'
                                 });
                             }
@@ -150,13 +160,13 @@ export function GroupsProvider({ children }: { children: ReactNode }) {
                             if (userWasMoved) {
                                 toastsToShow.push({
                                     title: "¡Movimiento de Grupo!",
-                                    description: `Para acelerar la activación, fuiste transferido del grupo ${donorGroup.id.split('-').pop()} al grupo de activación inmediata ${priorityGroup.id.split('-').pop()}.`,
+                                    description: `Fuiste transferido del grupo ${donorGroup.id.split('-').pop()} al de activación inmediata ${priorityGroup.id.split('-').pop()}.`,
                                     className: 'bg-blue-100 border-blue-500 text-blue-700'
                                 });
                             } else {
                                 toastsToShow.push({
                                     title: `Nuevos Miembros en ${priorityGroup.id}`,
-                                    description: `Se absorbieron ${membersToMove} miembros para acelerar la activación.`,
+                                    description: `Se absorbieron ${membersToMove} miembros para acelerar.`,
                                 });
                             }
                         }
@@ -165,18 +175,21 @@ export function GroupsProvider({ children }: { children: ReactNode }) {
                 }
             });
             
-            // Show toasts after the state update
-            toastsToShow.forEach(t => toast(t));
-
-            if (stateChanged) {
+             if (stateChanged) {
                 return updatedGroups;
             }
             return currentGroups;
         });
+
+        // Show toasts after the state update is committed
+        if(toastsToShow.length > 0) {
+            toastsToShow.forEach(t => toast(t));
+        }
+
     }, 5000);
 
     return () => clearTimeout(timer);
-}, [toast]);
+}, [toast, groups]);
 
 
   // Effect to show toast when a group is auctioned
