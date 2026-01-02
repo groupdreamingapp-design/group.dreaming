@@ -275,19 +275,23 @@ export default function GroupDetail() {
   }, [installments, cuotasPagadas, isPlanActive]);
   
   const cuotasFuturas = useMemo(() => {
-    if (!isPlanActive) return group.plazo - cuotasPagadas;
+    if (!isPlanActive) return 0;
     
-    // Find the number of the first non-paid, non-overdue installment
-    const firstFutureInstallmentNumber = installments[pendingInstallmentIndex]?.number;
-    
-    if (firstFutureInstallmentNumber) {
-        // The number of installments available to advance/bid is the total minus the number of the next one to pay
-        return group.plazo - firstFutureInstallmentNumber + 1;
-    }
+    const advancedCount = advancedInstallments[group.id] || 0;
 
-    // If all are paid or overdue, there are no future installments
-    return 0; 
-  }, [pendingInstallmentIndex, installments, group.plazo, isPlanActive, cuotasPagadas]);
+    const futureInstallments = installments.filter(inst => {
+      const isAdvanced = inst.number > group.plazo - advancedCount;
+      if(isAdvanced) return false;
+
+      if (inst.number <= cuotasPagadas) return false;
+      
+      const dueDate = parseISO(inst.dueDate);
+      return !isBefore(dueDate, new Date());
+    });
+
+    return futureInstallments.length;
+
+  }, [installments, isPlanActive, cuotasPagadas, advancedInstallments, group.id, group.plazo]);
 
   const futureInstallmentsForCalculation = useMemo(() => {
     if (!isPlanActive) return [];
@@ -806,7 +810,7 @@ export default function GroupDetail() {
                       
                       const currentAwards = groupAwards[inst.number - 1] || [];
                       const awardDateString = (isPlanActive || group.status === 'Cerrado') && currentAwards.length > 0 && inst.dueDate && !inst.dueDate.startsWith('Mes') ? addDays(parseISO(inst.dueDate), 5).toISOString() : undefined;
-                      const showAdjudicationInfo = (inst.number <= cuotasPagadas) && (group.status === 'Activo' || group.status === 'Cerrado' || group.status === 'Subastado');
+                      const showAdjudicationInfo = inst.number <= cuotasPagadas && (group.status === 'Activo' || group.status === 'Cerrado' || group.status === 'Subastado');
 
                       const handleReceiptClick = () => {
                         if (isAdvanced) {
