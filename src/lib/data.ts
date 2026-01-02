@@ -58,6 +58,7 @@ for (const capital of capitalOptions) {
                 status: 'Abierto',
                 userIsMember: false,
                 userAwardStatus: "No Adjudicado",
+                isImmediateActivation: false,
             });
         }
     }
@@ -83,17 +84,19 @@ generatedGroups.push({
 
 // Simulation group for award flow
 generatedGroups.push({
-    id: 'ID-20250401-9374',
-    capital: 20000,
-    plazo: 36,
-    cuotaPromedio: calculateCuotaPromedio(20000, 36),
-    membersCount: 96,
-    totalMembers: 96,
-    status: 'Activo',
+    id: 'ID-20230504-CLOSED',
+    capital: 25000,
+    plazo: 84,
+    cuotaPromedio: calculateCuotaPromedio(25000, 84),
+    membersCount: 144,
+    totalMembers: 144,
+    status: 'Cerrado',
     userIsMember: true,
-    userAwardStatus: "Adjudicado - Pendiente Aceptación",
-    monthsCompleted: 4, // Simulates a few months have passed
-    activationDate: '2025-04-03T00:00:00.000Z', // Activated as requested
+    userAwardStatus: "Adjudicado - Pendiente Aceptación", // Set for testing the award flow
+    monthsCompleted: 84,
+    activationDate: '2023-05-04T00:00:00.000Z',
+    acquiredInAuction: false,
+    isImmediateActivation: false,
 });
 
 
