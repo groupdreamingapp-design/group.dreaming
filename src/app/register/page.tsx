@@ -16,6 +16,7 @@ import { Logo } from '@/components/icons';
 import Link from 'next/link';
 import { Separator } from '@/components/ui/separator';
 import { FirebaseError } from 'firebase/app';
+import { ArrowLeft } from 'lucide-react';
 
 const registerSchema = z.object({
   email: z.string().email('Por favor, introduce un email válido.'),
@@ -140,12 +141,20 @@ export default function RegisterPage() {
                 <Button variant="outline" className="w-full" onClick={handleGoogleSignIn} disabled={isLoading || isGoogleLoading}>
                    {isGoogleLoading ? 'Cargando...' : <><GoogleIcon className="mr-2" /> Registrarse con Google</>}
                 </Button>
-                <p className="text-center text-sm text-muted-foreground">
-                    ¿Ya tienes una cuenta?{' '}
-                    <Link href="/login" className="font-semibold text-primary hover:underline">
-                        Inicia sesión aquí
-                    </Link>
-                </p>
+                <div className="text-center text-sm text-muted-foreground space-y-2">
+                    <p>
+                        ¿Ya tienes una cuenta?{' '}
+                        <Link href="/login" className="font-semibold text-primary hover:underline">
+                            Inicia sesión aquí
+                        </Link>
+                    </p>
+                    <p>
+                        <Link href="/" className="text-xs hover:underline flex items-center justify-center gap-1">
+                            <ArrowLeft className="h-3 w-3" />
+                            Volver al inicio
+                        </Link>
+                    </p>
+                </div>
            </div>
         </CardContent>
       </Card>
