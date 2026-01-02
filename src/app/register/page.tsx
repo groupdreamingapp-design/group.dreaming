@@ -54,7 +54,7 @@ export default function RegisterPage() {
         title: "¡Registro exitoso!",
         description: "Hemos creado tu cuenta. Redirigiendo a tu panel...",
       });
-      router.push('/panel');
+      router.push('/panel/profile');
     } catch (error: any) {
       handleAuthError(error);
     } finally {
@@ -71,7 +71,7 @@ export default function RegisterPage() {
         title: "¡Registro con Google exitoso!",
         description: "Hemos creado tu cuenta. Redirigiendo a tu panel...",
       });
-      router.push('/panel');
+      router.push('/panel/profile');
     } catch (error: any) {
       handleAuthError(error);
     } finally {
@@ -112,8 +112,14 @@ export default function RegisterPage() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-secondary p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
+      <Card className="w-full max-w-md relative">
+         <Button variant="ghost" size="sm" className="absolute top-4 left-4" asChild>
+            <Link href="/">
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Volver al inicio
+            </Link>
+        </Button>
+        <CardHeader className="text-center pt-16">
           <div className="flex justify-center mb-4">
               <Logo className="h-12 w-12 text-primary" />
           </div>
@@ -146,12 +152,6 @@ export default function RegisterPage() {
                         ¿Ya tienes una cuenta?{' '}
                         <Link href="/login" className="font-semibold text-primary hover:underline">
                             Inicia sesión aquí
-                        </Link>
-                    </p>
-                    <p>
-                        <Link href="/" className="text-xs hover:underline flex items-center justify-center gap-1">
-                            <ArrowLeft className="h-3 w-3" />
-                            Volver al inicio
                         </Link>
                     </p>
                 </div>
