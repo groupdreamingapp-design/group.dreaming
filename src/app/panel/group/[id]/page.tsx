@@ -775,7 +775,7 @@ export default function GroupDetail() {
                       
                       const currentAwards = groupAwards[inst.number - 1] || [];
                       const awardDateString = (isPlanActive || group.status === 'Cerrado') && currentAwards.length > 0 && inst.dueDate && !inst.dueDate.startsWith('Mes') ? addDays(parseISO(inst.dueDate), 5).toISOString() : undefined;
-                      const showAdjudicationInfo = currentStatus === 'Pagado' && (group.status === 'Activo' || group.status === 'Cerrado' || group.status === 'Subastado');
+                      const showAdjudicationInfo = inst.number <= cuotasPagadas && (group.status === 'Activo' || group.status === 'Cerrado' || group.status === 'Subastado');
 
 
                       return (
