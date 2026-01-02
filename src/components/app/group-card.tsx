@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -92,7 +91,7 @@ export function GroupCard({ group, isPublic = false }: GroupCardProps) {
     group.status === 'Pendiente' && 'bg-yellow-500/20 text-yellow-700 border-yellow-500/30',
     group.status === 'Activo' && 'bg-green-500/20 text-green-700 border-green-500/30',
     group.status === 'Abierto' && 'bg-blue-500/20 text-blue-700 border-blue-500/30',
-    group.status === 'Subastado' && 'bg-red-500/20 text-red-700 border-red-500/30'
+    group.status === 'Subastado' && 'bg-orange-500/20 text-orange-700 border-orange-500/30'
   );
 
   return (
@@ -113,7 +112,7 @@ export function GroupCard({ group, isPublic = false }: GroupCardProps) {
                 {group.isImmediateActivation && (
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <Badge variant="outline" className="bg-fuchsia-500/20 text-fuchsia-700 border-fuchsia-500/30">
+                      <Badge variant="outline" className="bg-red-500/20 text-red-700 border-red-500/30">
                         <Zap className="mr-1 h-3 w-3" />
                         Activación Inmediata
                       </Badge>

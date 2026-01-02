@@ -76,7 +76,7 @@ generatedGroups.push({
     membersCount: 45, // Simulate 3 members failed payment
     totalMembers: 48,
     status: 'Abierto', // It's open again to fill the remaining slots
-    userIsMember: true, // The current user is one of the confirmed members
+    userIsMember: false, // The current user is NOT a member so it shows in public explore
     userIsAwarded: false,
     monthsCompleted: 0,
     activationDate: undefined, // Not active yet
@@ -237,6 +237,7 @@ function generateNewGroup(templateGroup: Group): Group {
 
 
     
+
 
 
 
