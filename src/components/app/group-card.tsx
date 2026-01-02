@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -131,7 +132,7 @@ export function GroupCard({ group, isPublic = false }: GroupCardProps) {
                     </TooltipContent>
                   </Tooltip>
                 )}
-                {group.userIsAwarded && !isPublic && (
+                {group.userAwardStatus === 'Adjudicado - Aprobado' && !isPublic && (
                     <div className="absolute -top-3 -right-3 animate-bounce">
                         <Trophy className="h-6 w-6 text-yellow-500 fill-yellow-400" />
                     </div>

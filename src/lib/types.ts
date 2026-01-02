@@ -10,6 +10,7 @@ export type User = {
 };
 
 export type GroupStatus = "Abierto" | "Pendiente" | "Activo" | "Cerrado" | "Subastado";
+export type UserAwardStatus = "No Adjudicado" | "Adjudicado - Pendiente Aceptación" | "Adjudicado - Pendiente Garantías" | "Adjudicado - Aprobado";
 
 export type Group = {
   id: string;
@@ -20,7 +21,7 @@ export type Group = {
   totalMembers: number;
   status: GroupStatus;
   userIsMember: boolean;
-  userIsAwarded?: boolean;
+  userAwardStatus: UserAwardStatus;
   monthsCompleted?: number;
   activationDate?: string;
   acquiredInAuction?: boolean;

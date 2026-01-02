@@ -46,7 +46,7 @@ for (const capital of capitalOptions) {
             
             const totalMembers = plazo <= 24 ? 48 : plazo <= 48 ? 96 : 144;
             
-            const membersCount = 0; // All open groups start with 0 members
+            const membersCount = 0;
             groupCounter++;
 
 
@@ -59,7 +59,7 @@ for (const capital of capitalOptions) {
                 totalMembers,
                 status: 'Abierto',
                 userIsMember: false,
-                userIsAwarded: false,
+                userAwardStatus: "No Adjudicado",
             });
         }
     }
@@ -72,11 +72,11 @@ generatedGroups.push({
     capital: 15000,
     plazo: 24,
     cuotaPromedio: calculateCuotaPromedio(15000, 24),
-    membersCount: 47, // Simulate only 1 member is missing
+    membersCount: 47,
     totalMembers: 48,
     status: 'Abierto', // It's open again to fill the remaining slots
     userIsMember: false, // The current user is NOT a member so it shows in public explore
-    userIsAwarded: false,
+    userAwardStatus: 'No Adjudicado',
     monthsCompleted: 0,
     activationDate: undefined, // Not active yet
     isImmediateActivation: true, // Special flag for UI
@@ -92,7 +92,7 @@ generatedGroups.push({
     totalMembers: 24,
     status: 'Cerrado',
     userIsMember: true,
-    userIsAwarded: true, // Let's assume the user was awarded in this old plan
+    userAwardStatus: "Adjudicado - Pendiente Aceptación",
     monthsCompleted: 12,
     activationDate: '2023-05-04T00:00:00.000Z',
 });
@@ -194,7 +194,7 @@ function generateNewGroup(templateGroup: Group): Group {
       membersCount: 0,
       status: 'Abierto',
       userIsMember: false,
-      userIsAwarded: false,
+      userAwardStatus: "No Adjudicado",
       monthsCompleted: 0,
       activationDate: undefined,
       acquiredInAuction: false,
@@ -236,6 +236,7 @@ function generateNewGroup(templateGroup: Group): Group {
 
 
     
+
 
 
 

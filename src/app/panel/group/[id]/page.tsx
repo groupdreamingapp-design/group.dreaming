@@ -1,7 +1,8 @@
 
+
 'use client';
 
-import type { Group, Installment, Award } from '@/lib/types';
+import type { Group, Installment, Award, UserAwardStatus } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
@@ -10,7 +11,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { ArrowLeft, Users, Clock, Users2, Calendar, Gavel, HandCoins, Ticket, Info, Trophy, FileX2, TrendingUp, Hand, Scale, CalendarCheck, Gift, Check, X, Award as AwardIcon, Sparkles } from 'lucide-react';
+import { ArrowLeft, Users, Clock, Users2, Calendar, Gavel, HandCoins, Ticket, Info, Trophy, FileX2, TrendingUp, Hand, Scale, CalendarCheck, Gift, Check, X, Award as AwardIcon, Sparkles, Upload, MessageCircleQuestion } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import { useGroups } from '@/hooks/use-groups';
@@ -63,7 +64,7 @@ const generateStaticAwards = (group: Group): Award[][] => {
     const awards: Award[][] = Array.from({ length: group.plazo }, () => []);
     
     // If the user is already awarded, remove them from the main pool and place their award
-    if (group.userIsAwarded) {
+    if (group.userAwardStatus !== 'No Adjudicado') {
         const userIndex = potentialWinners.indexOf(userOrderNumber);
         if (userIndex > -1) {
             potentialWinners.splice(userIndex, 1);
@@ -244,7 +245,7 @@ export default function GroupDetail() {
 
   const hasAdvancedInstallments = false; // Mock state for benefit eligibility
 
-  const isEligibleForBenefit = group.userIsAwarded && 
+  const isEligibleForBenefit = group.userAwardStatus === 'Adjudicado - Aprobado' && 
       awardMonth && awardMonth > benefitThresholdMonth && 
       (userAwardInfo?.type === 'sorteo' || userAwardInfo?.type === 'sorteo-especial') &&
       hasNoOverduePayments &&
@@ -324,6 +325,21 @@ export default function GroupDetail() {
     });
   };
 
+  const awardStatusText: Record<UserAwardStatus, string> = {
+    "No Adjudicado": "Pendiente",
+    "Adjudicado - Pendiente Aceptación": "Adjudicado (Pend. Aceptación)",
+    "Adjudicado - Pendiente Garantías": "Adjudicado (Pend. Garantías)",
+    "Adjudicado - Aprobado": "Adjudicado (Aprobado)",
+  };
+  const awardStatusIcon: Record<UserAwardStatus, React.ElementType> = {
+      "No Adjudicado": Calendar,
+      "Adjudicado - Pendiente Aceptación": MessageCircleQuestion,
+      "Adjudicado - Pendiente Garantías": Upload,
+      "Adjudicado - Aprobado": Trophy,
+  };
+  const AwardStatusIconComponent = awardStatusIcon[group.userAwardStatus];
+
+
   return (
     <TooltipProvider>
       <div className="mb-4">
@@ -347,8 +363,8 @@ export default function GroupDetail() {
                 <div className="flex items-center gap-2"><TrendingUp className="h-4 w-4 text-primary" /><span>Cuotas Pagadas: <strong>{cuotasPagadas}/{group.plazo}</strong></span></div>
                 <div className="flex items-center gap-2"><HandCoins className="h-4 w-4 text-primary" /><span>Capital Aportado (Puro): <strong>{formatCurrency(capitalAportadoPuro)}</strong></span></div>
                 <div className="flex items-center gap-2">
-                    {group.userIsAwarded ? <Trophy className="h-4 w-4 text-yellow-500" /> : <Calendar className="h-4 w-4 text-primary" />}
-                    <span>Adjudicación: {group.userIsAwarded ? <strong className="text-green-600">Adjudicado (Mes {awardMonth})</strong> : <strong>Pendiente</strong>}</span>
+                    <AwardStatusIconComponent className={cn("h-4 w-4", group.userAwardStatus === "Adjudicado - Aprobado" ? "text-yellow-500" : "text-primary")} />
+                    <span>Adjudicación: <strong className={cn(group.userAwardStatus === 'Adjudicado - Aprobado' && "text-green-600")}>{awardStatusText[group.userAwardStatus]} {group.userAwardStatus !== "No Adjudicado" && `(Mes ${awardMonth})`}</strong></span>
                 </div>
               </CardContent>
             </Card>
@@ -408,7 +424,7 @@ export default function GroupDetail() {
             </div>
         )}
         
-         {isMember && isPlanActive && (
+         {isMember && (isPlanActive || group.userAwardStatus.startsWith('Adjudicado')) && (
            <div className="lg:col-span-3">
              <Card>
                <CardHeader>
@@ -416,6 +432,60 @@ export default function GroupDetail() {
                  <CardDescription>Opciones disponibles para tu plan.</CardDescription>
                </CardHeader>
                <CardContent className="flex flex-wrap gap-2">
+                {group.userAwardStatus === "Adjudicado - Pendiente Aceptación" && (
+                    <Dialog>
+                        <DialogTrigger asChild>
+                            <Button size="sm" variant="default" className='bg-green-600 hover:bg-green-700'>
+                                <AwardIcon className="mr-2 h-4 w-4" /> Aceptar Adjudicación
+                            </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                            <DialogHeader>
+                                <DialogTitle>¡Felicitaciones! Has sido adjudicado</DialogTitle>
+                                <DialogDescription>Tienes 48hs para aceptar. Al aceptar, te comprometes a presentar las garantías y pagar la licitación (si aplica) en las próximas 72hs.</DialogDescription>
+                            </DialogHeader>
+                            <DialogFooter>
+                                <Button variant="destructive">Rechazar</Button>
+                                <Button className='bg-green-600 hover:bg-green-700'>Aceptar Adjudicación</Button>
+                            </DialogFooter>
+                        </DialogContent>
+                    </Dialog>
+                )}
+                 {group.userAwardStatus === "Adjudicado - Pendiente Garantías" && (
+                     <Dialog>
+                        <DialogTrigger asChild>
+                            <Button size="sm" variant="default">
+                                <Upload className="mr-2 h-4 w-4" /> Presentar Garantías
+                            </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                            <DialogHeader>
+                                <DialogTitle>Presentación de Garantías</DialogTitle>
+                                <DialogDescription>Sube la documentación requerida. Tienes 72hs.</DialogDescription>
+                            </DialogHeader>
+                            <div className='space-y-4'>
+                                <Alert>
+                                    <AlertTitle>Liquidación de Licitación</AlertTitle>
+                                    <AlertDescription className='flex justify-between items-center'>
+                                        <span>Monto a pagar: <strong>{formatCurrency(5000)}</strong></span>
+                                        <Button size="sm">Pagar Ahora</Button>
+                                    </AlertDescription>
+                                </Alert>
+                                <div className="space-y-2">
+                                    <Label htmlFor="dniFront">Recibo de Sueldo / Comprobante de Ingresos</Label>
+                                    <Input id="dniFront" type="file" />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="dniBack">Garantía Propietaria / Seguro de Caución</Label>
+                                    <Input id="dniBack" type="file" />
+                                </div>
+                            </div>
+                            <DialogFooter>
+                                <Button type="submit">Enviar Documentación</Button>
+                            </DialogFooter>
+                        </DialogContent>
+                    </Dialog>
+                )}
                  <Dialog onOpenChange={() => { setCuotasToAdvance(0); setTermsAcceptedAdvance(false); }}>
                    <DialogTrigger asChild><Button size="sm" variant="secondary" disabled={!isPlanActive}><TrendingUp className="mr-2 h-4 w-4" /> Adelantar</Button></DialogTrigger>
                    <DialogContent>
@@ -465,7 +535,7 @@ export default function GroupDetail() {
                    </DialogContent>
                  </Dialog>
  
-                 {!group.userIsAwarded && (
+                 {group.userAwardStatus === "No Adjudicado" && (
                    <>
                      <Dialog onOpenChange={() => { setCuotasToBid(0); setTermsAcceptedBid(false); }}>
                        <DialogTrigger asChild>
