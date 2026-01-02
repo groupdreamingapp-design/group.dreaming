@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { ArrowLeft, Users, Clock, Users2, Calendar, Gavel, HandCoins, Ticket, Info, Trophy, FileX2, TrendingUp, Hand, Scale, CalendarCheck, Gift, Check, X, Award as AwardIcon } from 'lucide-react';
+import { ArrowLeft, Users, Clock, Users2, Calendar, Gavel, HandCoins, Ticket, Info, Trophy, FileX2, TrendingUp, Hand, Scale, CalendarCheck, Gift, Check, X, Award as AwardIcon, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import { useGroups } from '@/hooks/use-groups';
@@ -108,7 +108,7 @@ const generateStaticAwards = (group: Group): Award[][] => {
                  } else {
                     const isDeserted = customRandom() < 0.15 && desertedLicitaciones < 3; // 15% chance, max 3
                     if (!isDeserted) {
-                        if (!awards[i].some(a => a.orderNumber === winnerPool[0])) {
+                        if (winnerPool.length > 0 && !awards[i].some(a => a.orderNumber === winnerPool[0])) {
                             awards[i].push({ type: 'licitacion', orderNumber: winnerPool.shift()! });
                         }
                     } else {
@@ -643,7 +643,7 @@ export default function GroupDetail() {
                                        <span>{<ClientFormattedDate dateString={awardDateString} formatString="dd/MM/yyyy" />}</span>
                                   </div>
                               )}
-                              {showAdjudicationInfo && (
+                              {showAdjudicationInfo && currentAwards.length > 0 && (
                                 <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1">
                                   {currentAwards?.map(award => (
                                     <div key={`${award.type}-${award.orderNumber}`} className="flex items-center gap-1">
