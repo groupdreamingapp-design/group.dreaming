@@ -73,7 +73,7 @@ for (let i = 0; i < 3; i++) {
         const groupToUpdate = openGroups[randomIndex];
         if (groupToUpdate) {
           groupToUpdate.membersCount = groupToUpdate.totalMembers - 1;
-          groupToUpdate.isImmediateActivation = true;
+          // groupToUpdate.isImmediateActivation = true; // This flag is now used differently
           // Remove it from the pool so we don't select it again
           openGroups.splice(randomIndex, 1);
         }
@@ -98,19 +98,19 @@ generatedGroups.push({
 });
 
 
-// Simulation group for award flow
+// Simulation group for award flow, now open to join
 generatedGroups.push({
     id: 'ID-20250501-AWRD',
     capital: 20000,
     plazo: 36,
     cuotaPromedio: calculateCuotaPromedio(20000, 36),
-    membersCount: 72,
+    membersCount: 65,
     totalMembers: 72,
-    status: 'Activo',
-    userIsMember: true,
-    userAwardStatus: "Adjudicado - Pendiente Aceptación", // Set for testing the award flow
-    monthsCompleted: 7,
-    activationDate: '2025-05-04T00:00:00.000Z',
+    status: 'Abierto',
+    userIsMember: false,
+    userAwardStatus: "No Adjudicado",
+    monthsCompleted: 0,
+    activationDate: undefined,
     acquiredInAuction: false,
     isImmediateActivation: false,
 });
@@ -150,6 +150,22 @@ generatedGroups.push({
     isImmediateActivation: false,
 });
 
+// A closed group example
+generatedGroups.push({
+    id: 'ID-20230504-OPEN',
+    capital: 15000,
+    plazo: 48,
+    cuotaPromedio: calculateCuotaPromedio(15000, 48),
+    membersCount: 35,
+    totalMembers: 48,
+    status: 'Abierto',
+    userIsMember: false,
+    userAwardStatus: "No Adjudicado",
+    monthsCompleted: 0,
+    activationDate: undefined,
+    acquiredInAuction: false,
+    isImmediateActivation: false,
+});
 
 export const initialGroups: Group[] = generatedGroups;
 
