@@ -3,7 +3,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Gift, Award, ShieldCheck } from "lucide-react";
+import { ArrowLeft, Gift, Award, ShieldCheck, Ticket } from "lucide-react";
 import Link from "next/link";
 import { useUser } from "@/firebase";
 import { useRouter } from "next/navigation";
@@ -27,7 +27,7 @@ const benefits = [
                 title: "La Recompensa",
                 points: [
                     "Se realizará la devolución del 50% del 'Derecho de Suscripción' abonado en el plan vigente.",
-                    "Se otorgará un descuento del 50% en el 'Derecho de Suscripción' para el próximo plan que el miembro suscriba en la plataforma."
+                    "Se otorgará un Cupón con un descuento del 50% en el 'Derecho de Suscripción' para el próximo plan que el miembro suscriba."
                 ]
             },
             {
@@ -59,7 +59,7 @@ const benefits = [
             {
                 title: "La Recompensa",
                 points: [
-                    "Además de la adjudicación de su capital, cada ganador del Sorteo Especial recibirá un Premio Sorpresa.",
+                    "Además de la adjudicación de su capital, cada ganador del Sorteo Especial recibirá un Premio Sorpresa en forma de Cupón.",
                     "El premio es una bonificación adicional y varía según el grupo y las condiciones promocionales vigentes."
                 ]
             },
@@ -107,7 +107,7 @@ export default function Benefits() {
                 <p className="text-muted-foreground">Incentivos y recompensas por tu compromiso y fidelidad.</p>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start mb-8">
                 {benefits.map((benefit, bIndex) => (
                     <Card key={bIndex} className="shadow-lg h-full flex flex-col">
                         <CardHeader>
@@ -139,6 +139,39 @@ export default function Benefits() {
                     </Card>
                 ))}
             </div>
+
+            <Card className="shadow-lg">
+                <CardHeader>
+                    <div className="flex items-center gap-4">
+                        <div className="bg-primary/10 p-3 rounded-lg">
+                            <Ticket className="h-6 w-6 text-primary" />
+                        </div>
+                        <div>
+                            <CardTitle>Cupones de Beneficios</CardTitle>
+                            <CardDescription>Códigos únicos que desbloquean recompensas y descuentos especiales en la plataforma.</CardDescription>
+                        </div>
+                    </div>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                    <div>
+                        <h3 className="font-semibold text-lg mb-3 border-b pb-2">¿Cómo funcionan?</h3>
+                        <ul className="space-y-3 text-sm text-muted-foreground">
+                            <li className="flex items-start gap-3">
+                                <ShieldCheck className="h-4 w-4 mt-1 text-primary shrink-0" />
+                                <span>Los cupones son códigos alfanuméricos que recibes en tus notificaciones al cumplir los requisitos de ciertos beneficios (como "Los últimos serán los primeros").</span>
+                            </li>
+                             <li className="flex items-start gap-3">
+                                <ShieldCheck className="h-4 w-4 mt-1 text-primary shrink-0" />
+                                <span>Ofrecen ventajas como descuentos en futuros planes, reintegros en tu billetera o premios especiales.</span>
+                            </li>
+                            <li className="flex items-start gap-3">
+                                <ShieldCheck className="h-4 w-4 mt-1 text-primary shrink-0" />
+                                <span>Para usarlos, simplemente copia el código y canjéalo en la sección "Canjear Cupón" de tu Billetera en el panel de usuario.</span>
+                            </li>
+                        </ul>
+                    </div>
+                </CardContent>
+            </Card>
         </>
     );
 }
