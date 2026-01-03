@@ -2,7 +2,7 @@
 'use client';
 
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, DollarSign, Megaphone, FileText, ShieldCheck, Clock, Zap } from "lucide-react";
+import { ArrowLeft, DollarSign, Megaphone, FileText, ShieldCheck, Clock, Zap, Handshake, UserCheck, HeartHandshake, BadgeCheck } from "lucide-react";
 import Link from "next/link";
 import { useUser } from "@/firebase";
 import { useRouter } from "next/navigation";
@@ -47,6 +47,29 @@ const personalSavingPoints = [
         icon: ShieldCheck,
         title: "Protección MEP",
         description: "Ahorrar billetes físicos tiene riesgos de seguridad. En GD, tu dinero está bancarizado, digitalizado y convertido a valor MEP, protegido contra la devaluación y con trazabilidad total.",
+    }
+];
+
+const informalCirclePoints = [
+    {
+        icon: Handshake,
+        title: "De la 'Palabra' al Contrato",
+        description: "En un círculo informal, un problema financiero pone en riesgo la amistad. En GD, un contrato individual protege la relación; si alguien falla, le falla a un sistema preparado para cubrirlo.",
+    },
+    {
+        icon: UserCheck,
+        title: "Alcance y Trazabilidad (KYC)",
+        description: "En un grupo de amigos, no sabes quién es el 'amigo de un amigo'. Aquí, cada miembro pasa por una validación de identidad (KYC), asegurando que todos son personas reales y validadas.",
+    },
+    {
+        icon: HeartHandshake,
+        title: "Seguridad ante Siniestros",
+        description: "Si un participante de un círculo informal fallece, el grupo enfrenta un dilema. En GD, el Seguro de Vida Colectivo cancela la deuda, protegiendo a su familia y al resto de los miembros.",
+    },
+    {
+        icon: BadgeCheck,
+        title: "Garantía de Adjudicación",
+        description: "En un grupo informal, el último en cobrar cruza los dedos. En GD, la Administradora garantiza la adjudicación de todos los miembros, respaldada por el Fondo de Reserva y la estructura legal.",
     }
 ];
 
@@ -109,6 +132,28 @@ export default function ComparisonsPage() {
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                     {personalSavingPoints.map((point, index) => (
+                        <div key={index} className="flex flex-col items-center text-center">
+                             <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 mb-4">
+                                <point.icon className="h-6 w-6 text-primary" />
+                            </div>
+                            <h3 className="text-lg font-bold mb-2">{point.title}</h3>
+                            <p className="text-sm text-muted-foreground">{point.description}</p>
+                        </div>
+                    ))}
+                </div>
+            </section>
+
+            <Separator className="my-12" />
+
+            <section className="w-full py-12">
+                <div className="text-center space-y-4 mb-12">
+                    <h2 className="text-3xl font-bold tracking-tighter md:text-4xl/tight">Group Dreaming vs. Círculos Informales</h2>
+                    <p className="mx-auto max-w-[700px] text-muted-foreground md:text-xl">
+                       "No cambies a tus amigos, cambiá el sistema con el que ahorran."
+                    </p>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                    {informalCirclePoints.map((point, index) => (
                         <div key={index} className="flex flex-col items-center text-center">
                              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 mb-4">
                                 <point.icon className="h-6 w-6 text-primary" />
