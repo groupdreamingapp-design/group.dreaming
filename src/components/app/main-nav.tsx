@@ -45,11 +45,6 @@ export function MainNav({ isMobile = false }: MainNavProps) {
       label: "Billetera",
       icon: Wallet,
     },
-     {
-      href: "/panel/dolar-mep",
-      label: "Dólar MEP",
-      icon: DollarSign,
-    },
   ];
 
   const linkClass = (href: string) => cn(

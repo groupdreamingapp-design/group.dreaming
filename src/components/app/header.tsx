@@ -11,7 +11,6 @@ import { Notifications } from "./notifications"
 export function Header() {
   const infoLinks = [
     { href: "/panel/transparency", label: "Transparencia", icon: PieChart },
-    { href: "/panel/dolar-mep", label: "Dólar MEP", icon: DollarSign },
     { href: "/panel/benefits", label: "Beneficios", icon: Gift },
     { href: "/panel/rules", label: "Reglamento", icon: Landmark },
     { href: "/panel/faq", label: "Preguntas Frecuentes", icon: HelpCircle },

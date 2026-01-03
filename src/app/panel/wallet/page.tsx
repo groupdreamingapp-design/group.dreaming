@@ -1,23 +1,103 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { transactions } from "@/lib/data";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Download, Upload, Calendar as CalendarIcon, ListRestart } from "lucide-react";
+import { Download, Upload, Calendar as CalendarIcon, ListRestart, DollarSign, Clock, TrendingUp, TrendingDown, Loader2, AlertTriangle } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { format, parseISO, startOfDay, endOfDay } from "date-fns";
 import type { DateRange } from "react-day-picker";
 import { PaymentMethods } from '@/components/app/payment-methods';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { es } from 'date-fns/locale';
 
+interface MepRate {
+    moneda: string;
+    casa: string;
+    nombre: string;
+    compra: number;
+    venta: number;
+    fechaActualizacion: string;
+}
 
 type TransactionTypeFilter = 'todos' | 'ingreso' | 'egreso';
+
+function DolarMepCard() {
+    const [mepRate, setMepRate] = useState<MepRate | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+        const fetchMepRate = async () => {
+            try {
+                const response = await fetch('https://dolarapi.com/v1/dolares/mep');
+                if (!response.ok) {
+                    throw new Error(`Error HTTP: ${response.status}`);
+                }
+                const data = await response.json();
+                setMepRate(data);
+            } catch (e: any) {
+                setError(e.message || 'Error al obtener la cotización.');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchMepRate();
+    }, []);
+
+    const formatCurrencyARS = (amount: number) => new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(amount);
+
+    return (
+        <Card>
+            <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-base">
+                    <DollarSign className="h-5 w-5 text-primary" />
+                    Dólar MEP (Referencia)
+                </CardTitle>
+                <CardDescription>Tipo de cambio para operaciones en ARS.</CardDescription>
+            </CardHeader>
+            <CardContent>
+                {loading && (
+                    <div className="flex items-center justify-center gap-2 py-4 text-muted-foreground">
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        <span className="text-sm">Cargando...</span>
+                    </div>
+                )}
+                {error && (
+                    <div className="flex items-center justify-center gap-2 py-4 text-red-600">
+                        <AlertTriangle className="h-4 w-4" />
+                        <span className="text-sm">{error}</span>
+                    </div>
+                )}
+                {mepRate && (
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="flex flex-col items-center p-2 bg-muted rounded-lg">
+                            <span className="text-xs font-medium text-muted-foreground">COMPRA</span>
+                            <p className="text-lg font-bold">{formatCurrencyARS(mepRate.compra)}</p>
+                        </div>
+                        <div className="flex flex-col items-center p-2 bg-muted rounded-lg">
+                            <span className="text-xs font-medium text-muted-foreground">VENTA</span>
+                            <p className="text-lg font-bold">{formatCurrencyARS(mepRate.venta)}</p>
+                        </div>
+                    </div>
+                )}
+            </CardContent>
+            {mepRate && (
+                <CardFooter className="text-xs text-muted-foreground justify-center pt-4">
+                    <Clock className="mr-1.5 h-3 w-3" />
+                    Actualizado: {format(parseISO(mepRate.fechaActualizacion), "dd/MM HH:mm", { locale: es })}
+                </CardFooter>
+            )}
+        </Card>
+    )
+}
 
 export default function Wallet() {
   const [typeFilter, setTypeFilter] = useState<TransactionTypeFilter>('todos');
@@ -60,7 +140,7 @@ export default function Wallet() {
         <Card className="lg:col-span-1">
           <CardHeader>
             <CardTitle>Saldo Disponible</CardTitle>
-            <CardDescription>Dinero disponible para usar en la plataforma.</CardDescription>
+            <CardDescription>Dinero para usar en la plataforma.</CardDescription>
           </CardHeader>
           <CardContent>
             <p className="text-4xl font-bold">{formatCurrency(availableBalance)}</p>
@@ -75,11 +155,13 @@ export default function Wallet() {
             </Button>
           </CardFooter>
         </Card>
+        
+        <DolarMepCard />
 
-        <Card className="lg:col-span-2">
+        <Card className="md:col-span-2 lg:col-span-1">
            <CardHeader>
                 <CardTitle>Métodos de Pago</CardTitle>
-                <CardDescription>Configura cómo se realizarán tus pagos de débito automático.</CardDescription>
+                <CardDescription>Débito automático de cuotas.</CardDescription>
             </CardHeader>
             <CardContent>
                 <PaymentMethods />
