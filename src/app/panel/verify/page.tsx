@@ -402,7 +402,7 @@ export default function Verification() {
                                         <CheckCircle className="h-4 w-4 text-green-500" />
                                         <AlertTitle>¡Verificación Exitosa!</AlertTitle>
                                         <AlertDescription>Tu identidad facial ha sido confirmada.</AlertDescription>
-                                    </Alert>
+                                    </Aler>
                                     <Button onClick={handleRetryBiometric} variant="outline" className="w-full"><Repeat className="mr-2"/>Repetir Verificación</Button>
                                 </div>
                             )}
