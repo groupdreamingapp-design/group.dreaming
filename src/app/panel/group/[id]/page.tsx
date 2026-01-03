@@ -733,7 +733,7 @@ export default function GroupDetail() {
                              <Card className="bg-muted/50 p-4 space-y-2">
                                 <div className="flex justify-between"><span>Capital Aportado (Puro):</span><strong>{formatCurrency(capitalAportadoPuro)}</strong></div>
                                 <div className="flex justify-between text-red-600"><span>Penalidad (5% + IVA):</span><strong>-{formatCurrency(penalidadBaja)}</strong></div>
-                                <div className="flex justify-between font-bold border-t pt-2 mt-2"><span>Monto a Devolver (al final):</span><strong>{formatCurrency(capitalAportadoPuro - penalidadBaja)}</strong></div>
+                                <div className="flex justify-between font-bold text-base border-t pt-2 mt-2"><span>Monto a Devolver (al final):</span><strong>{formatCurrency(capitalAportadoPuro - penalidadBaja)}</strong></div>
                              </Card>
                               <p className="text-xs text-muted-foreground">La devolución se efectuará una vez finalizado el plazo original del grupo para no afectar al resto de los miembros.</p>
                               <div className="items-top flex space-x-2 pt-2">
@@ -950,7 +950,7 @@ export default function GroupDetail() {
                         installment={selectedReceipt}
                         group={group}
                         user={mockUser}
-                        awards={groupAwards[selectedReceipt.number - 1] || []}
+                        awards={groupAwards[selectedReceipt.number - 2] || []}
                     />
                 </div>
             </DialogContent>
@@ -959,7 +959,3 @@ export default function GroupDetail() {
     </TooltipProvider>
   );
 }
-
-    
-
-    

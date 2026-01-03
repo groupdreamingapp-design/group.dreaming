@@ -58,6 +58,7 @@ export function InstallmentReceipt({ installment, group, user, awards }: Receipt
     const receiptId = `R${installment.number.toString().padStart(4, '0')}-${group.id.split('-')[1]}`;
     const paymentDate = new Date(); // Simulate payment date as today
     const isAdvancedPayment = installment.total === installment.breakdown.alicuotaPura;
+    const previousMonthNumber = installment.number - 1;
 
     return (
         <div className="bg-background text-foreground p-4 md:p-8">
@@ -149,31 +150,37 @@ export function InstallmentReceipt({ installment, group, user, awards }: Receipt
                     </div>
                 </section>
                 
-                 {awards.length > 0 && !isAdvancedPayment && (
-                    <section className="mt-6 pt-4 border-t">
-                        <h3 className="text-sm font-semibold mb-3">Información de Adjudicación (Mes {installment.number}):</h3>
-                        <div className="grid grid-cols-2 gap-4 text-xs">
-                             {awards.find(a => a.type === 'sorteo') && (
-                                <div className="flex items-center gap-2">
-                                    <Ticket className="h-4 w-4 text-blue-500" />
-                                    <span>Sorteo: Orden #{awards.find(a => a.type === 'sorteo')?.orderNumber}</span>
-                                </div>
-                             )}
-                             {awards.find(a => a.type === 'licitacion') && (
-                                <div className="flex items-center gap-2">
-                                    <HandCoins className="h-4 w-4 text-orange-500" />
-                                    <span>Licitación: Orden #{awards.find(a => a.type === 'licitacion')?.orderNumber}</span>
-                                </div>
-                             )}
-                              {awards.filter(a => a.type === 'sorteo-especial').map((award, idx) => (
-                                <div key={idx} className="flex items-center gap-2">
-                                    <Gift className="h-4 w-4 text-fuchsia-500" />
-                                    <span>Sorteo Especial: Orden #{award.orderNumber > 0 ? award.orderNumber : '??'}</span>
-                                </div>
-                              ))}
+                <section className="mt-6 pt-4 border-t">
+                    {awards.length > 0 && !isAdvancedPayment ? (
+                        <div>
+                            <h3 className="text-sm font-semibold mb-3">Información de Adjudicación (Mes Anterior: {previousMonthNumber}):</h3>
+                            <div className="grid grid-cols-2 gap-4 text-xs">
+                                {awards.find(a => a.type === 'sorteo') && (
+                                    <div className="flex items-center gap-2">
+                                        <Ticket className="h-4 w-4 text-blue-500" />
+                                        <span>Sorteo: Orden #{awards.find(a => a.type === 'sorteo')?.orderNumber}</span>
+                                    </div>
+                                )}
+                                {awards.find(a => a.type === 'licitacion') && (
+                                    <div className="flex items-center gap-2">
+                                        <HandCoins className="h-4 w-4 text-orange-500" />
+                                        <span>Licitación: Orden #{awards.find(a => a.type === 'licitacion')?.orderNumber}</span>
+                                    </div>
+                                )}
+                                {awards.filter(a => a.type === 'sorteo-especial').map((award, idx) => (
+                                    <div key={idx} className="flex items-center gap-2">
+                                        <Gift className="h-4 w-4 text-fuchsia-500" />
+                                        <span>Sorteo Especial: Orden #{award.orderNumber > 0 ? award.orderNumber : '??'}</span>
+                                    </div>
+                                ))}
+                            </div>
                         </div>
-                    </section>
-                 )}
+                    ) : (
+                        <p className="text-xs text-muted-foreground text-center">
+                           {installment.number === 1 ? "Los resultados del primer acto de adjudicación se reflejarán en su próximo recibo." : "No hubo adjudicaciones para informar del mes anterior."}
+                        </p>
+                    )}
+                </section>
 
                 <footer className="mt-8 text-center text-xs text-muted-foreground">
                     <p>Este es un comprobante de pago no fiscal. Válido para uso interno.</p>
