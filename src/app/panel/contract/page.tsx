@@ -15,42 +15,46 @@ const contractClauses = [
     },
     {
         title: "TERCERA: FUNCIONAMIENTO DEL SISTEMA",
-        content: "EL SUSCRIPTOR se integra a un grupo con un número determinado de miembros, un plazo y un capital definidos. Mensualmente, abonará una cuota compuesta por: a) Alícuota (parte del capital), b) Gastos Administrativos, c) Seguro de Vida sobre saldo deudor. Las adjudicaciones se realizan mensualmente, una por sorteo y otra por licitación, entre los miembros con cuotas al día. EL SUSCRIPTOR declara bajo juramento gozar de buena salud, y que tiene pleno conocimiento de que el seguro de vida contratado en forma colectiva por LA ADMINISTRADORA no cubre siniestros ocurridos a consecuencia de enfermedades preexistentes a la fecha de suscripción del presente contrato."
+        content: "EL SUSCRIPTOR se integra a un grupo con un número determinado de miembros, un plazo y un capital definidos. Mensualmente, abonará una cuota compuesta por: a) Alícuota (parte del capital), b) Gastos Administrativos, c) Seguro de Vida sobre saldo deudor. EL SUSCRIPTOR declara bajo juramento gozar de buena salud, y que tiene pleno conocimiento de que el seguro de vida contratado en forma colectiva por LA ADMINISTRADORA no cubre siniestros ocurridos a consecuencia de enfermedades preexistentes a la fecha de suscripción del presente contrato."
     },
     {
-        title: "CUARTA: DERECHOS Y OBLIGACIONES DE LA ADMINISTRADORA",
-        content: "LA ADMINISTRADORA se obliga a: a) Gestionar los fondos de los grupos de manera diligente y transparente. b) Realizar mensualmente los actos de adjudicación por sorteo y licitación. c) Entregar los capitales a los suscriptores adjudicados en los plazos estipulados, previa constitución de las garantías correspondientes. d) Administrar el Mercado Secundario (Subastas), garantizando un proceso justo y transparente. Esto incluye: publicar los planes que los suscriptores ofrezcan, establecer el precio base (50% del total de cuotas puras emitidas), y liquidar el monto al vendedor descontando deudas y la comisión del 2% (+IVA). e) Si un plan en subasta no recibe ofertas, LA ADMINISTRADORA lo absorberá, utilizando sus propios fondos para realizar una oferta de licitación en el mes siguiente y así garantizar la liquidación al vendedor."
+        title: "CUARTA: ACTO DE ADJUDICACIÓN",
+        content: "Mensualmente se realizan dos adjudicaciones: una por sorteo y otra por licitación. En la licitación, la oferta mínima es de una (1) cuota pura y la máxima es la totalidad de las cuotas puras futuras pendientes de pago. En caso de empate, se definirá por sorteo entre los ofertantes. REGLA DE PRIORIDAD: Si LA ADMINISTRADORA ha adquirido un plan (por baja de un miembro o por absorber una subasta sin ofertas), dicho plan licitará automáticamente por el monto máximo posible en el mes vigente. Esta oferta de LA ADMINISTRADORA tendrá prioridad y ganará la adjudicación por licitación de ese mes, anulando cualquier otra oferta de licitación para ese cupo, con el fin de garantizar la liquidez y el correcto funcionamiento del grupo."
     },
     {
-        title: "QUINTA: DERECHOS Y OBLIGACIONES DEL SUSCRIPTOR",
+        title: "QUINTA: DERECHOS Y OBLIGACIONES DE LA ADMINISTRADORA",
+        content: "LA ADMINISTRADORA se obliga a: a) Gestionar los fondos de los grupos de manera diligente y transparente. b) Realizar mensualmente los actos de adjudicación. c) Entregar los capitales a los suscriptores adjudicados en los plazos estipulados, previa constitución de las garantías correspondientes. d) Administrar el Mercado Secundario (Subastas), garantizando un proceso justo. Esto incluye: publicar los planes, establecer el precio base (50% del total de cuotas puras emitidas), y liquidar el monto al vendedor descontando deudas y la comisión del 2% (+IVA). e) Si un plan en subasta no recibe ofertas, LA ADMINISTRADORA lo absorberá, utilizando sus propios fondos para realizar una oferta de licitación en el mes siguiente y así garantizar la liquidación al vendedor."
+    },
+    {
+        title: "SEXTA: DERECHOS Y OBLIGACIONES DEL SUSCRIPTOR",
         content: "EL SUSCRIPTOR se obliga a: a) Pagar puntualmente las cuotas mensuales. b) En caso de ser adjudicado, constituir las garantías requeridas por LA ADMINISTRADORA y continuar pagando las cuotas restantes. EL SUSCRIPTOR tiene derecho a: c) Participar de los actos de adjudicación si su cuota está al día. d) Ceder su plan en el Mercado Secundario (subastar) a partir de la 3ra cuota paga. e) Solicitar la baja voluntaria del plan. f) Como comprador en una subasta, al ganar y pagar, asume todos los derechos y obligaciones del plan, incluyendo los pagos futuros. La comisión de compra (2% +IVA) se descuenta del capital al momento de su adjudicación. Un plan adquirido en subasta no puede volver a ser subastado."
     },
     {
-        title: "SEXTA: GARANTÍAS DE ADJUDICACIÓN",
+        title: "SÉPTIMA: GARANTÍAS DE ADJUDICACIÓN",
         content: "Al momento de resultar adjudicado y previo a la entrega del capital, EL SUSCRIPTOR deberá constituir una garantía a satisfacción de LA ADMINISTRADORA para asegurar el cumplimiento del pago de las cuotas restantes. La garantía requerida será determinada por LA ADMINISTRADORA en función del análisis de riesgo crediticio (incluyendo, pero no limitado a, scoring crediticio y reportes de Veraz), el saldo deudor y el plazo restante del plan. Las garantías aceptadas podrán ser, a modo enunciativo: a) presentación de uno o más recibos de sueldo que demuestren solvencia suficiente, b) una garantía propietaria de un inmueble, c) la contratación de un seguro de caución a cargo de EL SUSCRIPTOR."
     },
     {
-        title: "SÉPTIMA: FINALIZACIÓN DEL CONTRATO, INCUMPLIMIENTO Y BAJA",
+        title: "OCTAVA: FINALIZACIÓN DEL CONTRATO, INCUMPLIMIENTO Y BAJA",
         content: "El contrato finalizará de pleno derecho al vencimiento del plazo del grupo. La falta de pago de dos (2) o más cuotas facultará a LA ADMINISTRADORA a declarar la rescisión. Si es un plan original, se procederá a una 'Subasta Forzosa'; del monto obtenido en la misma, se cubrirán deudas, penalidades y comisiones, y el excedente, si lo hubiere, será acreditado al suscriptor original. Si el plan fue adquirido en subasta, se procederá a una 'Baja Forzosa'. La 'Baja Voluntaria' implica la devolución del capital puro aportado al final del ciclo del grupo, con las penalidades correspondientes. Si el ganador de una subasta no integra el capital en 24hs, será multado (10% +IVA sobre su oferta) y el plan se volverá a subastar."
     },
     {
-        title: "OCTAVA: MONEDA Y TIPO DE CAMBIO",
+        title: "NOVENA: MONEDA Y TIPO DE CAMBIO",
         content: "Todos los valores, capitales, cuotas y transacciones expresados en la plataforma se denominan en Dólares Estadounidenses (USD). Cualquier pago, liquidación o transferencia que deba realizarse en Pesos Argentinos (ARS) se convertirá utilizando la cotización de 'Dólar MEP' (dólar bolsa) vendedora informada por una fuente de mercado de referencia al cierre del día hábil inmediato anterior a la fecha de la operación."
     },
     {
-        title: "NOVENA: LIMITACIÓN DE RESPONSABILIDAD",
+        title: "DÉCIMA: LIMITACIÓN DE RESPONSABILIDAD",
         content: "LA ADMINISTRADora no será responsable por daños, perjuicios o pérdidas sufridas por EL SUSCRIPTOR causados por fallas en el sistema, en el servidor o en Internet, que sean ajenas a su control. Tampoco será responsable por cualquier virus que pudiera infectar el equipo de EL SUSCRIPTOR como consecuencia del acceso o uso de su sitio web. EL SUSCRIPTOR es el único responsable de la confidencialidad de su contraseña y del uso de su cuenta, y exime de responsabilidad a LA ADMINISTRADora por el acceso no autorizado o uso indebido de la misma por parte de terceros."
     },
     {
-        title: "DÉCIMA: JURISDICCIÓN",
+        title: "UNDÉCIMA: JURISDICCIÓN",
         content: "Para cualquier controversia que pudiera surgir de la interpretación o ejecución del presente contrato, las partes se someten a la jurisdicción de los Tribunales Ordinarios de la Ciudad Autónoma de Buenos Aires, renunciando a cualquier otro fuero o jurisdicción."
     },
     {
-        title: "UNDÉCIMA: ACEPTACIÓN",
+        title: "DUODÉCIMA: ACEPTACIÓN",
         content: "EL SUSCRIPTOR, al hacer clic en el botón 'Confirmar y Unirme' o acción equivalente en la plataforma y habiendo tildado la casilla de aceptación, manifiesta su consentimiento y aceptación expresa, incondicional e irrevocable de todos y cada uno de los términos y condiciones establecidos en el presente Contrato de Adhesión, perfeccionándose el vínculo contractual entre las partes."
     },
     {
-        title: "DUODÉCIMA: ANEXO DE BENEFICIOS",
+        title: "DECIMOTERCERA: ANEXO DE BENEFICIOS",
         content: "LA ADMINISTRADORA podrá ofrecer programas de beneficios y recompensas a los suscriptores. Los términos, condiciones, vigencia y funcionamiento de dichos programas se detallarán en la sección 'Beneficios' de la plataforma, la cual se considera un anexo al presente contrato. LA ADMINISTRADORA se reserva el derecho de modificar o discontinuar dichos programas, comunicándolo de forma fehaciente. La participación en los mismos es opcional y está sujeta al cumplimiento de las bases y condiciones específicas de cada uno."
     }
 ];
