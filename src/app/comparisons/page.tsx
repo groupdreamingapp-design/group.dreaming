@@ -2,12 +2,13 @@
 'use client';
 
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, DollarSign, Megaphone, FileText, ShieldCheck, Clock, Zap, Handshake, UserCheck, HeartHandshake, BadgeCheck, BadgePercent, UserX, Landmark, FileCheck } from "lucide-react";
+import { ArrowLeft, DollarSign, Megaphone, FileText, ShieldCheck, Clock, Zap, Handshake, UserCheck, HeartHandshake, BadgeCheck, BadgePercent, UserX, Landmark, FileCheck, Banknote, Users, Gavel, Save } from "lucide-react";
 import Link from "next/link";
 import { useUser } from "@/firebase";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { Separator } from "@/components/ui/separator";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 
 const traditionalPoints = [
     {
@@ -124,7 +125,39 @@ export default function ComparisonsPage() {
                 <p className="text-muted-foreground">Entiende las ventajas clave de nuestro sistema.</p>
             </div>
 
-            <section className="w-full py-12">
+            <Card className="mb-12">
+                <CardHeader>
+                    <CardTitle>Navegación Rápida</CardTitle>
+                </CardHeader>
+                <CardContent className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                    <Button asChild variant="outline">
+                        <a href="#vs-traditional" className="flex items-center gap-2">
+                            <Gavel className="h-4 w-4" />
+                            <span>vs. Plan Tradicional</span>
+                        </a>
+                    </Button>
+                    <Button asChild variant="outline">
+                        <a href="#vs-personal" className="flex items-center gap-2">
+                            <Save className="h-4 w-4" />
+                            <span>vs. Ahorro Personal</span>
+                        </a>
+                    </Button>
+                     <Button asChild variant="outline">
+                        <a href="#vs-informal" className="flex items-center gap-2">
+                            <Users className="h-4 w-4" />
+                           <span>vs. Círculo Informal</span>
+                        </a>
+                    </Button>
+                    <Button asChild variant="outline">
+                        <a href="#vs-bank" className="flex items-center gap-2">
+                            <Banknote className="h-4 w-4" />
+                            <span>vs. Banco</span>
+                        </a>
+                    </Button>
+                </CardContent>
+            </Card>
+
+            <section className="w-full py-12" id="vs-traditional">
                 <div className="text-center space-y-4 mb-12">
                     <h2 className="text-3xl font-bold tracking-tighter md:text-4xl/tight">Group Dreaming vs. Plan de Ahorro Tradicional</h2>
                     <p className="mx-auto max-w-[700px] text-muted-foreground md:text-xl">
@@ -146,7 +179,7 @@ export default function ComparisonsPage() {
 
             <Separator className="my-12" />
 
-            <section className="w-full py-12">
+            <section className="w-full py-12" id="vs-personal">
                 <div className="text-center space-y-4 mb-12">
                     <h2 className="text-3xl font-bold tracking-tighter md:text-4xl/tight">Group Dreaming vs. Ahorro Personal ("Bajo el colchón")</h2>
                     <p className="mx-auto max-w-[700px] text-muted-foreground md:text-xl">
@@ -168,7 +201,7 @@ export default function ComparisonsPage() {
 
             <Separator className="my-12" />
 
-            <section className="w-full py-12">
+            <section className="w-full py-12" id="vs-informal">
                 <div className="text-center space-y-4 mb-12">
                     <h2 className="text-3xl font-bold tracking-tighter md:text-4xl/tight">Group Dreaming vs. Círculos Informales</h2>
                     <p className="mx-auto max-w-[700px] text-muted-foreground md:text-xl">
@@ -190,7 +223,7 @@ export default function ComparisonsPage() {
 
             <Separator className="my-12" />
 
-            <section className="w-full py-12">
+            <section className="w-full py-12" id="vs-bank">
                 <div className="text-center space-y-4 mb-12">
                     <h2 className="text-3xl font-bold tracking-tighter md:text-4xl/tight">Group Dreaming vs. Sistema Bancario</h2>
                     <p className="mx-auto max-w-[700px] text-muted-foreground md:text-xl">
@@ -212,3 +245,5 @@ export default function ComparisonsPage() {
         </>
     );
 }
+
+    
