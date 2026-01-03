@@ -73,11 +73,9 @@ export default function LandingPageClient() {
     }
 
     return (
-      <>
-        <Button asChild>
-          <Link href="/login">Ingresar o Probar Demo</Link>
-        </Button>
-      </>
+      <Button asChild>
+        <Link href="/login">Ingresar o Probar Demo</Link>
+      </Button>
     );
   };
 
@@ -154,8 +152,6 @@ export default function LandingPageClient() {
                             </CardFooter>
                         </Card>
                     ))}
-                    {/* Placeholder for alignment on large screens */}
-                    <div className="hidden lg:flex lg:col-start-2"></div>
                 </div>
             </div>
         </section>

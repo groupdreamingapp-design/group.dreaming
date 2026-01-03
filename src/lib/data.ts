@@ -193,19 +193,18 @@ generatedGroups.push({
 
 // A closed group example
 generatedGroups.push({
-    id: 'ID-20230504-OPEN',
+    id: 'ID-20230504-CLOSED',
     capital: 15000,
     plazo: 48,
     cuotaPromedio: calculateCuotaPromedio(15000, 48),
-    membersCount: 35,
+    membersCount: 48,
     totalMembers: 48,
-    status: 'Abierto',
-    userIsMember: false,
-    userAwardStatus: "No Adjudicado",
-    monthsCompleted: 0,
-    activationDate: undefined,
-    acquiredInAuction: false,
-    isImmediateActivation: false,
+    status: 'Cerrado',
+    userIsMember: true,
+    userAwardStatus: 'Adjudicado - Aprobado',
+    monthsCompleted: 48,
+    activationDate: '2023-05-04T00:00:00.000Z',
+    acquiredInAuction: true,
 });
 
 export const initialGroups: Group[] = generatedGroups;
