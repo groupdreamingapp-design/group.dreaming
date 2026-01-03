@@ -74,11 +74,8 @@ export default function LandingPageClient() {
 
     return (
       <>
-        <Button variant="ghost" asChild>
-          <Link href="/login">Ingresar</Link>
-        </Button>
         <Button asChild>
-          <Link href="/register">Comenzar Ahora</Link>
+          <Link href="/login">Ingresar o Probar Demo</Link>
         </Button>
       </>
     );

@@ -172,12 +172,6 @@ function LoginPageContent() {
                 <Button variant="secondary" className="w-full" onClick={handleAnonymousSignIn} disabled={isLoading || isGoogleLoading || isAnonymousLoading}>
                     {isAnonymousLoading ? 'Cargando...' : <><UserCheck className="mr-2" /> Probar Demo (Ingreso anónimo)</>}
                 </Button>
-                <p className="text-center text-sm text-muted-foreground">
-                    ¿No tienes una cuenta?{' '}
-                    <Link href="/register" className="font-semibold text-primary hover:underline">
-                        Regístrate aquí
-                    </Link>
-                </p>
            </div>
         </CardContent>
       </Card>

@@ -19,13 +19,6 @@ import { Separator } from '@/components/ui/separator';
 import { FirebaseError } from 'firebase/app';
 import { ArrowLeft, UserCheck } from 'lucide-react';
 
-const registerSchema = z.object({
-  email: z.string().email('Por favor, introduce un email válido.'),
-  password: z.string().min(6, 'La contraseña debe tener al menos 6 caracteres.'),
-});
-
-type RegisterFormValues = z.infer<typeof registerSchema>;
-
 const GoogleIcon = (props: React.SVGProps<SVGSVGElement>) => (
   <svg {...props} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="24px" height="24px">
     <path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12s5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24s8.955,20,20,20s20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z" />
@@ -44,30 +37,14 @@ function RegisterPageContent() {
   const searchParams = useSearchParams();
   const auth = useAuth();
 
-  const { register, handleSubmit, formState: { errors } } = useForm<RegisterFormValues>({
-    resolver: zodResolver(registerSchema),
-  });
 
   const handleSuccess = () => {
     const redirectUrl = searchParams.get('redirect') || '/panel/profile';
     toast({
-      title: "¡Registro exitoso!",
-      description: "Hemos creado tu cuenta. Redirigiendo...",
+      title: "¡Acceso exitoso!",
+      description: "Hemos creado tu sesión. Redirigiendo...",
     });
     router.push(redirectUrl);
-  };
-
-  const onSubmit = async (data: RegisterFormValues) => {
-    setIsLoading(true);
-    try {
-      if (!auth) throw new Error("Auth service not available");
-      await initiateEmailSignUp(auth, data.email, data.password);
-      handleSuccess();
-    } catch (error: any) {
-      handleAuthError(error);
-    } finally {
-      setIsLoading(false);
-    }
   };
 
   const handleGoogleSignIn = async () => {
@@ -141,32 +118,17 @@ function RegisterPageContent() {
               <Logo className="h-12 w-12 text-primary" />
           </div>
           <CardTitle>Crea tu cuenta</CardTitle>
-          <CardDescription>Empieza a construir tus sueños hoy mismo.</CardDescription>
+          <CardDescription>Elige una opción para empezar a construir tus sueños.</CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" placeholder="tu@email.com" {...register('email')} />
-              {errors.email && <p className="text-red-500 text-xs">{errors.email.message}</p>}
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Contraseña</Label>
-              <Input id="password" type="password" placeholder="Mínimo 6 caracteres" {...register('password')} />
-              {errors.password && <p className="text-red-500 text-xs">{errors.password.message}</p>}
-            </div>
-            <Button type="submit" className="w-full" disabled={isLoading || isGoogleLoading || isAnonymousLoading}>
-              {isLoading ? 'Creando cuenta...' : 'Crear Cuenta'}
-            </Button>
-          </form>
-          <Separator className="my-6" />
            <div className="space-y-4">
                 <Button variant="outline" className="w-full" onClick={handleGoogleSignIn} disabled={isLoading || isGoogleLoading || isAnonymousLoading}>
-                   {isGoogleLoading ? 'Cargando...' : <><GoogleIcon className="mr-2" /> Registrarse con Google</>}
+                   {isGoogleLoading ? 'Cargando...' : <><GoogleIcon className="mr-2" /> Ingresar con Google</>}
                 </Button>
                 <Button variant="secondary" className="w-full" onClick={handleAnonymousSignIn} disabled={isLoading || isGoogleLoading || isAnonymousLoading}>
                     {isAnonymousLoading ? 'Cargando...' : <><UserCheck className="mr-2" /> Probar Demo (Ingreso anónimo)</>}
                 </Button>
+                <Separator className="my-6" />
                 <div className="text-center text-sm text-muted-foreground space-y-2">
                     <p>
                         ¿Ya tienes una cuenta?{' '}
