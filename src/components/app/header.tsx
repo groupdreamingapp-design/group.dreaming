@@ -38,8 +38,8 @@ export function Header() {
           </nav>
         </SheetContent>
       </Sheet>
-      <div className="flex w-full items-center justify-end gap-2">
-         <div className="flex-1" />
+      <div className="flex-1" />
+      <div className="flex items-center gap-2">
          <div className="hidden md:flex items-center gap-1">
             {infoLinks.map(link => (
                 <Button key={link.href} variant="ghost" asChild size="sm">
