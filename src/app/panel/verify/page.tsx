@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, useEffect } from 'react';
@@ -51,8 +50,8 @@ const verificationSchema = z.object({
   healthDeclaration: z.boolean().refine(val => val === true, { message: "Debes aceptar la declaración de salud" }),
   
   // Documents
-  dniFront: z.any().refine(file => file.length > 0, 'El frente del DNI es requerido.'),
-  dniBack: z.any().refine(file => file.length > 0, 'El dorso del DNI es requerido.'),
+  dniFront: z.any().refine(fileList => fileList && fileList.length > 0, 'El frente del DNI es requerido.'),
+  dniBack: z.any().refine(fileList => fileList && fileList.length > 0, 'El dorso del DNI es requerido.'),
 });
 
 type VerificationForm = z.infer<typeof verificationSchema>;
@@ -76,6 +75,44 @@ export default function Verification() {
         },
     });
 
+    useEffect(() => {
+      const getCameraPermission = async () => {
+          if (biometricStep !== 'capturing') return;
+          
+          try {
+              const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+              setHasCameraPermission(true);
+              if (videoRef.current) {
+                  videoRef.current.srcObject = stream;
+              }
+              // Simulate capture and success
+              setTimeout(() => {
+                  if (videoRef.current && videoRef.current.srcObject) {
+                      const tracks = (videoRef.current.srcObject as MediaStream).getTracks();
+                      tracks.forEach(track => track.stop());
+                  }
+                  setBiometricStep('success');
+              }, 3000);
+          } catch (error) {
+              console.error("Error accessing camera: ", error);
+              setHasCameraPermission(false);
+              setBiometricStep('failed');
+              toast({
+                variant: 'destructive',
+                title: 'Camera Access Denied',
+                description: 'Please enable camera permissions in your browser settings to use this feature.',
+              });
+          }
+      };
+      
+      getCameraPermission();
+      
+    }, [biometricStep, toast]);
+
+    const handleStartBiometric = () => {
+        setBiometricStep('capturing');
+    };
+
     const onSubmit = (data: VerificationForm) => {
         setIsSubmitting(true);
         console.log(data);
@@ -91,29 +128,6 @@ export default function Verification() {
             });
             router.push('/panel');
         }, 2000);
-    };
-
-    const handleStartBiometric = async () => {
-        setBiometricStep('capturing');
-        try {
-            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-            setHasCameraPermission(true);
-            if (videoRef.current) {
-                videoRef.current.srcObject = stream;
-            }
-            // Simulate capture and success
-            setTimeout(() => {
-                if (videoRef.current && videoRef.current.srcObject) {
-                    const tracks = (videoRef.current.srcObject as MediaStream).getTracks();
-                    tracks.forEach(track => track.stop());
-                }
-                setBiometricStep('success');
-            }, 3000);
-        } catch (error) {
-            console.error("Error accessing camera: ", error);
-            setHasCameraPermission(false);
-            setBiometricStep('failed');
-        }
     };
     
     const handleRetryBiometric = () => {
@@ -396,22 +410,23 @@ export default function Verification() {
                         </CardHeader>
                         <CardContent>
                             {biometricStep === 'idle' && (
-                                <Button onClick={handleStartBiometric} className="w-full">
+                                <Button onClick={handleStartBiometric} className="w-full" type="button">
                                     <Camera className="mr-2" /> Iniciar Verificación Facial
                                 </Button>
                             )}
                             
                             {biometricStep === 'capturing' && (
                                 <div className="space-y-4 text-center">
-                                    <div className="w-full aspect-video bg-black rounded-md overflow-hidden relative">
-                                        <video ref={videoRef} className="w-full h-full object-cover" autoPlay muted playsInline />
-                                        {!hasCameraPermission && (
-                                            <div className="absolute inset-0 flex items-center justify-center bg-black/50">
-                                                <p className="text-white text-sm text-center p-4">Se requiere acceso a la cámara.</p>
-                                            </div>
-                                        )}
-                                        <div className="absolute inset-0 border-8 border-primary/50 rounded-md animate-pulse"></div>
-                                    </div>
+                                    <video ref={videoRef} className="w-full aspect-video rounded-md" autoPlay playsInline muted />
+                                    { !hasCameraPermission && (
+                                        <Alert variant="destructive">
+                                            <AlertTitle>Camera Access Required</AlertTitle>
+                                            <AlertDescription>
+                                                Please allow camera access to use this feature.
+                                            </AlertDescription>
+                                        </Alert>
+                                    )}
+                                    <div className="absolute inset-0 border-8 border-primary/50 rounded-md animate-pulse"></div>
                                     <p className="text-sm text-muted-foreground">Mantén tu rostro dentro del marco...</p>
                                 </div>
                             )}
@@ -422,7 +437,7 @@ export default function Verification() {
                                         <AlertTitle>Error de Cámara</AlertTitle>
                                         <AlertDescription>No se pudo acceder a la cámara. Revisa los permisos de tu navegador.</AlertDescription>
                                     </Alert>
-                                    <Button onClick={handleRetryBiometric} variant="outline" className="w-full"><Repeat className="mr-2"/>Reintentar</Button>
+                                    <Button onClick={handleRetryBiometric} variant="outline" className="w-full" type="button"><Repeat className="mr-2"/>Reintentar</Button>
                                 </div>
                             )}
 
@@ -432,8 +447,8 @@ export default function Verification() {
                                         <CheckCircle className="h-4 w-4 text-green-500" />
                                         <AlertTitle>¡Verificación Exitosa!</AlertTitle>
                                         <AlertDescription>Tu identidad facial ha sido confirmada.</AlertDescription>
-                                    </Aler>
-                                    <Button onClick={handleRetryBiometric} variant="outline" className="w-full"><Repeat className="mr-2"/>Repetir Verificación</Button>
+                                    </Alert>
+                                    <Button onClick={handleRetryBiometric} variant="outline" className="w-full" type="button"><Repeat className="mr-2"/>Repetir Verificación</Button>
                                 </div>
                             )}
 
