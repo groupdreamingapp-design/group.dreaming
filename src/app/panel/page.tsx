@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useMemo, useState, useEffect } from "react";
+import { useMemo } from "react";
 import { user, transactions } from "@/lib/data"
 import { useGroups } from "@/hooks/use-groups";
 import { Repeat, Wallet, PieChart, Info } from "lucide-react"
@@ -18,13 +18,6 @@ const MAX_CAPITAL = 100000;
 
 export default function Dashboard() {
   const { groups } = useGroups();
-  const [isClient, setIsClient] = useState(false);
-
-  useEffect(() => {
-    // This effect runs only on the client, after the initial render.
-    setIsClient(true);
-  }, []);
-
 
   const formatCurrency = (amount: number) => new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(amount);
 
@@ -36,14 +29,13 @@ export default function Dashboard() {
   }), [groups]);
 
   const subscribedCapital = useMemo(() => {
-    if (!isClient) return 0; // Return a default server-side value
     return groups
         .filter(g => g.userIsMember && (g.status === 'Activo' || g.status === 'Abierto' || g.status === 'Pendiente'))
         .reduce((acc, g) => acc + g.capital, 0);
-  }, [groups, isClient]);
+  }, [groups]);
 
   const availableToSubscribe = MAX_CAPITAL - subscribedCapital;
-  const usedCapitalPercentage = isClient ? (subscribedCapital / MAX_CAPITAL) * 100 : 0;
+  const usedCapitalPercentage = (subscribedCapital / MAX_CAPITAL) * 100;
 
 
   const getProgress = (group: Group) => {
