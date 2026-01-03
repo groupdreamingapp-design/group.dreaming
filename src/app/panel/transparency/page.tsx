@@ -131,11 +131,11 @@ export default function Transparency() {
                                     <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/50 mb-2">
                                         <Banknote className="h-6 w-6 text-blue-600 dark:text-blue-400" />
                                     </div>
-                                    <CardTitle>2. Mes 1 - Primer Pago</CardTitle>
+                                    <CardTitle>2. Mes 1 - Primer Pago (Capitalización)</CardTitle>
                                     <CardDescription>Conformación de los fondos iniciales</CardDescription>
                                 </CardHeader>
                                 <CardContent>
-                                    <p className="text-sm text-muted-foreground text-center mb-4">Los 24 miembros pagan su primera cuota. Aún no hay adjudicaciones, solo se capitalizan los fondos.</p>
+                                    <p className="text-sm text-muted-foreground text-center mb-4">Los 24 miembros pagan su primera cuota. Aún no hay adjudicaciones, solo se capitalizan los fondos para asegurar la solvencia.</p>
                                     <div className="grid grid-cols-2 gap-4 text-sm">
                                         <div>
                                             <h4 className="font-semibold">Fondo General</h4>
@@ -162,7 +162,7 @@ export default function Transparency() {
                                     <CardDescription>Se entregan los primeros 2 capitales de $12.000</CardDescription>
                                 </CardHeader>
                                 <CardContent>
-                                    <p className="text-sm text-muted-foreground text-center mb-4">Con el pago de la segunda cuota, el Fondo General tiene suficiente para las primeras adjudicaciones.</p>
+                                    <p className="text-sm text-muted-foreground text-center mb-4">Con el pago de la segunda cuota, el Fondo General ya tiene suficiente para las primeras adjudicaciones.</p>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                                         <div>
                                             <h4 className="font-semibold">Adjudicación por Sorteo</h4>
