@@ -11,7 +11,7 @@ const rulesConfig = [
         points: [
             "Un miembro puede poner su plan en subasta a partir de la 3ra cuota paga.",
             "El vendedor publica su plan. El precio base se establece a partir del total de cuotas emitidas, menos un 50%.",
-            "Del monto final a liquidar al vendedor, se deduce cualquier deuda pendiente para entregar el plan saneado, más la comisión por venta (2% + IVA)."
+            "Del monto final a liquidar al vendedor, se deduce cualquier deuda pendiente para entregar el plan saneado, más la comisión por venta (2% + IVA). Si hay un excedente, se acredita al vendedor. Esta lógica aplica tanto para subastas voluntarias como forzosas."
         ]
     },
     {

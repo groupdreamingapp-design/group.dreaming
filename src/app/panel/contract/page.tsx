@@ -31,7 +31,7 @@ const contractClauses = [
     },
     {
         title: "SÉPTIMA: FINALIZACIÓN DEL CONTRATO, INCUMPLIMIENTO Y BAJA",
-        content: "El contrato finalizará de pleno derecho al vencimiento del plazo del grupo, una vez que todas las cuotas hayan sido abonadas y el capital adjudicado haya sido entregado. La falta de pago de dos (2) o más cuotas facultará a LA ADMINISTRADORA a declarar la rescisión. Si es un plan original, se procederá a una 'Subasta Forzosa'. Si fue adquirido en subasta, se procederá a una 'Baja Forzosa'. La baja voluntaria implica la devolución del capital puro aportado al final del ciclo del grupo, con las penalidades correspondientes. Si el ganador de una subasta no integra el capital en 24hs, será multado (10% +IVA sobre su oferta) y el plan se volverá a subastar."
+        content: "El contrato finalizará de pleno derecho al vencimiento del plazo del grupo. La falta de pago de dos (2) o más cuotas facultará a LA ADMINISTRADORA a declarar la rescisión. Si es un plan original, se procederá a una 'Subasta Forzosa'; del monto obtenido en la misma, se cubrirán deudas, penalidades y comisiones, y el excedente, si lo hubiere, será acreditado al suscriptor original. Si el plan fue adquirido en subasta, se procederá a una 'Baja Forzosa'. La 'Baja Voluntaria' implica la devolución del capital puro aportado al final del ciclo del grupo, con las penalidades correspondientes. Si el ganador de una subasta no integra el capital en 24hs, será multado (10% +IVA sobre su oferta) y el plan se volverá a subastar."
     },
     {
         title: "OCTAVA: MONEDA Y TIPO DE CAMBIO",
