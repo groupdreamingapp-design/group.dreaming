@@ -147,7 +147,7 @@ service cloud.firestore {
      * @principle Secures role management to existing administrators only.
      */
     match /roles_admin/{userId} {
-      allow get: if isAdmin();
+      allow get: if isOwner(userId) || isAdmin();
       allow list: if isAdmin();
       allow create: if isOwner(userId);
       allow update: if isAdmin() && resource != null;
