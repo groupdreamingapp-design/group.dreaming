@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, createContext, useContext, ReactNode, useEffect } from "react";
+import { useState, createContext, useContext, ReactNode, useEffect, useMemo } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import {
@@ -13,13 +13,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { useUser } from "@/firebase";
+import { useUser, useDoc, useMemoFirebase } from "@/firebase";
 import Link from "next/link";
 import { CheckCircle, Shield, User } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/firebase/provider";
 import { signOut } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
+import { doc } from "firebase/firestore";
 import { useFirestore } from "@/firebase";
 
 type UserNavContextType = {
@@ -32,22 +32,19 @@ const UserNavContext = createContext<UserNavContextType | undefined>(undefined);
 
 export function UserNavProvider({ children }: { children: ReactNode }) {
   const [isVerified, setIsVerified] = useState(true);
-  const [isAdmin, setIsAdmin] = useState(false);
   const { user } = useUser();
   const firestore = useFirestore();
 
-  useEffect(() => {
-    const checkAdminStatus = async () => {
-      if (user && firestore) {
-        const adminRef = doc(firestore, 'roles_admin', user.uid);
-        const adminDoc = await getDoc(adminRef);
-        setIsAdmin(adminDoc.exists());
-      } else {
-        setIsAdmin(false);
-      }
-    };
-    checkAdminStatus();
+  const adminDocRef = useMemoFirebase(() => {
+    if (user && firestore) {
+      return doc(firestore, 'roles_admin', user.uid);
+    }
+    return null;
   }, [user, firestore]);
+
+  const { data: adminDoc } = useDoc(adminDocRef);
+
+  const isAdmin = useMemo(() => !!adminDoc, [adminDoc]);
 
   return (
     <UserNavContext.Provider value={{ isVerified, setIsVerified, isAdmin }}>
