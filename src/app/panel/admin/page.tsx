@@ -59,13 +59,6 @@ export default function AdminPage() {
           requestResourceData: adminData,
         });
         errorEmitter.emit('permission-error', permissionError);
-        
-        // We still show a generic toast, but the detailed error is now in the console overlay.
-        toast({
-          variant: "destructive",
-          title: "Error de Permisos",
-          description: "No tienes permiso para realizar esta acción.",
-        });
       })
       .finally(() => {
         setIsLoading(false);
