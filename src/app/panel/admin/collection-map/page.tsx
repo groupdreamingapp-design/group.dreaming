@@ -11,8 +11,6 @@ import { cn } from "@/lib/utils";
 import { ArrowLeft, Banknote, CalendarClock, CheckCircle, Percent, Phone, RefreshCw, Shield, Wallet, Waves } from "lucide-react";
 import Link from "next/link";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useGroups } from '@/hooks/use-groups';
-
 
 const collectionData = [
     {
@@ -83,7 +81,6 @@ const kpiData = {
     }
 };
 
-
 const statusStyles: { [key: string]: string } = {
     "Cobrado": "bg-green-100 text-green-800 border-green-200",
     "Reintento": "bg-yellow-100 text-yellow-800 border-yellow-200",
@@ -91,12 +88,10 @@ const statusStyles: { [key: string]: string } = {
     "Pendiente": "bg-blue-100 text-blue-800 border-blue-200",
 };
 
-
 export default function CollectionMap() {
-    const { groups } = useGroups();
     const [selectedGroup, setSelectedGroup] = useState('all');
 
-    const activeGroups = useMemo(() => groups.filter(g => g.status === 'Activo'), [groups]);
+    const groupFilterOptions = useMemo(() => Object.keys(kpiData).filter(key => key !== 'all'), []);
     
     const currentKpis = useMemo(() => {
         return kpiData[selectedGroup as keyof typeof kpiData] || kpiData.all;
@@ -133,8 +128,8 @@ export default function CollectionMap() {
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectItem value="all">Todos los grupos</SelectItem>
-                                {activeGroups.map(group => (
-                                    <SelectItem key={group.id} value={group.id}>{group.id} ({group.capital})</SelectItem>
+                                {groupFilterOptions.map(groupId => (
+                                    <SelectItem key={groupId} value={groupId}>{groupId}</SelectItem>
                                 ))}
                             </SelectContent>
                         </Select>
