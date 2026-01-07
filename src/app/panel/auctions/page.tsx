@@ -21,10 +21,13 @@ import { useGroups } from "@/hooks/use-groups";
 import type { Group, Auction } from "@/lib/types";
 
 
-const Countdown = ({ endDate, isUrgent }: { endDate: string, isUrgent?: boolean }) => {
+function ClientCountdown({ endDate, isUrgent }: { endDate: string, isUrgent?: boolean }) {
   const [timeLeft, setTimeLeft] = useState<string>('');
+  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
+    setIsMounted(true);
+    
     const calculateTimeLeft = () => {
       const end = new Date(endDate);
       const now = new Date();
@@ -35,8 +38,8 @@ const Countdown = ({ endDate, isUrgent }: { endDate: string, isUrgent?: boolean 
         return;
       }
 
-      const hours = Math.floor((difference / (1000 * 60 * 60)) % 24).toString().padStart(2, '0');
       const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((difference / (1000 * 60 * 60)) % 24).toString().padStart(2, '0');
       const totalHours = days * 24 + parseInt(hours, 10);
       const minutes = Math.floor((difference / 1000 / 60) % 60).toString().padStart(2, '0');
       const seconds = Math.floor((difference / 1000) % 60).toString().padStart(2, '0');
@@ -50,6 +53,15 @@ const Countdown = ({ endDate, isUrgent }: { endDate: string, isUrgent?: boolean 
     return () => clearInterval(timer);
   }, [endDate]);
 
+  if (!isMounted) {
+    return (
+      <div className="flex items-center gap-2">
+        <Clock className="h-4 w-4 text-muted-foreground" />
+        <span>Calculando...</span>
+      </div>
+    );
+  }
+
   return (
     <div className={cn(
        "flex items-center gap-2",
@@ -59,7 +71,7 @@ const Countdown = ({ endDate, isUrgent }: { endDate: string, isUrgent?: boolean 
       <span>{isUrgent ? 'Cierre Urgente' : 'Termina en'} {timeLeft}</span>
     </div>
   );
-};
+}
 
 
 export default function Auctions() {
@@ -224,7 +236,7 @@ export default function Auctions() {
                       <Gavel className="h-4 w-4 text-muted-foreground" />
                       <span>{auction.numberOfBids} oferta{auction.numberOfBids !== 1 && 's'}</span>
                     </div>
-                    <Countdown endDate={auction.endDate} isUrgent={auction.isPostAdjudicacion} />
+                    <ClientCountdown endDate={auction.endDate} isUrgent={auction.isPostAdjudicacion} />
                   </div>
                 </CardContent>
                 <CardFooter className="flex-col items-stretch gap-2 pt-4">
@@ -399,5 +411,3 @@ export default function Auctions() {
     </>
   );
 }
-
-    
