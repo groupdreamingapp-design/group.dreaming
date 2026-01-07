@@ -18,11 +18,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 const capitalOptions = [5000, 10000, 15000, 20000, 25000];
 const plazoOptions = [48, 84];
 const cuotaRanges = [
-  { label: "$0 - $200", min: 0, max: 200 },
-  { label: "$201 - $400", min: 201, max: 400 },
-  { label: "$401 - $600", min: 401, max: 600 },
-  { label: "$601 - $800", min: 601, max: 800 },
-  { label: "$801 - $1000", min: 801, max: 1000 },
+  { label: "$0 - $100", min: 0, max: 100 },
+  { label: "$101 - $200", min: 101, max: 200 },
+  { label: "$201 - $300", min: 201, max: 300 },
+  { label: "$301+", min: 301, max: Infinity },
 ];
 
 type SortKey = 'capital_asc' | 'capital_desc' | 'plazo_asc' | 'plazo_desc' | 'cuota_asc' | 'cuota_desc' | 'miembros_faltantes';
