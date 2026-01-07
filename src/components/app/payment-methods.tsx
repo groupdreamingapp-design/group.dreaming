@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Wallet as WalletIcon, Banknote, CreditCard, ShieldCheck } from "lucide-react";
+import Link from "next/link";
 
 // A simple component to represent the Mercado Pago logo
 const MercadoPagoLogo = () => (
@@ -99,16 +100,21 @@ export function PaymentMethods() {
                         </CardFooter>
                     </Card>
                 </TabsContent>
-                <TabsContent value="wallet-virtual" className="mt-4">
+                 <TabsContent value="wallet-virtual" className="mt-4">
                      <Card>
                         <CardHeader>
                             <CardTitle>Billeteras Virtuales</CardTitle>
-                            <CardDescription>Conecta tu billetera virtual preferida.</CardDescription>
+                            <CardDescription>Conecta tu cuenta para autorizar el débito automático de tus cuotas.</CardDescription>
                         </CardHeader>
                         <CardContent>
-                            <Button variant="outline" className="w-full justify-start text-base p-6">
-                               <MercadoPagoLogo />
-                               Vincular cuenta de Mercado Pago
+                            <p className="text-sm text-muted-foreground mb-4">
+                                Al hacer clic en "Vincular", serás redirigido a Mercado Pago para autorizar a <strong>Group Dreaming</strong> a realizar débitos automáticos en tu cuenta para el pago de tus cuotas.
+                            </p>
+                            <Button asChild variant="outline" className="w-full justify-start text-base p-6">
+                               <Link href="#">
+                                  <MercadoPagoLogo />
+                                  Vincular cuenta de Mercado Pago
+                               </Link>
                             </Button>
                         </CardContent>
                     </Card>
