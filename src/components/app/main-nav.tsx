@@ -87,7 +87,6 @@ export function MainNav({ isMobile = false }: MainNavProps) {
           {route.label}
         </Link>
       ))}
-      {isAdmin && (
         <>
             <div className="px-3 py-2">
                 <span className="text-xs font-semibold text-muted-foreground">Admin</span>
@@ -103,7 +102,7 @@ export function MainNav({ isMobile = false }: MainNavProps) {
                 </Link>
             ))}
         </>
-      )}
     </>
   )
 }
+
