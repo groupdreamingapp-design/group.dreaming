@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
-import { ArrowLeft, Banknote, CalendarClock, CheckCircle, Percent, Phone, RefreshCw, Shield, WalletCards, Waves } from "lucide-react";
+import { ArrowLeft, Banknote, CalendarClock, CheckCircle, Percent, Phone, RefreshCw, Shield, Wallet, Waves } from "lucide-react";
 import Link from "next/link";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useGroups } from '@/hooks/use-groups';
@@ -17,40 +17,72 @@ import { useGroups } from '@/hooks/use-groups';
 const collectionData = [
     {
         user: "Juan Pérez",
-        group: "G-001",
+        group: "ID-20250806-TEST",
         quota: "05/24",
         method: "SIRO (CBU)",
         status: "Cobrado",
     },
     {
         user: "Ana López",
-        group: "G-001",
+        group: "ID-20250806-TEST",
         quota: "05/24",
         method: "SIRO (CBU)",
         status: "Reintento",
     },
     {
         user: "Luis Sosa",
-        group: "G-001",
+        group: "ID-20250806-TEST",
         quota: "05/24",
         method: "Tarjeta de Débito",
         status: "Rechazado",
     },
     {
         user: "Marta Díaz",
-        group: "G-002",
+        group: "ID-20250501-AWRD",
         quota: "12/12",
         method: "Rapipago",
         status: "Pendiente",
     },
     {
         user: "Carlos Garcia",
-        group: "G-003",
+        group: "ID-20241101-ABCD",
         quota: "01/48",
         method: "SIRO (CBU)",
         status: "Cobrado",
     }
 ];
+
+const kpiData = {
+    all: {
+        recaudacion: { value: "$84,500 / $102,000", description: "82.8% del objetivo recaudado" },
+        cobrabilidad: { value: "91.5%", description: "102 de 111 usuarios pagaron" },
+        reserva: { value: "$12,350.50", description: "Disponible para cubrir moras" },
+        adjudicacion: { value: "Ver por grupo", description: "Seleccione un grupo para ver" },
+        ingresos: { value: "$4,225", description: "Ingresos totales del mes" },
+    },
+    "ID-20250806-TEST": {
+        recaudacion: { value: "$40,000 / $48,000", description: "83.3% del objetivo" },
+        cobrabilidad: { value: "90%", description: "45 de 50 usuarios" },
+        reserva: { value: "$6,500.00", description: "Fondo específico del grupo" },
+        adjudicacion: { value: "25 de Julio, 2024", description: "Sorteo y Licitación G-001" },
+        ingresos: { value: "$2,000", description: "Ingresos del grupo" },
+    },
+    "ID-20250501-AWRD": {
+        recaudacion: { value: "$24,500 / $30,000", description: "81.6% del objetivo" },
+        cobrabilidad: { value: "92%", description: "23 de 25 usuarios" },
+        reserva: { value: "$3,850.50", description: "Fondo específico del grupo" },
+        adjudicacion: { value: "26 de Julio, 2024", description: "Sorteo y Licitación G-002" },
+        ingresos: { value: "$1,225", description: "Ingresos del grupo" },
+    },
+    "ID-20241101-ABCD": {
+        recaudacion: { value: "$20,000 / $24,000", description: "83.3% del objetivo" },
+        cobrabilidad: { value: "95%", description: "34 de 36 usuarios" },
+        reserva: { value: "$2,000.00", description: "Fondo específico del grupo" },
+        adjudicacion: { value: "27 de Julio, 2024", description: "Sorteo y Licitación G-003" },
+        ingresos: { value: "$1,000", description: "Ingresos del grupo" },
+    }
+};
+
 
 const statusStyles: { [key: string]: string } = {
     "Cobrado": "bg-green-100 text-green-800 border-green-200",
@@ -65,6 +97,10 @@ export default function CollectionMap() {
     const [selectedGroup, setSelectedGroup] = useState('all');
 
     const activeGroups = useMemo(() => groups.filter(g => g.status === 'Activo'), [groups]);
+    
+    const currentKpis = useMemo(() => {
+        return kpiData[selectedGroup as keyof typeof kpiData] || kpiData.all;
+    }, [selectedGroup]);
 
     const filteredCollectionData = useMemo(() => {
         if (selectedGroup === 'all') {
@@ -82,48 +118,16 @@ export default function CollectionMap() {
                     Volver a Administración
                     </Link>
                 </Button>
-                <h1 className="text-3xl font-bold font-headline flex items-center gap-3">
-                    <Waves className="h-8 w-8 text-primary" />
-                    Mapa de Cobranza
-                </h1>
-                <p className="text-muted-foreground">Estado de la recaudación mensual y conciliación.</p>
-            </div>
-
-             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-8">
-                <StatCard
-                    title="Recaudación del Mes"
-                    value="$84,500 / $102,000"
-                    icon={Banknote}
-                    description="82.8% del objetivo recaudado"
-                />
-                <StatCard
-                    title="Tasa de Cobrabilidad"
-                    value="91.5%"
-                    icon={Percent}
-                    description="102 de 111 usuarios pagaron"
-                />
-                <StatCard
-                    title="Fondo de Reserva Actual"
-                    value="$12,350.50"
-                    icon={Shield}
-                    description="Disponible para cubrir moras"
-                />
-                <StatCard
-                    title="Próxima Adjudicación"
-                    value="25 de Julio, 2024"
-                    icon={CalendarClock}
-                    description="Sorteo y Licitación G-002"
-                />
-            </div>
-
-            <Card>
-                <CardHeader className="flex-row items-center justify-between">
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                     <div>
-                        <CardTitle>Detalle de Cobranzas del Mes</CardTitle>
-                        <CardDescription>Esta tabla se alimenta de los webhooks y archivos de conciliación de los proveedores de pago.</CardDescription>
+                        <h1 className="text-3xl font-bold font-headline flex items-center gap-3">
+                            <Waves className="h-8 w-8 text-primary" />
+                            Mapa de Cobranza
+                        </h1>
+                        <p className="text-muted-foreground">Estado de la recaudación mensual y conciliación.</p>
                     </div>
-                    <div className="w-full max-w-sm">
-                        <Select value={selectedGroup} onValueChange={setSelectedGroup}>
+                    <div className="w-full md:w-auto min-w-[250px]">
+                         <Select value={selectedGroup} onValueChange={setSelectedGroup}>
                             <SelectTrigger>
                                 <SelectValue placeholder="Filtrar por grupo" />
                             </SelectTrigger>
@@ -134,6 +138,48 @@ export default function CollectionMap() {
                                 ))}
                             </SelectContent>
                         </Select>
+                    </div>
+                </div>
+            </div>
+
+             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5 mb-8">
+                <StatCard
+                    title="Recaudación del Mes"
+                    value={currentKpis.recaudacion.value}
+                    icon={Banknote}
+                    description={currentKpis.recaudacion.description}
+                />
+                <StatCard
+                    title="Tasa de Cobrabilidad"
+                    value={currentKpis.cobrabilidad.value}
+                    icon={Percent}
+                    description={currentKpis.cobrabilidad.description}
+                />
+                <StatCard
+                    title="Fondo de Reserva"
+                    value={currentKpis.reserva.value}
+                    icon={Shield}
+                    description={currentKpis.reserva.description}
+                />
+                 <StatCard
+                    title="Ingresos de la Plataforma"
+                    value={currentKpis.ingresos.value}
+                    icon={Wallet}
+                    description={currentKpis.ingresos.description}
+                />
+                <StatCard
+                    title="Próxima Adjudicación"
+                    value={currentKpis.adjudicacion.value}
+                    icon={CalendarClock}
+                    description={currentKpis.adjudicacion.description}
+                />
+            </div>
+
+            <Card>
+                <CardHeader>
+                    <div>
+                        <CardTitle>Detalle de Cobranzas del Mes</CardTitle>
+                        <CardDescription>Esta tabla se alimenta de los webhooks y archivos de conciliación de los proveedores de pago.</CardDescription>
                     </div>
                 </CardHeader>
                 <CardContent>
