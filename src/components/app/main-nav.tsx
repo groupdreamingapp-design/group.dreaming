@@ -4,8 +4,9 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
-import { Gavel, LayoutDashboard, Search, Users, PieChart, Shield, HelpCircle, Gift, Landmark, Bell } from "lucide-react"
-import { Badge } from "@/components/ui/badge";
+import { Gavel, LayoutDashboard, Search, Users, PieChart, Shield, HelpCircle, Gift, Landmark, Bell, Waves } from "lucide-react"
+import { useUserNav } from "./user-nav";
+
 
 type MainNavProps = {
   isMobile?: boolean;
@@ -13,8 +14,9 @@ type MainNavProps = {
 
 export function MainNav({ isMobile = false }: MainNavProps) {
   const pathname = usePathname();
+  const { isAdmin } = useUserNav();
 
-  const routes = [
+  const commonRoutes = [
     {
       href: "/panel",
       label: "Mi Panel",
@@ -52,6 +54,19 @@ export function MainNav({ isMobile = false }: MainNavProps) {
     },
   ];
 
+  const adminRoutes = [
+    {
+      href: "/panel/admin",
+      label: "Crear Admin",
+      icon: Shield,
+    },
+     {
+      href: "/panel/admin/collection-map",
+      label: "Mapa de Cobranza",
+      icon: Waves,
+    }
+  ];
+
   const linkClass = (href: string) => cn(
     "flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary",
     {
@@ -62,7 +77,7 @@ export function MainNav({ isMobile = false }: MainNavProps) {
 
   return (
     <>
-      {routes.map((route) => (
+      {commonRoutes.map((route) => (
         <Link
           key={route.href}
           href={route.href}
@@ -72,6 +87,23 @@ export function MainNav({ isMobile = false }: MainNavProps) {
           {route.label}
         </Link>
       ))}
+      {isAdmin && (
+        <>
+            <div className="px-3 py-2">
+                <span className="text-xs font-semibold text-muted-foreground">Admin</span>
+            </div>
+            {adminRoutes.map((route) => (
+                <Link
+                key={route.href}
+                href={route.href}
+                className={linkClass(route.href)}
+                >
+                <route.icon className="h-4 w-4" />
+                {route.label}
+                </Link>
+            ))}
+        </>
+      )}
     </>
   )
 }

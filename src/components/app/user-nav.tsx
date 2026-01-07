@@ -19,18 +19,38 @@ import { CheckCircle, Shield, User } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/firebase/provider";
 import { signOut } from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
+import { useFirestore } from "@/firebase";
 
 type UserNavContextType = {
   isVerified: boolean;
   setIsVerified: (isVerified: boolean) => void;
+  isAdmin: boolean;
 };
 
 const UserNavContext = createContext<UserNavContextType | undefined>(undefined);
 
 export function UserNavProvider({ children }: { children: ReactNode }) {
   const [isVerified, setIsVerified] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const { user } = useUser();
+  const firestore = useFirestore();
+
+  useEffect(() => {
+    const checkAdminStatus = async () => {
+      if (user && firestore) {
+        const adminRef = doc(firestore, 'roles_admin', user.uid);
+        const adminDoc = await getDoc(adminRef);
+        setIsAdmin(adminDoc.exists());
+      } else {
+        setIsAdmin(false);
+      }
+    };
+    checkAdminStatus();
+  }, [user, firestore]);
+
   return (
-    <UserNavContext.Provider value={{ isVerified, setIsVerified }}>
+    <UserNavContext.Provider value={{ isVerified, setIsVerified, isAdmin }}>
       {children}
     </UserNavContext.Provider>
   );
