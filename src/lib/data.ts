@@ -47,7 +47,37 @@ export const calculateTotalFinancialCost = (capital: number, plazo: number): num
     return (costoTotal / capital) * 100;
 }
 
-export const initialGroups: Group[] = [];
+const capitalOptions = [5000, 10000, 15000, 20000, 25000];
+const plazoOptions = [48, 84];
+
+const generatedGroups: Group[] = [];
+let idCounter = 1;
+
+plazoOptions.forEach(plazo => {
+  capitalOptions.forEach(capital => {
+    const today = new Date();
+    const dateString = `${today.getFullYear()}${(today.getMonth() + 1).toString().padStart(2, '0')}${today.getDate().toString().padStart(2, '0')}`;
+    const newId = `ID-${dateString}-${idCounter.toString().padStart(4, '0')}`;
+    idCounter++;
+    
+    generatedGroups.push({
+      id: newId,
+      capital,
+      plazo,
+      cuotaPromedio: calculateCuotaPromedio(capital, plazo),
+      totalMembers: plazo * 2,
+      membersCount: 0,
+      status: 'Abierto',
+      userIsMember: false,
+      userAwardStatus: "No Adjudicado",
+      monthsCompleted: 0,
+      acquiredInAuction: false,
+      isImmediateActivation: false,
+    });
+  });
+});
+
+export const initialGroups: Group[] = generatedGroups;
 
 
 export const transactions: Transaction[] = [
