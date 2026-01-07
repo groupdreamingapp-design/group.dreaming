@@ -48,7 +48,7 @@ export const calculateTotalFinancialCost = (capital: number, plazo: number): num
 }
 
 const capitalOptions = [5000, 10000, 15000, 20000, 25000];
-const plazoOptions = [12, 24, 36, 48, 60, 72, 84];
+const plazoOptions = [48, 84];
 
 const generatedGroups: Group[] = [];
 let groupCounter = 1;
@@ -60,7 +60,7 @@ const day = String(todayForId.getDate()).padStart(2, '0');
 const dateString = `${year}${month}${day}`;
 
 for (const capital of capitalOptions) {
-    for (const plazo of plazoOptions) {
+    for (const plazo of plazoOptions) { // This loop will be affected
         const cuotaPromedio = calculateCuotaPromedio(capital, plazo);
 
         if (cuotaPromedio <= 1000) {
