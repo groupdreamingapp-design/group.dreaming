@@ -38,8 +38,8 @@ export const groupTemplates: GroupTemplate[] = [
   {
     purposeCode: "005",
     name: 'Ingreso inesperado',
-    capital: 2500,
-    plazo: 18,
+    capital: 1000,
+    plazo: 12,
     imageUrl: PlaceHolderImages.find(img => img.id === 'goal-unexpected-income')?.imageUrl || '',
     imageHint: 'surprise money',
   },
