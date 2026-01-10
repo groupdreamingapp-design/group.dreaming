@@ -4,27 +4,13 @@
 import { useState, useEffect } from "react";
 import { initialGroups } from "@/lib/data";
 import { GroupCard } from "@/components/app/group-card";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import type { Group } from "@/lib/types";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { SlidersHorizontal, ListRestart } from "lucide-react";
+import { ListRestart } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useUser } from "@/firebase";
 import { useRouter } from "next/navigation";
 
-
-const capitalOptions = [5000, 10000, 15000, 20000, 25000];
-const plazoOptions = [48, 84];
-const cuotaRanges = [
-  { label: "$0 - $100", min: 0, max: 100 },
-  { label: "$101 - $200", min: 101, max: 200 },
-  { label: "$201 - $300", min: 201, max: 300 },
-  { label: "$301+", min: 301, max: Infinity },
-];
 
 type SortKey = 'capital_asc' | 'capital_desc' | 'plazo_asc' | 'plazo_desc' | 'cuota_asc' | 'cuota_desc' | 'miembros_faltantes';
 
@@ -32,11 +18,6 @@ type SortKey = 'capital_asc' | 'capital_desc' | 'plazo_asc' | 'plazo_desc' | 'cu
 export default function ExploreGroups() {
   const [groups, setGroups] = useState<Group[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filters, setFilters] = useState({
-    capital: [] as number[],
-    plazo: [] as number[],
-    cuota: [] as { min: number; max: number }[],
-  });
   const [sortKey, setSortKey] = useState<SortKey>('miembros_faltantes');
   const { user, loading: userLoading } = useUser();
   const router = useRouter();
@@ -55,46 +36,9 @@ export default function ExploreGroups() {
     setLoading(false);
   }, []);
 
-  const handleFilterChange = (type: 'capital' | 'plazo', value: number) => {
-    setFilters(prev => {
-      const current = prev[type] as number[];
-      const updated = current.includes(value)
-        ? current.filter(item => item !== value)
-        : [...current, value];
-      return { ...prev, [type]: updated };
-    });
-  };
-
-  const handleCuotaChange = (range: { min: number; max: number }) => {
-    setFilters(prev => {
-      const current = prev.cuota;
-      const isSelected = current.some(r => r.min === range.min && r.max === range.max);
-      const updated = isSelected
-        ? current.filter(r => r.min !== range.min || r.max !== range.max)
-        : [...current, range];
-      return { ...prev, cuota: updated };
-    });
-  };
-
-  const clearFilters = () => {
-    setFilters({ capital: [], plazo: [], cuota: [] });
-  };
-
   const processedGroups = (() => {
     if (loading) return [];
     let filteredGroups: Group[] = groups.filter(g => g.status === 'Abierto' && !g.userIsMember);
-
-    if (filters.capital.length > 0) {
-      filteredGroups = filteredGroups.filter(g => filters.capital.includes(g.capital));
-    }
-    if (filters.plazo.length > 0) {
-      filteredGroups = filteredGroups.filter(g => filters.plazo.includes(g.plazo));
-    }
-    if (filters.cuota.length > 0) {
-      filteredGroups = filteredGroups.filter(g => 
-        filters.cuota.some(range => g.cuotaPromedio >= range.min && g.cuotaPromedio <= range.max)
-      );
-    }
     
     // Sorting logic
     filteredGroups.sort((a, b) => {
@@ -120,8 +64,6 @@ export default function ExploreGroups() {
 
     return filteredGroups;
   })();
-
-  const formatCurrency = (amount: number) => new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(amount);
   
   if (userLoading || user) {
     return <div className="flex justify-center items-center h-full">Cargando...</div>;
@@ -134,86 +76,6 @@ export default function ExploreGroups() {
         <p className="text-muted-foreground">Encuentra el plan perfecto que se adapte a tus sueños.</p>
       </div>
 
-      <Collapsible className="mb-8" defaultOpen>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <div>
-                <CardTitle>Filtros de Búsqueda</CardTitle>
-                <CardDescription>Usa los filtros para encontrar tu plan ideal.</CardDescription>
-            </div>
-              <CollapsibleTrigger asChild>
-              <Button variant="ghost">
-                <SlidersHorizontal className="mr-2 h-4 w-4" />
-                Mostrar/Ocultar Filtros
-              </Button>
-            </CollapsibleTrigger>
-          </CardHeader>
-          <CollapsibleContent>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div>
-                  <h3 className="font-semibold mb-2">Capital (USD)</h3>
-                  <ScrollArea className="h-40">
-                    <div className="space-y-2 pr-4">
-                      {capitalOptions.map(option => (
-                        <div key={option} className="flex items-center space-x-2">
-                          <Checkbox 
-                            id={`capital-${option}`} 
-                            onCheckedChange={() => handleFilterChange('capital', option)}
-                            checked={filters.capital.includes(option)}
-                          />
-                          <Label htmlFor={`capital-${option}`} className="font-normal">{formatCurrency(option)}</Label>
-                        </div>
-                      ))}
-                    </div>
-                  </ScrollArea>
-                </div>
-                <div>
-                  <h3 className="font-semibold mb-2">Plazo (Meses)</h3>
-                  <ScrollArea className="h-40">
-                    <div className="space-y-2 pr-4">
-                      {plazoOptions.map(option => (
-                        <div key={option} className="flex items-center space-x-2">
-                          <Checkbox 
-                            id={`plazo-${option}`} 
-                            onCheckedChange={() => handleFilterChange('plazo', option)}
-                            checked={filters.plazo.includes(option)}
-                          />
-                          <Label htmlFor={`plazo-${option}`} className="font-normal">{option} meses</Label>
-                        </div>
-                      ))}
-                    </div>
-                  </ScrollArea>
-                </div>
-                <div>
-                  <h3 className="font-semibold mb-2">Cuota Promedio</h3>
-                    <ScrollArea className="h-40">
-                    <div className="space-y-2 pr-4">
-                      {cuotaRanges.map(range => (
-                        <div key={range.label} className="flex items-center space-x-2">
-                          <Checkbox 
-                            id={`cuota-${range.label}`} 
-                            onCheckedChange={() => handleCuotaChange(range)}
-                            checked={filters.cuota.some(r => r.min === range.min && r.max === range.max)}
-                          />
-                          <Label htmlFor={`cuota-${range.label}`} className="font-normal">{range.label}</Label>
-                        </div>
-                      ))}
-                    </div>
-                  </ScrollArea>
-                </div>
-              </div>
-            </CardContent>
-              <CardFooter>
-                <Button variant="ghost" onClick={clearFilters}>
-                    <ListRestart className="mr-2 h-4 w-4" />
-                    Limpiar Filtros
-                </Button>
-            </CardFooter>
-          </CollapsibleContent>
-        </Card>
-      </Collapsible>
-      
       <div className="flex justify-between items-center mb-4">
         <div>
           {!loading && (
@@ -257,8 +119,7 @@ export default function ExploreGroups() {
           </div>
         ) : (
           <div className="text-center py-16 text-muted-foreground col-span-full">
-              <p>No se encontraron grupos con los filtros seleccionados.</p>
-              <p>Intenta modificar tu búsqueda o <Button variant="link" className="p-0 h-auto" onClick={clearFilters}>borrar los filtros</Button>.</p>
+              <p>No se encontraron grupos disponibles.</p>
           </div>
         )}
       </section>
