@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,6 +14,7 @@ import { es } from 'date-fns/locale';
 import { useState, useEffect } from "react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
 import { calculateTotalFinancialCost } from "@/lib/data";
+import Image from "next/image";
 
 type GroupCardProps = {
   group: Group;
@@ -100,13 +100,23 @@ export function GroupCard({ group }: GroupCardProps) {
     <TooltipProvider>
       <Card className="flex flex-col">
         <Link href={cardLink} className="flex flex-col flex-grow">
-          <CardHeader className="p-4">
-            <div className="flex justify-between items-start">
-              <div>
-                <CardDescription>{group.id}</CardDescription>
-                <CardTitle className="text-xl">{formatCurrency(group.capital)}</CardTitle>
+          <CardHeader className="p-0 relative">
+            <div className="relative h-32 w-full">
+              <Image 
+                src={group.imageUrl}
+                alt={group.name}
+                fill
+                className="object-cover rounded-t-lg"
+                data-ai-hint={group.imageHint}
+                sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
+              <div className="absolute bottom-2 left-4 text-white">
+                <CardTitle className="text-xl [text-shadow:1px_1px_2px_rgba(0,0,0,0.8)]">{group.name}</CardTitle>
+                <CardDescription className="text-white/90 [text-shadow:1px_1px_2px_rgba(0,0,0,0.8)]">{formatCurrency(group.capital)}</CardDescription>
               </div>
-              <div className="relative flex flex-col items-end gap-2">
+            </div>
+             <div className="absolute top-2 right-2 flex flex-col items-end gap-2">
                 <Badge className={badgeClassName} variant="outline">
                     <StatusIcon className="mr-1 h-3 w-3" />
                     {group.status}
@@ -138,14 +148,13 @@ export function GroupCard({ group }: GroupCardProps) {
                   </Tooltip>
                 )}
                 {group.userAwardStatus === 'Adjudicado - Aprobado' && (
-                    <div className="absolute -top-3 -right-3 animate-bounce">
+                    <div className="absolute -top-1 -right-1 animate-bounce">
                         <Trophy className="h-6 w-6 text-yellow-500 fill-yellow-400" />
                     </div>
                 )}
               </div>
-            </div>
           </CardHeader>
-          <CardContent className="flex-grow p-4 pt-0">
+          <CardContent className="flex-grow p-4">
             <div className="space-y-4">
               <div>
                 <div className="flex justify-between text-xs text-muted-foreground mb-1">
@@ -191,7 +200,7 @@ export function GroupCard({ group }: GroupCardProps) {
             </div>
           </CardContent>
         </Link>
-        <CardFooter className="flex justify-between items-center bg-muted/50 p-3 mt-4">
+        <CardFooter className="flex justify-between items-center bg-muted/50 p-3 mt-auto">
           <div className="text-center">
               <p className="text-xs text-muted-foreground">Cuota Promedio</p>
               <p className="font-bold text-base">{formatCurrency(group.cuotaPromedio)}</p>

@@ -13,10 +13,11 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { SlidersHorizontal, ListRestart } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { groupTemplates } from "@/lib/group-templates";
 
 
-const capitalOptions = [5000, 10000, 15000, 20000, 25000];
-const plazoOptions = [48, 84];
+const capitalOptions = groupTemplates.map(t => t.capital).sort((a,b) => a-b);
+const plazoOptions = groupTemplates.map(t => t.plazo).sort((a,b) => a-b);
 const cuotaRanges = [
   { label: "$0 - $100", min: 0, max: 100 },
   { label: "$101 - $200", min: 101, max: 200 },

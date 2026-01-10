@@ -1,8 +1,9 @@
 
-import type { Group, User, Auction, Installment, Award } from './types';
+import type { Group, User, Auction, Installment, Award, GroupTemplate } from './types';
 import { PlaceHolderImages } from './placeholder-images';
 import { format, addMonths, setDate, addDays, parseISO, lastDayOfMonth, differenceInMonths, startOfToday } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { groupTemplates } from './group-templates';
 
 export const user: User = {
   id: 'user-1',
@@ -15,7 +16,7 @@ export const user: User = {
 
 const IVA = 1.21;
 
-const calculateCuotaPromedio = (capital: number, plazo: number): number => {
+export const calculateCuotaPromedio = (capital: number, plazo: number): number => {
     const alicuotaPura = capital / plazo;
     const gastosAdm = (alicuotaPura * 0.10) * IVA;
     const seguroVidaPromedio = (capital * 0.0009) / 2; // Rough average
@@ -47,37 +48,31 @@ export const calculateTotalFinancialCost = (capital: number, plazo: number): num
     return (costoTotal / capital) * 100;
 }
 
-const capitalOptions = [5000, 10000, 15000, 20000, 25000];
-const plazoOptions = [48, 84];
+const createGroupFromTemplate = (template: GroupTemplate): Group => {
+  const today = new Date();
+  const dateString = `${today.getFullYear()}${(today.getMonth() + 1).toString().padStart(2, '0')}${today.getDate().toString().padStart(2, '0')}`;
+  const randomSuffix = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+  
+  return {
+    id: `ID-${template.name.substring(0, 3).toUpperCase()}-${dateString}-${randomSuffix}`,
+    name: template.name,
+    capital: template.capital,
+    plazo: template.plazo,
+    imageUrl: template.imageUrl,
+    imageHint: template.imageHint,
+    cuotaPromedio: calculateCuotaPromedio(template.capital, template.plazo),
+    totalMembers: Math.ceil(template.plazo * 1.5),
+    membersCount: 0,
+    status: 'Abierto',
+    userIsMember: false,
+    userAwardStatus: "No Adjudicado",
+    monthsCompleted: 0,
+    acquiredInAuction: false,
+    isImmediateActivation: false,
+  };
+};
 
-const generatedGroups: Group[] = [];
-let idCounter = 1;
-
-plazoOptions.forEach(plazo => {
-  capitalOptions.forEach(capital => {
-    const today = new Date();
-    const dateString = `${today.getFullYear()}${(today.getMonth() + 1).toString().padStart(2, '0')}${today.getDate().toString().padStart(2, '0')}`;
-    const newId = `ID-${dateString}-${idCounter.toString().padStart(4, '0')}`;
-    idCounter++;
-    
-    generatedGroups.push({
-      id: newId,
-      capital,
-      plazo,
-      cuotaPromedio: calculateCuotaPromedio(capital, plazo),
-      totalMembers: plazo * 2,
-      membersCount: 0,
-      status: 'Abierto',
-      userIsMember: false,
-      userAwardStatus: "No Adjudicado",
-      monthsCompleted: 0,
-      acquiredInAuction: false,
-      isImmediateActivation: false,
-    });
-  });
-});
-
-export const initialGroups: Group[] = generatedGroups;
+export const initialGroups: Group[] = groupTemplates.map(createGroupFromTemplate);
 
 
 export let auctions: Omit<Auction, 'precioBase'>[] = [];

@@ -1,16 +1,15 @@
 
-
 'use client';
 
 import { useState, useCallback, ReactNode, useEffect, useRef } from 'react';
-import { initialGroups, generateInstallments } from '@/lib/data';
-import type { Group } from '@/lib/types';
+import { initialGroups } from '@/lib/data';
+import type { Group, GroupTemplate } from '@/lib/types';
 import { GroupsContext } from '@/hooks/use-groups';
 import { useToast } from '@/hooks/use-toast';
-import { parseISO, differenceInHours, isBefore } from 'date-fns';
+import { groupTemplates } from '@/lib/group-templates';
 
 
-function generateNewGroup(templateGroup: Group): Group {
+function generateNewGroup(template: GroupTemplate): Group {
     const today = new Date();
     const year = today.getFullYear();
     const month = String(today.getMonth() + 1).padStart(2, '0');
@@ -18,22 +17,22 @@ function generateNewGroup(templateGroup: Group): Group {
     const dateString = `${year}${month}${day}`;
     
     const randomNumbers = String(Math.floor(Math.random() * 10000)).padStart(4, '0');
-    const newId = `ID-${dateString}-${randomNumbers}`;
+    const newId = `ID-${template.name.substring(0,3).toUpperCase()}-${dateString}-${randomNumbers}`;
     
     return {
-      // Copy only the template properties, not the dynamic state
       id: newId,
-      capital: templateGroup.capital,
-      plazo: templateGroup.plazo,
-      cuotaPromedio: templateGroup.cuotaPromedio,
-      totalMembers: templateGroup.totalMembers,
-      // Reset dynamic state for the new group
+      name: template.name,
+      capital: template.capital,
+      plazo: template.plazo,
+      imageUrl: template.imageUrl,
+      imageHint: template.imageHint,
+      cuotaPromedio: template.plazo > 0 ? (template.capital / template.plazo) : 0,
+      totalMembers: Math.ceil(template.plazo * 1.5),
       membersCount: 0,
       status: 'Abierto',
       userIsMember: false,
       userAwardStatus: "No Adjudicado",
       monthsCompleted: 0,
-      activationDate: undefined,
       acquiredInAuction: false,
       isImmediateActivation: false,
     };
@@ -104,9 +103,12 @@ export function GroupsProvider({ children }: { children: ReactNode }) {
             updatedGroup.status = 'Pendiente';
         }
         
-        const newGroup = generateNewGroup(updatedGroup);
-        newGroups.push(newGroup);
-        newGroupWasCreated = true;
+        const template = groupTemplates.find(t => t.name === updatedGroup.name);
+        if (template) {
+            const newGroup = generateNewGroup(template);
+            newGroups.push(newGroup);
+            newGroupWasCreated = true;
+        }
       }
       
       newGroups[groupIndex] = updatedGroup;
@@ -128,7 +130,7 @@ export function GroupsProvider({ children }: { children: ReactNode }) {
     } else if (newGroupWasCreated) {
       toast({
         title: "¡Grupo Completo!",
-        description: `El grupo ${joinedGroup?.id} está lleno. Se ha creado un nuevo grupo con la misma configuración.`,
+        description: `El grupo ${joinedGroup?.id} está lleno y se activará pronto. Ya hemos creado un nuevo grupo '${joinedGroup?.name}' para que más personas puedan unirse.`,
         className: 'bg-blue-100 border-blue-500 text-blue-700'
       });
     }

@@ -41,6 +41,22 @@
       "height": 720
     },
     {
+      "id": "goal-business",
+      "description": "Tu propio negocio",
+      "imageUrl": "https://images.unsplash.com/photo-1556740738-b6a63e27c4df?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80",
+      "imageHint": "small business",
+      "width": 1170,
+      "height": 780
+    },
+    {
+      "id": "goal-treat",
+      "description": "Un gusto personal",
+      "imageUrl": "https://images.unsplash.com/photo-1588196749597-9ff075ee6b5b?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=774&q=80",
+      "imageHint": "personal gift",
+      "width": 774,
+      "height": 516
+    },
+    {
       "id": "collage-travel",
       "description": "A beautiful travel destination, like Santorini.",
       "imageUrl": "https://images.unsplash.com/photo-1664012898080-ad180d7732a6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHx0cmF2ZWwlMjBncmVlY2V8ZW58MHx8fHwxNzY3MzU3NDgyfDA&ixlib=rb-4.1.0&q=80&w=1080",

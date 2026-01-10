@@ -15,6 +15,7 @@ export type UserAwardStatus = "No Adjudicado" | "Adjudicado - Pendiente Aceptaci
 
 export type Group = {
   id: string;
+  name: string;
   capital: number;
   plazo: number;
   cuotaPromedio: number;
@@ -23,6 +24,8 @@ export type Group = {
   status: GroupStatus;
   userIsMember: boolean;
   userAwardStatus: UserAwardStatus;
+  imageUrl: string;
+  imageHint: string;
   monthsCompleted?: number;
   activationDate?: string;
   acquiredInAuction?: boolean;
@@ -79,4 +82,12 @@ export type Notification = {
   read: boolean;
   type: NotificationType;
   icon: LucideIcon;
+};
+
+export type GroupTemplate = {
+  name: string;
+  capital: number;
+  plazo: number;
+  imageUrl: string;
+  imageHint: string;
 };
