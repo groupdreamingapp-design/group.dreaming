@@ -11,40 +11,6 @@ import { useEffect } from "react";
 
 const benefits = [
     {
-        title: "Los últimos serán los primeros",
-        description: "Un programa que recompensa la paciencia y el compromiso de nuestros miembros más fieles.",
-        icon: Gift,
-        clauses: [
-            {
-                title: "Funcionamiento del Beneficio",
-                points: [
-                    "Este beneficio está diseñado para los miembros que son adjudicados por sorteo en la recta final de su plan de ahorro.",
-                    "Se activa automáticamente si un miembro resulta adjudicado por sorteo dentro del último 20% del plazo total de su grupo.",
-                    "Por ejemplo, en un plan de 24 meses, el beneficio aplica si la adjudicación ocurre entre el mes 20 y el 24."
-                ]
-            },
-            {
-                title: "La Recompensa",
-                points: [
-                    "Se realizará la devolución del 50% del 'Derecho de Suscripción' abonado en el plan vigente.",
-                    "Se otorgará un Cupón con un descuento del 50% en el 'Derecho de Suscripción' para el próximo plan que el miembro suscriba."
-                ]
-            },
-            {
-                title: "Condiciones para Acceder (Bases)",
-                points: [
-                    "No haber registrado cuotas vencidas ni pagado fuera de término durante toda la vigencia del plan.",
-                    "No haber realizado adelanto de cuotas durante la vigencia del plan.",
-                    "No haber rechazado un acto de adjudicación previo en el mismo plan.",
-                    "El beneficio aplica únicamente a adjudicaciones por sorteo, no por licitación.",
-                    "El plan no debe haber sido adquirido a través de una subasta en el mercado secundario.",
-                    "El plan no debe haber sido suscripto utilizando un bono de descuento de un beneficio obtenido anteriormente.",
-                    "Los beneficios no son acumulables. Solo puede combinarse con el 'Beneficio Sorteo Especial'."
-                ]
-            }
-        ]
-    },
-    {
         title: "Beneficio Sorteo Especial",
         description: "Una recompensa extra para los adjudicados en el gran sorteo final del grupo.",
         icon: Award,
@@ -70,7 +36,7 @@ const benefits = [
                     "No haber registrado cuotas vencidas ni pagado fuera de término durante toda la vigencia del plan.",
                     "No haber realizado adelanto de cuotas durante la vigencia del plan.",
                     "No haber rechazado un acto de adjudicación previo en el mismo plan.",
-                    "Este beneficio es el único que puede acumularse con otros beneficios, como 'Los últimos serán los primeros', si se cumplen las condiciones de ambos."
+                    "Este beneficio es el único que puede acumularse con otros beneficios, si se cumplen las condiciones de ambos."
                 ]
             }
         ]

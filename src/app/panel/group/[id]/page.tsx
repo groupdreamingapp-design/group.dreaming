@@ -140,7 +140,6 @@ export default function GroupDetail() {
   }, [groupAwards, group, userOrderNumber]);
 
   const awardMonth = userAwardInfo?.month;
-  const benefitThresholdMonth = Math.floor(group.plazo * 0.8);
   
   const hasNoOverduePayments = useMemo(() => {
       if(!group.activationDate) return true;
@@ -148,15 +147,6 @@ export default function GroupDetail() {
       const today = new Date();
       return !groupInstallments.some(inst => inst.number <= installmentsPaid && isBefore(parseISO(inst.dueDate), today));
   }, [group, installmentsPaid]);
-
-  const hasAdvancedInstallments = false; // Mock state for benefit eligibility
-
-  const isEligibleForBenefit = group.userAwardStatus === 'Adjudicado - Aprobado' && 
-      awardMonth && awardMonth > benefitThresholdMonth && 
-      (userAwardInfo?.type === 'sorteo' || userAwardInfo?.type === 'sorteo-especial') &&
-      hasNoOverduePayments &&
-      !hasAdvancedInstallments;
-
   
   const alicuotaPuraTotal = realInstallments.length > 0 ? realInstallments[0].breakdown.alicuotaPura : (group.capital / group.plazo);
   const capitalAportadoPuro = installmentsPaid * alicuotaPuraTotal;
@@ -361,46 +351,6 @@ export default function GroupDetail() {
           )}
         </div>
 
-        {isEligibleForBenefit && (
-            <div className="lg:col-span-3">
-                 <Card className="bg-green-500/10 border-green-500">
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2 text-green-800"><Gift className="h-6 w-6"/> ¡Beneficio "Los últimos serán los primeros"!</CardTitle>
-                        <CardDescription className="text-green-700">Felicitaciones, has sido adjudicado por sorteo en la recta final y cumples con las condiciones para acceder a este beneficio.</CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                         <div>
-                            <h4 className="font-semibold mb-2">Requisitos Cumplidos:</h4>
-                            <ul className="text-sm space-y-2">
-                                <li className="flex items-center gap-2">
-                                    <Check className="h-4 w-4 text-green-600" />
-                                    <span>Adjudicado por sorteo en el último 20% del plan (mes ${awardMonth} de ${group.plazo}).</span>
-                                </li>
-                                <li className="flex items-center gap-2">
-                                    {hasNoOverduePayments ? <Check className="h-4 w-4 text-green-600" /> : <X className="h-4 w-4 text-red-600" />}
-                                    <span>Sin cuotas vencidas durante el plan.</span>
-                                </li>
-                                <li className="flex items-center gap-2">
-                                    {!hasAdvancedInstallments ? <Check className="h-4 w-4 text-green-600" /> : <X className="h-4 w-4 text-red-600" />}
-                                    <span>Sin adelanto de cuotas.</span>
-                                </li>
-                                 <li className="flex items-center gap-2">
-                                    <Check className="h-4 w-4 text-green-600" /> 
-                                    <span>No se rechazaron actos de adjudicación.</span>
-                                </li>
-                            </ul>
-                        </div>
-                        <div>
-                            <h4 className="font-semibold mb-2">Tus Recompensas:</h4>
-                             <ul className="text-sm space-y-2">
-                                <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-600"/> 50% de reintegro del Derecho de Suscripción de este plan.</li>
-                                <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-600"/> 50% de descuento en el Derecho de Suscripción de tu próximo plan.</li>
-                            </ul>
-                        </div>
-                    </CardContent>
-                </Card>
-            </div>
-        )}
         
          {isMember && (isPlanActive || group.userAwardStatus.startsWith('Adjudicado')) && (
            <div className="lg:col-span-3">
