@@ -49,11 +49,13 @@ export const calculateTotalFinancialCost = (capital: number, plazo: number): num
 }
 
 const viviendaTemplate = groupTemplates.find(t => t.purposeCode === '001')!;
+const autoTemplate = groupTemplates.find(t => t.purposeCode === '002')!;
 const emprendimientoTemplate = groupTemplates.find(t => t.purposeCode === '003')!;
 const gustitoTemplate = groupTemplates.find(t => t.purposeCode === '004')!;
 
 
 export const initialGroups: Group[] = [
+  // Grupos a los que el usuario ya pertenece
   {
     id: `ID-001-20240501-0001`,
     name: viviendaTemplate.name,
@@ -106,21 +108,71 @@ export const initialGroups: Group[] = [
     acquiredInAuction: false,
     isImmediateActivation: false,
   },
+  
+  // Grupos disponibles para unirse
   {
     id: `ID-002-20240710-0002`,
-    name: 'Mi Auto',
-    capital: 25000,
-    plazo: 84,
-    imageUrl: groupTemplates.find(t => t.purposeCode === '002')?.imageUrl || '',
-    imageHint: 'car keys',
-    cuotaPromedio: calculateCuotaPromedio(25000, 84),
-    totalMembers: 84 * 2,
+    name: autoTemplate.name,
+    capital: autoTemplate.capital,
+    plazo: autoTemplate.plazo,
+    imageUrl: autoTemplate.imageUrl,
+    imageHint: autoTemplate.imageHint,
+    cuotaPromedio: calculateCuotaPromedio(autoTemplate.capital, autoTemplate.plazo),
+    totalMembers: autoTemplate.plazo * 2,
     membersCount: 5,
     status: 'Abierto',
     userIsMember: false,
     userAwardStatus: "No Adjudicado",
     acquiredInAuction: false,
     isImmediateActivation: false,
+  },
+  {
+    id: `ID-001-20240801-0001`,
+    name: viviendaTemplate.name,
+    capital: viviendaTemplate.capital,
+    plazo: viviendaTemplate.plazo,
+    imageUrl: viviendaTemplate.imageUrl,
+    imageHint: viviendaTemplate.imageHint,
+    cuotaPromedio: calculateCuotaPromedio(viviendaTemplate.capital, viviendaTemplate.plazo),
+    totalMembers: viviendaTemplate.plazo * 2,
+    membersCount: 120,
+    status: 'Abierto',
+    userIsMember: false,
+    userAwardStatus: "No Adjudicado",
+    acquiredInAuction: false,
+    isImmediateActivation: false,
+  },
+  {
+    id: `ID-003-20240805-0001`,
+    name: emprendimientoTemplate.name,
+    capital: emprendimientoTemplate.capital,
+    plazo: emprendimientoTemplate.plazo,
+    imageUrl: emprendimientoTemplate.imageUrl,
+    imageHint: emprendimientoTemplate.imageHint,
+    cuotaPromedio: calculateCuotaPromedio(emprendimientoTemplate.capital, emprendimientoTemplate.plazo),
+    totalMembers: emprendimientoTemplate.plazo * 2,
+    membersCount: 80,
+    status: 'Abierto',
+    userIsMember: false,
+    userAwardStatus: "No Adjudicado",
+    acquiredInAuction: false,
+    isImmediateActivation: false,
+  },
+  {
+    id: `ID-004-20240810-0001`,
+    name: gustitoTemplate.name,
+    capital: gustitoTemplate.capital,
+    plazo: gustitoTemplate.plazo,
+    imageUrl: gustitoTemplate.imageUrl,
+    imageHint: gustitoTemplate.imageHint,
+    cuotaPromedio: calculateCuotaPromedio(gustitoTemplate.capital, gustitoTemplate.plazo),
+    totalMembers: gustitoTemplate.plazo * 2,
+    membersCount: 45,
+    status: 'Abierto',
+    userIsMember: false,
+    userAwardStatus: "No Adjudicado",
+    acquiredInAuction: false,
+    isImmediateActivation: true,
   }
 ];
 
@@ -271,22 +323,17 @@ export const generateStaticAwards = (group: Group): Award[][] => {
         alreadyAwardedInMonth = awards[i].map(a => a.orderNumber);
         // Add Licitacion winner if not present and pool is not empty
         if (!hasLicitacion && winnerPool.length > 0) {
-            // Specific logic for the test group
-            if (group.id === 'ID-20230504-CLOSED' && i === 3) { // Month 4 is index 3
-                desertedLicitaciones++;
-            } else {
-                const isDeserted = customRandom() < 0.15 && desertedLicitaciones < 3; // 15% chance, max 3
-                if (!isDeserted) {
-                    if (winnerPool.length > 0) {
-                        const winnerIndex = winnerPool.findIndex(w => !alreadyAwardedInMonth.includes(w));
-                        if(winnerIndex > -1){
-                            const winner = winnerPool.splice(winnerIndex, 1)[0];
-                            awards[i].push({ type: 'licitacion', orderNumber: winner });
-                        }
+            const isDeserted = customRandom() < 0.15 && desertedLicitaciones < 3; // 15% chance, max 3
+            if (!isDeserted) {
+                if (winnerPool.length > 0) {
+                    const winnerIndex = winnerPool.findIndex(w => !alreadyAwardedInMonth.includes(w));
+                    if(winnerIndex > -1){
+                        const winner = winnerPool.splice(winnerIndex, 1)[0];
+                        awards[i].push({ type: 'licitacion', orderNumber: winner });
                     }
-                } else {
-                    desertedLicitaciones++;
                 }
+            } else {
+                desertedLicitaciones++;
             }
         }
     }
