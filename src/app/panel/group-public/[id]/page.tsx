@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useParams, useRouter } from 'next/navigation';
@@ -109,7 +110,7 @@ export default function GroupPublicDetail() {
             {isVerified ? (
                 <div className="space-y-4">
                     <p className="text-sm text-muted-foreground">
-                        Se generará el débito de la primera cuota en tu método de pago principal.
+                        Al confirmar, se debitará la primera cuota desde tu método de pago principal para asegurar tu lugar en el grupo.
                     </p>
                     <Alert>
                         <CheckCircle className="h-4 w-4" />

@@ -3,7 +3,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Landmark, ShieldCheck, FileText, BadgePercent, Users, Repeat, Scaling, UserCheck, Banknote, Gavel, FileX, Handshake } from "lucide-react";
+import { ArrowLeft, Landmark, ShieldCheck, FileText, BadgePercent, Users, Repeat, Scaling, UserCheck, Banknote, Gavel, FileX, Handshake, CalendarPlus } from "lucide-react";
 import Link from "next/link";
 
 const platformRules = [
@@ -13,8 +13,17 @@ const platformRules = [
         points: [
             "El registro simple te permite explorar la plataforma.",
             "Para unirte a un grupo, licitar o participar en subastas, es obligatoria la Verificación de Identidad (KYC).",
-            "La verificación incluye: validación de datos personales con DNI, prueba de identidad por sistema biométrico y firma de la declaración jurada sobre el origen de los fondos.",
+            "El pago de la primera cuota es obligatorio para confirmar la adhesión a un grupo.",
             "Es necesario designar un beneficiario para el seguro de vida colectivo.",
+        ]
+    },
+    {
+        title: "Activación de Grupo y Cobranza",
+        icon: CalendarPlus,
+        points: [
+            "Un grupo se 'Activa' cuando el último miembro se une y abona su primera cuota.",
+            "La segunda cuota de TODOS los miembros se genera con vencimiento a 30 días de la fecha de activación del grupo.",
+            "Las cuotas subsiguientes vencerán en la misma fecha de cada mes, asegurando un ciclo de pago ordenado para todos.",
         ]
     },
     {
@@ -60,10 +69,9 @@ const platformRules = [
         icon: FileX,
         points:
         [
-            "Puedes solicitar la baja voluntaria de un plan no adjudicado.",
-            "Se te devolverá el total de las 'alícuotas puras' que hayas pagado.",
-            "La devolución se efectúa al finalizar el ciclo completo del grupo para no afectar a los demás miembros.",
-            "Se aplica una penalidad administrativa sobre el monto a devolver, según el contrato."
+            "Si el grupo no se activa después de 60 días desde tu adhesión, puedes solicitar la 'Cancelación por Demora' y recibir el reintegro total e inmediato de tu primera cuota.",
+            "Puedes solicitar la 'Baja Voluntaria' de un plan no adjudicado. Se te devolverá el total de las 'alícuotas puras' que hayas pagado al finalizar el ciclo del grupo.",
+            "A la devolución por Baja Voluntaria se le aplica una penalidad administrativa, según el contrato."
         ]
     },
     {

@@ -39,19 +39,19 @@ const financialFlow = [
 
 const operationalFlow = [
     {
-        title: "Mes 1: Formación y Capitalización",
+        title: "Mes 1: Formación y Activación",
         icon: PlayCircle,
-        description: "Los miembros se unen y se cobra la primera cuota para formar el fondo común. Este mes es solo para capitalizar el grupo; no hay adjudicaciones."
+        description: "Los miembros se unen pagando la primera cuota. El grupo se 'Activa' cuando el último miembro se adhiere, asegurando el fondo inicial. No hay adjudicaciones este mes."
     },
     {
         title: "Mes 2: Primer Acto de Adjudicación",
         icon: Award,
-        description: "Se realiza el primer acto de adjudicación. Se entrega el capital a un miembro por sorteo y a otro por licitación."
+        description: "Se realiza el primer acto de adjudicación. Se entrega el capital a un miembro por sorteo y a otro por licitación. La segunda cuota vence a los 30 días de la activación del grupo."
     },
     {
         title: "Mes 3 a 11: Ciclo Mensual",
         icon: Repeat,
-        description: "El ciclo se repite. Cada mes se cobra la cuota y se realizan dos nuevas adjudicaciones. A partir de la cuota 3, los miembros pueden vender su plan en el Mercado Secundario (subastas)."
+        description: "El ciclo se repite. Cada mes se cobra la cuota y se realizan dos nuevas adjudicaciones. A partir de la 3ra cuota, los miembros pueden vender su plan en nuestro Mercado Secundario (subastas)."
     },
     {
         title: "Mes 12: Gran Adjudicación Final",
