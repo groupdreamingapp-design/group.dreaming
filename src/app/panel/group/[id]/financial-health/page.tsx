@@ -44,7 +44,8 @@ export default function FinancialHealthPage() {
         return installments.slice(0, group.monthsCompleted).map(inst => {
             const isPaid = inst.number <= paidInstallmentsCount;
             const alicuotaPura = inst.breakdown.alicuotaPura;
-            const membersWhoPaid = isPaid ? group.totalMembers : Math.floor(group.totalMembers * 0.95); // Simulate 95% payment for overdue
+            // Simulate that for overdue installments, only 95% of members paid.
+            const membersWhoPaid = isPaid ? group.totalMembers : Math.floor(group.totalMembers * 0.95); 
             const collected = alicuotaPura * membersWhoPaid;
             
             return {
