@@ -20,6 +20,7 @@ import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Input } from '@/components/ui/input';
 
 const MAX_CAPITAL = 100000;
 
@@ -119,6 +120,10 @@ export default function GroupPublicDetail() {
                             Tu cuenta está verificada y lista para operar.
                         </AlertDescription>
                     </Alert>
+                    <div className="space-y-2">
+                        <Label htmlFor="coupon-code">Código de Cupón (Opcional)</Label>
+                        <Input id="coupon-code" placeholder="Ingresa tu cupón de beneficio" />
+                    </div>
                       <div className="items-top flex space-x-2 pt-2">
                         <Checkbox 
                           id="terms" 
