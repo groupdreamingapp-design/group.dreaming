@@ -52,8 +52,6 @@ const viviendaTemplate = groupTemplates.find(t => t.purposeCode === '001')!;
 const emprendimientoTemplate = groupTemplates.find(t => t.purposeCode === '003')!;
 const gustitoTemplate = groupTemplates.find(t => t.purposeCode === '004')!;
 
-const today = startOfToday();
-
 export const initialGroups: Group[] = [
   {
     id: `ID-001-20240501-0001`,
@@ -200,3 +198,5 @@ export const generateExampleInstallments = (capital: number, plazo: number): Ins
         };
     });
 };
+
+    
