@@ -35,4 +35,12 @@ export const groupTemplates: GroupTemplate[] = [
     imageUrl: PlaceHolderImages.find(img => img.id === 'goal-treat')?.imageUrl || '',
     imageHint: 'personal gift',
   },
+  {
+    purposeCode: "005",
+    name: 'Ingreso inesperado',
+    capital: 1500,
+    plazo: 18,
+    imageUrl: PlaceHolderImages.find(img => img.id === 'goal-unexpected-income')?.imageUrl || '',
+    imageHint: 'surprise money',
+  },
 ];

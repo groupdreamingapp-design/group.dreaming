@@ -52,6 +52,7 @@ const viviendaTemplate = groupTemplates.find(t => t.purposeCode === '001')!;
 const autoTemplate = groupTemplates.find(t => t.purposeCode === '002')!;
 const emprendimientoTemplate = groupTemplates.find(t => t.purposeCode === '003')!;
 const gustitoTemplate = groupTemplates.find(t => t.purposeCode === '004')!;
+const ingresoInesperadoTemplate = groupTemplates.find(t => t.purposeCode === '005')!;
 
 
 export const initialGroups: Group[] = [
@@ -147,6 +148,21 @@ export const initialGroups: Group[] = [
     cuotaPromedio: calculateCuotaPromedio(emprendimientoTemplate.capital, emprendimientoTemplate.plazo),
     totalMembers: emprendimientoTemplate.plazo * 2,
     membersCount: 80,
+    status: 'Abierto',
+    userIsMember: false,
+    userAwardStatus: "No Adjudicado",
+    acquiredInAuction: false,
+  },
+  {
+    id: `ID-005-20240815-0001`,
+    name: ingresoInesperadoTemplate.name,
+    capital: ingresoInesperadoTemplate.capital,
+    plazo: ingresoInesperadoTemplate.plazo,
+    imageUrl: ingresoInesperadoTemplate.imageUrl,
+    imageHint: ingresoInesperadoTemplate.imageHint,
+    cuotaPromedio: calculateCuotaPromedio(ingresoInesperadoTemplate.capital, ingresoInesperadoTemplate.plazo),
+    totalMembers: ingresoInesperadoTemplate.plazo * 2,
+    membersCount: 1,
     status: 'Abierto',
     userIsMember: false,
     userAwardStatus: "No Adjudicado",
