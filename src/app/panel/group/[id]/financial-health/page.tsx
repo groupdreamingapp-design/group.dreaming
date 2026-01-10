@@ -4,7 +4,7 @@
 import { useMemo } from 'react';
 import { useParams } from 'next/navigation';
 import { useGroups } from '@/hooks/use-groups';
-import { generateInstallments } from '@/lib/data';
+import { generateInstallments, generateStaticAwards } from '@/lib/data';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
@@ -17,6 +17,11 @@ export default function FinancialHealthPage() {
     const { groups } = useGroups();
     
     const group = useMemo(() => groups.find(g => g.id === groupId), [groups, groupId]);
+
+    const groupAwards = useMemo(() => {
+        if (!group) return [];
+        return generateStaticAwards(group);
+    }, [group]);
 
     const formatCurrency = (amount: number) => {
         return new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(amount);
@@ -37,12 +42,16 @@ export default function FinancialHealthPage() {
 
             const monthlyAlicuotaPaid = alicuotaPura * membersWhoPaidThisMonth;
             
-            const totalLicitaciones = (cuotaNumber > 1 && Math.random() > 0.6) ? alicuotaPura * (Math.floor(Math.random() * 10) + 8) : 0;
+            // Check if there was a licitacion winner in this month (cuotaNumber - 1 for array index)
+            const awardsThisMonth = groupAwards[cuotaNumber - 1] || [];
+            const licitacionWinner = awardsThisMonth.find(a => a.type === 'licitacion');
+            
+            const totalLicitaciones = licitacionWinner ? alicuotaPura * (Math.floor(Math.random() * 10) + 8) : 0; // Simulate bid of 8-18 cuotas
+            
             const totalAdelantos = (cuotaNumber > 2 && Math.random() > 0.8) ? alicuotaPura * (Math.floor(Math.random() * 5) + 2) : 0;
             
             const impagos = alicuotaPura * missedPaymentsThisMonth;
             
-            // Assume 2 adjudications per month after the first capitalization month
             const adjudicadoDelMes = cuotaNumber > 1 ? group.capital * 2 : 0;
 
             accumulated = accumulated + monthlyAlicuotaPaid + totalLicitaciones + totalAdelantos - adjudicadoDelMes;
@@ -57,7 +66,7 @@ export default function FinancialHealthPage() {
                 acumulado: accumulated,
             };
         });
-    }, [group]);
+    }, [group, groupAwards]);
 
 
     if (!group) {

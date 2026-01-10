@@ -1,5 +1,5 @@
 
-import type { Group, User, Auction, Installment, GroupTemplate } from './types';
+import type { Group, User, Auction, Installment, GroupTemplate, Award } from './types';
 import { PlaceHolderImages } from './placeholder-images';
 import { format, addMonths, setDate, addDays, parseISO, lastDayOfMonth, differenceInMonths, startOfToday } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -103,7 +103,6 @@ export const initialGroups: Group[] = [
     status: 'Abierto',
     userIsMember: true,
     userAwardStatus: "No Adjudicado",
-    monthsCompleted: 0,
     acquiredInAuction: false,
     isImmediateActivation: false,
   },
@@ -120,7 +119,6 @@ export const initialGroups: Group[] = [
     status: 'Abierto',
     userIsMember: false,
     userAwardStatus: "No Adjudicado",
-    monthsCompleted: 0,
     acquiredInAuction: false,
     isImmediateActivation: false,
   }
@@ -198,4 +196,111 @@ export const generateExampleInstallments = (capital: number, plazo: number): Ins
             },
         };
     });
+};
+
+export const generateStaticAwards = (group: Group): Award[][] => {
+    // Initialize a pseudo-random generator based on the group ID for consistency
+    let seed = 0;
+    for (let i = 0; i < group.id.length; i++) {
+        seed = (seed + group.id.charCodeAt(i)) % 1000000;
+    }
+    const customRandom = () => {
+        const x = Math.sin(seed++) * 10000;
+        return x - Math.floor(x);
+    };
+
+    const memberOrderNumbers = Array.from({ length: group.totalMembers }, (_, i) => i + 1);
+    
+    // Generate a consistent user order number based on group ID
+    let userOrderNumberSeed = 0;
+    for (let i = 0; i < group.id.length; i++) {
+      userOrderNumberSeed += group.id.charCodeAt(i);
+    }
+    const userOrderNumber = (userOrderNumberSeed % group.totalMembers) + 1;
+
+
+    // Fisher-Yates shuffle
+    const shuffle = (array: number[]) => {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(customRandom() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+    };
+    
+    // Create a pool of potential winners and shuffle it
+    let potentialWinners = shuffle([...memberOrderNumbers]);
+    
+    const awards: Award[][] = Array.from({ length: group.plazo }, () => []);
+    
+    // If the user is already awarded, remove them from the main pool and place their award
+    if (group.userAwardStatus !== 'No Adjudicado') {
+        const userIndex = potentialWinners.indexOf(userOrderNumber);
+        if (userIndex > -1) {
+            potentialWinners.splice(userIndex, 1);
+        }
+        // Force the award to be in month 7 (index 6) for simulation
+        const awardMonthIndex = 6;
+        
+        if (!awards[awardMonthIndex].some(a => a.orderNumber === userOrderNumber)) {
+           awards[awardMonthIndex].push({ type: 'sorteo', orderNumber: userOrderNumber });
+        }
+    }
+
+    let winnerPool = [...potentialWinners];
+    let desertedLicitaciones = 0;
+
+    // Month 1 is for capitalization, so awards start from month 2 (index 1)
+    for (let i = 1; i < group.plazo - 1; i++) {
+        
+        let alreadyAwardedInMonth = awards[i].map(a => a.orderNumber);
+        const hasSorteo = awards[i].some(a => a.type === 'sorteo');
+        const hasLicitacion = awards[i].some(a => a.type === 'licitacion');
+        
+        // Add Sorteo winner if not present and pool is not empty
+        if (!hasSorteo && winnerPool.length > 0) {
+            const winner = winnerPool.shift()!;
+            if (!alreadyAwardedInMonth.includes(winner)) {
+                 awards[i].push({ type: 'sorteo', orderNumber: winner });
+                 alreadyAwardedInMonth.push(winner);
+            } else {
+                 winnerPool.push(winner); // put it back if already awarded
+            }
+        }
+
+        alreadyAwardedInMonth = awards[i].map(a => a.orderNumber);
+        // Add Licitacion winner if not present and pool is not empty
+        if (!hasLicitacion && winnerPool.length > 0) {
+            // Specific logic for the test group
+            if (group.id === 'ID-20230504-CLOSED' && i === 3) { // Month 4 is index 3
+                desertedLicitaciones++;
+            } else {
+                const isDeserted = customRandom() < 0.15 && desertedLicitaciones < 3; // 15% chance, max 3
+                if (!isDeserted) {
+                    if (winnerPool.length > 0) {
+                        const winnerIndex = winnerPool.findIndex(w => !alreadyAwardedInMonth.includes(w));
+                        if(winnerIndex > -1){
+                            const winner = winnerPool.splice(winnerIndex, 1)[0];
+                            awards[i].push({ type: 'licitacion', orderNumber: winner });
+                        }
+                    }
+                } else {
+                    desertedLicitaciones++;
+                }
+            }
+        }
+    }
+    
+    // Final month adjudication
+    const lastMonthIndex = group.plazo - 1;
+    winnerPool.forEach(winner => {
+        awards[lastMonthIndex].push({ type: 'sorteo-especial', orderNumber: winner });
+    });
+    
+    // Add deserted licitaciones as extra sorteos especiales in the last month
+    for(let j=0; j < desertedLicitaciones; j++) {
+        awards[lastMonthIndex].push({ type: 'sorteo-especial', orderNumber: 0 - (j + 1) }); // Use negative numbers for placeholder
+    }
+    
+    return awards;
 };
