@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { ArrowLeft, Users, Clock, Users2, Calendar, Gavel, HandCoins, Ticket, Info, Trophy, FileX2, TrendingUp, Hand, Scale, CalendarCheck, Gift, Check, X, Award as AwardIcon, Sparkles, Upload, MessageCircleQuestion, Youtube, CalendarDays } from 'lucide-react';
+import { ArrowLeft, Users, Clock, Users2, Calendar, Gavel, HandCoins, Ticket, Info, Trophy, FileX2, TrendingUp, Hand, Scale, CalendarCheck, Gift, Check, X, Award as AwardIcon, Sparkles, Upload, MessageCircleQuestion, Youtube, CalendarDays, LineChart } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import { useGroups } from '@/hooks/use-groups';
@@ -740,6 +740,13 @@ export default function GroupDetail() {
                      </Dialog>
                    </>
                  )}
+                  {isPlanActive && (
+                    <Button size="sm" variant="outline" asChild>
+                        <Link href={`/panel/group/${group.id}/financial-health`}>
+                            <LineChart className="mr-2 h-4 w-4" /> Ver Salud Financiera
+                        </Link>
+                    </Button>
+                  )}
                </CardContent>
              </Card>
            </div>
