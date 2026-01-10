@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label";
 import { useGroups } from "@/hooks/use-groups";
 import { AlertCircle, ArrowRight } from "lucide-react";
 import Link from "next/link";
-import { Tooltip, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 
 type SortKey = 'capital_asc' | 'capital_desc' | 'plazo_asc' | 'plazo_desc' | 'cuota_asc' | 'cuota_desc' | 'miembros_faltantes';
@@ -103,7 +103,7 @@ export default function ExploreGroups() {
   }
 
   return (
-    <>
+    <TooltipProvider>
       <div className="mb-8">
         <h1 className="text-3xl font-bold font-headline">Explorar Grupos Disponibles</h1>
         <p className="text-muted-foreground">Encuentra el plan perfecto que se adapte a tus sueños.</p>
@@ -157,7 +157,6 @@ export default function ExploreGroups() {
           </div>
         )}
       </section>
-    </>
+    </TooltipProvider>
   );
 }
-
