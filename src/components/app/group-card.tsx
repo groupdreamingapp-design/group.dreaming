@@ -138,11 +138,12 @@ export function GroupCard({ group }: GroupCardProps) {
   }
 
   const badgeClassName = cn(
-    "border-current",
-    group.status === 'Pendiente' && 'bg-yellow-500/20 text-yellow-700 border-yellow-500/30',
-    group.status === 'Activo' && 'bg-green-500/20 text-green-700 border-green-500/30',
-    group.status === 'Abierto' && 'bg-blue-500/20 text-blue-700 border-blue-500/30',
-    group.status === 'Subastado' && 'bg-orange-500/20 text-orange-700 border-orange-500/30'
+    "border-transparent text-white",
+    group.status === 'Pendiente' && 'bg-yellow-500',
+    group.status === 'Activo' && 'bg-green-600',
+    group.status === 'Abierto' && 'bg-blue-600',
+    group.status === 'Subastado' && 'bg-orange-600',
+    group.status === 'Cerrado' && 'bg-gray-600'
   );
 
   return (
@@ -166,14 +167,14 @@ export function GroupCard({ group }: GroupCardProps) {
               </div>
             </div>
              <div className="absolute top-2 right-2 flex flex-col items-end gap-2">
-                <Badge className={badgeClassName} variant="outline">
+                <Badge className={badgeClassName}>
                     <StatusIcon className="mr-1 h-3 w-3" />
                     {group.status}
                 </Badge>
                 {group.isImmediateActivation && (
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <Badge variant="outline" className="bg-red-500/20 text-red-700 border-red-500/30 animate-pulse">
+                      <Badge variant="destructive" className="animate-pulse">
                         <Zap className="mr-1 h-3 w-3" />
                         Activación Inmediata
                       </Badge>
@@ -186,7 +187,7 @@ export function GroupCard({ group }: GroupCardProps) {
                  {isFewMembersLeft && (
                    <Tooltip>
                     <TooltipTrigger asChild>
-                      <Badge variant="outline" className="bg-red-500/20 text-red-700 border-red-500/30">
+                      <Badge variant="destructive">
                         <Users className="mr-1 h-3 w-3" />
                         ¡Quedan pocos lugares!
                       </Badge>

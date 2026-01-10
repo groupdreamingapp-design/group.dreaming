@@ -135,12 +135,15 @@ export default function Dashboard() {
                                     </div>
                                 </TableCell>
                                 <TableCell>
-                                    <Badge variant={getStatusVariant(group.status)}
-                                    className={cn(
-                                        group.status === 'Activo' && 'bg-green-500/20 text-green-700 border-green-500/30',
-                                        group.status === 'Abierto' && 'bg-blue-500/20 text-blue-700 border-blue-500/30',
-                                        group.status === 'Pendiente' && 'bg-yellow-500/20 text-yellow-700 border-yellow-500/30',
-                                        group.status === 'Subastado' && 'bg-orange-500/20 text-orange-700 border-orange-500/30',
+                                    <Badge 
+                                      variant="outline"
+                                      className={cn(
+                                        "border-transparent text-white",
+                                        group.status === 'Pendiente' && 'bg-yellow-500',
+                                        group.status === 'Activo' && 'bg-green-600',
+                                        group.status === 'Abierto' && 'bg-blue-600',
+                                        group.status === 'Subastado' && 'bg-orange-600',
+                                        group.status === 'Cerrado' && 'bg-gray-600'
                                     )}
                                     >{group.status}</Badge>
                                 </TableCell>
