@@ -37,8 +37,6 @@ export default function FinancialHealthPage() {
         const alicuotaPura = group.capital / group.plazo;
         let accumulated = 0;
         let totalImpagos = 0;
-        let totalLicitado = 0;
-        let totalAdelantado = 0;
 
         const collectionData = installments.map((_, i) => {
             const cuotaNumber = i + 1;
@@ -52,10 +50,7 @@ export default function FinancialHealthPage() {
             const licitacionWinner = awardsThisMonth.find(a => a.type === 'licitacion');
             
             const totalLicitaciones = licitacionWinner ? alicuotaPura * (Math.floor(Math.random() * 10) + 8) : 0;
-            totalLicitado += totalLicitaciones;
-
             const totalAdelantos = (cuotaNumber > 2 && Math.random() > 0.8) ? alicuotaPura * (Math.floor(Math.random() * 5) + 2) : 0;
-            totalAdelantado += totalAdelantos;
             
             const impagos = alicuotaPura * missedPaymentsThisMonth;
             totalImpagos += impagos;
@@ -86,8 +81,6 @@ export default function FinancialHealthPage() {
             totalAcumulado: accumulated,
             totalImpagos: totalImpagos,
             capitalNecesario: group.capital * 2,
-            totalLicitado: totalLicitado,
-            totalAdelantado: totalAdelantado,
         };
         
         return { collectionData, kpis };
@@ -133,7 +126,7 @@ export default function FinancialHealthPage() {
                 <p className="text-muted-foreground">Un análisis del fondo general para adjudicaciones (Grupo {group.id}).</p>
             </div>
             
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 mb-8">
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mb-8">
                 <StatCard 
                     title="Fondo General Acumulado"
                     value={formatCurrency(kpis.totalAcumulado || 0)}
@@ -151,18 +144,6 @@ export default function FinancialHealthPage() {
                     value={formatCurrency(kpis.capitalNecesario || 0)}
                     icon={Target}
                     description="Monto para cubrir 2 adjudicaciones."
-                />
-                 <StatCard 
-                    title="Total Licitado Acumulado"
-                    value={formatCurrency(kpis.totalLicitado || 0)}
-                    icon={TrendingUp}
-                    description="Capital extra por competencia."
-                />
-                 <StatCard 
-                    title="Total Adelantado Acumulado"
-                    value={formatCurrency(kpis.totalAdelantado || 0)}
-                    icon={Zap}
-                    description="Capital extra por adelantos."
                 />
             </div>
 
