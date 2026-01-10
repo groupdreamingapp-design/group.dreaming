@@ -11,13 +11,13 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useAuth, initiateEmailSignIn, initiateAnonymousSignIn } from '@/firebase';
+import { useAuth, initiateEmailSignIn } from '@/firebase';
 import { signInWithGoogle } from '@/firebase/auth/google-auth';
 import { Logo } from '@/components/icons';
 import Link from 'next/link';
 import { Separator } from '@/components/ui/separator';
 import { FirebaseError } from 'firebase/app';
-import { ArrowLeft, UserCheck } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 
 const loginSchema = z.object({
   email: z.string().email('Por favor, introduce un email válido.'),
@@ -38,7 +38,6 @@ const GoogleIcon = (props: React.SVGProps<SVGSVGElement>) => (
 function LoginPageContent() {
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
-  const [isAnonymousLoading, setIsAnonymousLoading] = useState(false);
   const { toast } = useToast();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -83,19 +82,6 @@ function LoginPageContent() {
     }
   }
 
-  const handleAnonymousSignIn = async () => {
-    setIsAnonymousLoading(true);
-    try {
-      if (!auth) throw new Error("Auth service not available");
-      await initiateAnonymousSignIn(auth);
-      handleSuccess();
-    } catch (error: any) {
-      handleAuthError(error);
-    } finally {
-        setIsAnonymousLoading(false);
-    }
-  };
-  
   const handleAuthError = (error: any) => {
     let title = 'Error al iniciar sesión';
     let description = 'Ocurrió un error inesperado. Por favor, intenta de nuevo.';
@@ -160,17 +146,14 @@ function LoginPageContent() {
               <Input id="password" type="password" {...register('password')} />
               {errors.password && <p className="text-red-500 text-xs">{errors.password.message}</p>}
             </div>
-            <Button type="submit" className="w-full" disabled={isLoading || isGoogleLoading || isAnonymousLoading}>
+            <Button type="submit" className="w-full" disabled={isLoading || isGoogleLoading}>
                 {isLoading ? 'Iniciando sesión...' : 'Ingresar'}
             </Button>
           </form>
           <Separator className="my-6" />
            <div className="space-y-4">
-                <Button variant="outline" className="w-full" onClick={handleGoogleSignIn} disabled={isLoading || isGoogleLoading || isAnonymousLoading}>
+                <Button variant="outline" className="w-full" onClick={handleGoogleSignIn} disabled={isLoading || isGoogleLoading}>
                     {isGoogleLoading ? 'Cargando...' : <><GoogleIcon className="mr-2" /> Iniciar sesión con Google</>}
-                </Button>
-                <Button variant="secondary" className="w-full" onClick={handleAnonymousSignIn} disabled={isLoading || isGoogleLoading || isAnonymousLoading}>
-                    {isAnonymousLoading ? 'Cargando...' : <><UserCheck className="mr-2" /> Probar Demo (Ingreso anónimo)</>}
                 </Button>
                 <div className="text-center text-sm text-muted-foreground">
                   <p>
