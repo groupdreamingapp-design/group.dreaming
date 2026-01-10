@@ -13,20 +13,24 @@ import type { Group, GroupStatus } from "@/lib/types";
 export default function MyGroups() {
   const { groups } = useGroups();
   const [activeTab, setActiveTab] = useState<GroupStatus | "Todos">("Todos");
-  const [tabCounts, setTabCounts] = useState<Record<string, number | string>>({});
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   const myGroups = useMemo(() => groups.filter(g => g.userIsMember), [groups]);
 
   const tabs: (GroupStatus | "Todos")[] = ["Todos", "Activo", "Subastado", "Abierto", "Pendiente", "Cerrado"];
 
-  useEffect(() => {
-    // Calculate counts on the client-side to avoid hydration mismatch
+  const tabCounts = useMemo(() => {
     const counts: Record<string, number> = {};
     for (const tab of tabs) {
       counts[tab] = tab === "Todos" ? myGroups.length : myGroups.filter(g => g.status === tab).length;
     }
-    setTabCounts(counts);
+    return counts;
   }, [myGroups]);
+
 
   const filteredGroups = useMemo(() => {
     if (activeTab === "Todos") {
@@ -52,9 +56,9 @@ export default function MyGroups() {
           <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as GroupStatus | "Todos")} className="pt-4">
             <TabsList>
               {tabs.map(tab => {
-                const count = tabCounts[tab] ?? '...';
+                const count = isClient ? tabCounts[tab] : '...';
                 return (
-                  <TabsTrigger key={tab} value={tab}>
+                  <TabsTrigger key={tab} value={tab} disabled={!isClient}>
                     {tab} ({count})
                   </TabsTrigger>
                 );
