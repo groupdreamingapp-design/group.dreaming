@@ -1,4 +1,5 @@
 
+
 import type { Group, User, Auction, Installment, GroupTemplate, Award } from './types';
 import { PlaceHolderImages } from './placeholder-images';
 import { format, addMonths, setDate, addDays, parseISO, lastDayOfMonth, differenceInMonths, startOfToday } from 'date-fns';
@@ -182,7 +183,25 @@ export const initialGroups: Group[] = [
     userIsMember: false,
     userAwardStatus: "No Adjudicado",
     acquiredInAuction: false,
-  }
+  },
+  {
+    id: `ID-002-20240110-0001`,
+    name: autoTemplate.name,
+    capital: autoTemplate.capital,
+    plazo: autoTemplate.plazo,
+    imageUrl: autoTemplate.imageUrl,
+    imageHint: autoTemplate.imageHint,
+    cuotaPromedio: calculateCuotaPromedio(autoTemplate.capital, autoTemplate.plazo),
+    totalMembers: autoTemplate.plazo * 2,
+    membersCount: autoTemplate.plazo * 2,
+    status: 'Subastado',
+    userIsMember: false,
+    userAwardStatus: 'No Adjudicado',
+    activationDate: '2024-01-15T00:00:00.000Z',
+    monthsCompleted: 6,
+    auctionStartDate: new Date().toISOString(),
+    acquiredInAuction: true,
+  },
 ];
 
 
