@@ -2,12 +2,12 @@
 'use client';
 
 import { useState, useCallback, ReactNode, useEffect, useRef } from 'react';
-import { initialGroups, calculateCuotaPromedio } from '@/lib/data';
+import { initialGroups, calculateCuotaPromedio, generateInstallments } from '@/lib/data';
 import type { Group, GroupTemplate } from '@/lib/types';
 import { GroupsContext } from '@/hooks/use-groups';
 import { useToast } from '@/hooks/use-toast';
 import { groupTemplates } from '@/lib/group-templates';
-import { format, differenceInMonths, parseISO, addHours } from 'date-fns';
+import { format, differenceInMonths, parseISO, addHours, isBefore } from 'date-fns';
 
 let groupSequence: Record<string, number> = {};
 
@@ -61,7 +61,8 @@ export function GroupsProvider({ children }: { children: ReactNode }) {
         const installments = generateInstallments(group.capital, group.plazo, group.activationDate);
         const overdueInstallments = installments.filter(inst => {
             const dueDate = parseISO(inst.dueDate);
-            return isBefore(dueDate, today) && inst.number > (monthsPassed - (group.missedPayments || 0));
+            const monthsCompletedWithMissed = Math.max(0, monthsPassed - (group.missedPayments || 0));
+            return isBefore(dueDate, today) && inst.number > monthsCompletedWithMissed;
         });
 
         if (overdueInstallments.length >= 2) {
