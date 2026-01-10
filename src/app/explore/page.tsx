@@ -1,24 +1,26 @@
 
 'use client';
 
-import { useState, useEffect } from "react";
-import { initialGroups } from "@/lib/data";
+import { useState, useEffect, useMemo } from "react";
 import { GroupCard } from "@/components/app/group-card";
 import { Button } from "@/components/ui/button";
 import type { Group } from "@/lib/types";
-import { ListRestart } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useUser } from "@/firebase";
 import { useRouter } from "next/navigation";
 import { Label } from "@/components/ui/label";
+import { useGroups } from "@/hooks/use-groups";
+import { AlertCircle, ArrowRight } from "lucide-react";
+import Link from "next/link";
+import { Tooltip, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
 
 
 type SortKey = 'capital_asc' | 'capital_desc' | 'plazo_asc' | 'plazo_desc' | 'cuota_asc' | 'cuota_desc' | 'miembros_faltantes';
 
+const MAX_CAPITAL = 100000;
 
 export default function ExploreGroups() {
-  const [groups, setGroups] = useState<Group[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { groups: allGroups, loading: groupsLoading } = useGroups();
   const [sortKey, setSortKey] = useState<SortKey>('miembros_faltantes');
   const { user, loading: userLoading } = useUser();
   const router = useRouter();
@@ -31,15 +33,16 @@ export default function ExploreGroups() {
     }
   }, [user, userLoading, router]);
 
-  useEffect(() => {
-    // Simulate client-side data fetching and processing
-    setGroups(initialGroups);
-    setLoading(false);
-  }, []);
+  const subscribedCapital = useMemo(() => {
+    return allGroups
+        .filter(g => g.userIsMember && (g.status === 'Activo' || g.status === 'Abierto'))
+        .reduce((acc, g) => acc + g.capital, 0);
+  }, [allGroups]);
 
-  const processedGroups = (() => {
-    if (loading) return [];
-    let filteredGroups: Group[] = groups.filter(g => g.status === 'Abierto' && !g.userIsMember);
+
+  const processedGroups = useMemo(() => {
+    if (groupsLoading) return [];
+    let filteredGroups: Group[] = allGroups.filter(g => g.status === 'Abierto' && !g.userIsMember);
     
     // Sorting logic
     filteredGroups.sort((a, b) => {
@@ -64,10 +67,39 @@ export default function ExploreGroups() {
     });
 
     return filteredGroups;
-  })();
+  }, [allGroups, groupsLoading, sortKey]);
   
   if (userLoading || user) {
     return <div className="flex justify-center items-center h-full">Cargando...</div>;
+  }
+
+  const renderActionButton = (group: Group) => {
+    const exceedsCapital = (subscribedCapital + group.capital) > MAX_CAPITAL;
+    const cardLink = `/explore/group/${group.id}`;
+
+    if (exceedsCapital) {
+      return (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div className="w-full">
+              <Button size="sm" disabled className="w-full">
+                <AlertCircle className="mr-2 h-4 w-4" />
+                Cupo Excedido
+              </Button>
+            </div>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>El capital de este grupo excede tu cupo máximo para suscribir.</p>
+          </TooltipContent>
+        </Tooltip>
+      )
+    }
+
+    return (
+        <Button asChild size="sm">
+            <Link href={cardLink}>Ver Detalles</Link>
+        </Button>
+    );
   }
 
   return (
@@ -79,7 +111,7 @@ export default function ExploreGroups() {
 
       <div className="flex justify-between items-center mb-4">
         <div>
-          {!loading && (
+          {!groupsLoading && (
             <p className="text-sm text-muted-foreground">
               {processedGroups.length} {processedGroups.length === 1 ? 'grupo encontrado' : 'grupos encontrados'}
             </p>
@@ -105,7 +137,7 @@ export default function ExploreGroups() {
       </div>
 
       <section>
-        {loading ? (
+        {groupsLoading ? (
             <div className="text-center py-16 text-muted-foreground col-span-full">
                 <p>Cargando grupos...</p>
             </div>
@@ -115,6 +147,7 @@ export default function ExploreGroups() {
               <GroupCard 
                 key={group.id} 
                 group={group}
+                actionButton={renderActionButton(group)}
               />
             ))}
           </div>
@@ -127,3 +160,4 @@ export default function ExploreGroups() {
     </>
   );
 }
+

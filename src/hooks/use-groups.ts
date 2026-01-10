@@ -9,6 +9,7 @@ import type { Group } from '@/lib/types';
 // 1. Define the shape of the context
 interface GroupsContextType {
   groups: Group[];
+  loading: boolean;
   joinGroup: (groupId: string) => void;
   auctionGroup: (groupId: string) => void;
   acceptAward: (groupId: string) => void;

@@ -3,7 +3,7 @@
 
 import { useState, useCallback, ReactNode, useEffect, useRef } from 'react';
 import { initialGroups, calculateCuotaPromedio, generateInstallments } from '@/lib/data';
-import type { Group, GroupTemplate } from '@/lib/types';
+import type { Group, GroupTemplate, GroupStatus } from '@/lib/types';
 import { GroupsContext } from '@/hooks/use-groups';
 import { useToast } from '@/hooks/use-toast';
 import { groupTemplates } from '@/lib/group-templates';
@@ -41,6 +41,7 @@ function generateNewGroup(template: GroupTemplate): Group {
 
 export function GroupsProvider({ children }: { children: ReactNode }) {
   const [groups, setGroups] = useState<Group[]>(initialGroups);
+  const [loading, setLoading] = useState(true);
   const [advancedInstallments, setAdvancedInstallments] = useState<Record<string, number>>({});
   const { toast } = useToast();
   
@@ -66,7 +67,7 @@ export function GroupsProvider({ children }: { children: ReactNode }) {
             const secondOverdueDate = parseISO(overdueInstallments[1].dueDate);
             const seventyTwoHoursAgo = addHours(today, -72);
             if (isBefore(secondOverdueDate, seventyTwoHoursAgo) && !group.acquiredInAuction) {
-                return { ...group, status: 'Subastado', auctionStartDate: new Date().toISOString(), monthsCompleted: monthsPassed };
+                return { ...group, status: 'Subastado' as GroupStatus, auctionStartDate: new Date().toISOString(), monthsCompleted: monthsPassed };
             }
         }
         
@@ -75,6 +76,7 @@ export function GroupsProvider({ children }: { children: ReactNode }) {
       return group;
     });
     setGroups(updatedGroups);
+    setLoading(false);
   }, []); // Empty dependency array ensures this runs only once on mount
 
   const joinGroup = useCallback((groupId: string) => {
@@ -181,7 +183,7 @@ export function GroupsProvider({ children }: { children: ReactNode }) {
 
 
   return (
-    <GroupsContext.Provider value={{ groups, joinGroup, auctionGroup, acceptAward, approveAward, advanceInstallments, advancedInstallments }}>
+    <GroupsContext.Provider value={{ groups, loading, joinGroup, auctionGroup, acceptAward, approveAward, advanceInstallments, advancedInstallments }}>
       {children}
     </GroupsContext.Provider>
   );

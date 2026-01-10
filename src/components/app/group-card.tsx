@@ -15,12 +15,11 @@ import { useState, useEffect, useMemo } from "react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
 import { calculateTotalFinancialCost } from "@/lib/data";
 import Image from "next/image";
-import { useUser } from "@/firebase";
-import { useGroups } from "@/hooks/use-groups";
 
 
 type GroupCardProps = {
   group: Group;
+  actionButton: React.ReactNode;
 };
 
 // Component to safely format dates on the client side, avoiding hydration mismatch.
@@ -41,29 +40,16 @@ function ClientFormattedDate({ dateString, formatString }: { dateString: string,
 
 
 const statusConfig = {
-  Abierto: { icon: Users, color: "bg-blue-500", text: "text-blue-500" },
-  Activo: { icon: CheckCircle2, color: "bg-green-500", text: "text-green-700" },
-  Cerrado: { icon: Lock, color: "bg-gray-500", text: "text-gray-500" },
-  Subastado: { icon: Gavel, color: "bg-red-500", text: "text-red-700" },
+  Abierto: { icon: Users, color: "bg-blue-600", text: "text-blue-100" },
+  Activo: { icon: CheckCircle2, color: "bg-green-600", text: "text-green-100" },
+  Cerrado: { icon: Lock, color: "bg-gray-600", text: "text-gray-100" },
+  Subastado: { icon: Gavel, color: "bg-orange-600", text: "text-orange-100" },
 };
 
-const MAX_CAPITAL = 100000;
-
-export function GroupCard({ group }: GroupCardProps) {
-  const { user } = useUser();
-  const { groups } = useGroups();
+export function GroupCard({ group, actionButton }: GroupCardProps) {
   const { icon: StatusIcon } = statusConfig[group.status];
   const formatCurrency = (amount: number) => new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(amount);
   const totalFinancialCost = calculateTotalFinancialCost(group.capital, group.plazo);
-
-  const subscribedCapital = useMemo(() => {
-    if (!user) return 0;
-    return groups
-        .filter(g => g.userIsMember && g.status === 'Activo' || g.status === 'Abierto')
-        .reduce((acc, g) => acc + g.capital, 0);
-  }, [groups, user]);
-
-  const exceedsCapital = (subscribedCapital + group.capital) > MAX_CAPITAL;
 
   const progressValue = group.status === 'Abierto'
     ? (group.membersCount / group.totalMembers) * 100
@@ -81,65 +67,14 @@ export function GroupCard({ group }: GroupCardProps) {
     ? `${group.monthsCompleted} de ${group.plazo} meses`
     : 'Grupo finalizado';
     
-  const getCardLink = () => {
-    if (user) {
-      return group.userIsMember ? `/panel/group/${group.id}` : `/panel/group-public/${group.id}`;
-    }
-    return `/explore/group/${group.id}`;
-  };
+  const cardLink = group.userIsMember 
+    ? `/panel/group/${group.id}` 
+    : (group.status === 'Abierto' ? `/panel/group-public/${group.id}` : `/explore/group/${group.id}`);
 
-  const cardLink = getCardLink();
-
-
-  const renderAction = () => {
-    if (group.userIsMember) {
-        return (
-            <Button asChild variant="secondary" size="sm">
-                <Link href={cardLink}>
-                    Ver Detalles <ArrowRight className="ml-2 h-4 w-4" />
-                </Link>
-            </Button>
-        );
-    }
-
-     if (user) {
-        if (exceedsCapital) {
-           return (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <div className="w-full">
-                  <Button size="sm" disabled className="w-full">
-                    <AlertCircle className="mr-2 h-4 w-4" />
-                    Cupo Excedido
-                  </Button>
-                </div>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>El capital de este grupo excede tu cupo máximo para suscribir.</p>
-              </TooltipContent>
-            </Tooltip>
-           )
-        }
-        return (
-            <Button asChild size="sm" disabled={group.status !== 'Abierto'}>
-                <Link href={cardLink}>Unirme</Link>
-            </Button>
-        );
-    }
-
-    return (
-        <Button asChild size="sm">
-            <Link href={cardLink}>Ver Detalles</Link>
-        </Button>
-    )
-  }
 
   const badgeClassName = cn(
     "border-transparent text-white",
-    group.status === 'Activo' && 'bg-green-600',
-    group.status === 'Abierto' && 'bg-blue-600',
-    group.status === 'Subastado' && 'bg-orange-600',
-    group.status === 'Cerrado' && 'bg-gray-600'
+    statusConfig[group.status].color
   );
 
   return (
@@ -170,13 +105,13 @@ export function GroupCard({ group }: GroupCardProps) {
                 {isOpportunity && (
                    <Tooltip>
                     <TooltipTrigger asChild>
-                      <Badge variant="destructive" className="animate-pulse">
+                       <Badge variant="destructive" className="animate-pulse">
                         <Sparkles className="mr-1 h-3 w-3" />
                         ¡Oportunidad!
                       </Badge>
                     </TooltipTrigger>
                      <TooltipContent>
-                      <p>Este grupo está a punto de llenarse. ¡Asegura tu lugar!</p>
+                      <p>¡Faltan solo {membersMissing} miembro{membersMissing > 1 ? 's' : ''}!</p>
                     </TooltipContent>
                   </Tooltip>
                 )}
@@ -198,7 +133,7 @@ export function GroupCard({ group }: GroupCardProps) {
                   <Progress value={progressValue} aria-label={`Progreso del grupo ${progressValue.toFixed(0)}%`} className={cn(group.status === 'Abierto' && membersMissing > 0 && "bg-primary/20")} />
                   {isOpportunity && (
                     <div className="absolute inset-0 flex items-center justify-center">
-                      <span className="text-xs font-bold text-neutral-800">¡Faltan {membersMissing}!</span>
+                       <span className="text-xs font-bold text-neutral-800">¡Faltan {membersMissing}!</span>
                     </div>
                   )}
                 </div>
@@ -238,7 +173,7 @@ export function GroupCard({ group }: GroupCardProps) {
               <p className="text-xs text-muted-foreground">Cuota Promedio</p>
               <p className="font-bold text-base">{formatCurrency(group.cuotaPromedio)}</p>
           </div>
-          {renderAction()}
+          {actionButton}
         </CardFooter>
       </Card>
     </TooltipProvider>

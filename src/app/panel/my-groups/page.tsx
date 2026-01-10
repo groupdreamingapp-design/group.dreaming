@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { Group, GroupStatus } from "@/lib/types";
+import { ArrowRight } from "lucide-react";
 
 export default function MyGroups() {
   const { groups } = useGroups();
@@ -35,12 +36,22 @@ export default function MyGroups() {
   const filteredGroups = useMemo(() => {
     if (activeTab === "Todos") {
       return myGroups.sort((a, b) => {
-        const statusOrder = { "Activo": 1, "Subastado": 2, "Abierto": 3, "Cerrado": 4 };
+        const statusOrder: Record<GroupStatus, number> = { "Activo": 1, "Subastado": 2, "Abierto": 3, "Cerrado": 4 };
         return statusOrder[a.status] - statusOrder[b.status];
       });
     }
     return myGroups.filter(g => g.status === activeTab);
   }, [myGroups, activeTab]);
+
+  const renderActionButton = (group: Group) => {
+    return (
+        <Button asChild variant="secondary" size="sm">
+            <Link href={`/panel/group/${group.id}`}>
+                Ver Detalles <ArrowRight className="ml-2 h-4 w-4" />
+            </Link>
+        </Button>
+    );
+  }
 
   return (
     <>
@@ -58,7 +69,7 @@ export default function MyGroups() {
               {tabs.map(tab => {
                 const count = isClient ? tabCounts[tab] : '...';
                 return (
-                  <TabsTrigger key={tab} value={tab} disabled={!isClient}>
+                  <TabsTrigger key={tab} value={tab} disabled={!isClient || count === 0}>
                     {tab} ({count})
                   </TabsTrigger>
                 );
@@ -71,7 +82,7 @@ export default function MyGroups() {
           <div className="p-6 pt-0">
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
               {filteredGroups.map(group => (
-                <GroupCard key={group.id} group={group} />
+                <GroupCard key={group.id} group={group} actionButton={renderActionButton(group)} />
               ))}
             </div>
           </div>

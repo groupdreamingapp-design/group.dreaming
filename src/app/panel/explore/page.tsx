@@ -1,33 +1,36 @@
 
+
 'use client';
 
-import { useState, useEffect } from "react";
-import { initialGroups } from "@/lib/data";
+import { useState, useEffect, useMemo } from "react";
 import { GroupCard } from "@/components/app/group-card";
 import { Button } from "@/components/ui/button";
 import type { Group } from "@/lib/types";
-import { ListRestart } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import { useGroups } from "@/hooks/use-groups";
+import Link from "next/link";
+import { AlertCircle } from "lucide-react";
+import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 
 
 type SortKey = 'capital_asc' | 'capital_desc' | 'plazo_asc' | 'plazo_desc' | 'cuota_asc' | 'cuota_desc' | 'miembros_faltantes';
 
+const MAX_CAPITAL = 100000;
 
 export default function ExploreGroups() {
-  const [groups, setGroups] = useState<Group[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { groups: allGroups, loading } = useGroups();
   const [sortKey, setSortKey] = useState<SortKey>('miembros_faltantes');
 
-  useEffect(() => {
-    // Simulate client-side data fetching and processing
-    setGroups(initialGroups);
-    setLoading(false);
-  }, []);
+  const subscribedCapital = useMemo(() => {
+    return allGroups
+        .filter(g => g.userIsMember && (g.status === 'Activo' || g.status === 'Abierto'))
+        .reduce((acc, g) => acc + g.capital, 0);
+  }, [allGroups]);
 
-  const processedGroups = (() => {
+  const processedGroups = useMemo(() => {
     if (loading) return [];
-    let filteredGroups: Group[] = groups.filter(g => g.status === 'Abierto' && !g.userIsMember);
+    let filteredGroups: Group[] = allGroups.filter(g => g.status === 'Abierto' && !g.userIsMember);
     
     // Sorting logic
     filteredGroups.sort((a, b) => {
@@ -52,10 +55,40 @@ export default function ExploreGroups() {
     });
 
     return filteredGroups;
-  })();
+  }, [allGroups, loading, sortKey]);
+
+  const renderActionButton = (group: Group) => {
+    const exceedsCapital = (subscribedCapital + group.capital) > MAX_CAPITAL;
+    const cardLink = `/panel/group-public/${group.id}`;
+
+    if (exceedsCapital) {
+      return (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div className="w-full">
+              <Button size="sm" disabled className="w-full">
+                <AlertCircle className="mr-2 h-4 w-4" />
+                Cupo Excedido
+              </Button>
+            </div>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>El capital de este grupo excede tu cupo máximo para suscribir.</p>
+          </TooltipContent>
+        </Tooltip>
+      )
+    }
+
+    return (
+        <Button asChild size="sm" disabled={group.status !== 'Abierto'}>
+            <Link href={cardLink}>Unirme</Link>
+        </Button>
+    );
+  };
+
 
   return (
-    <>
+    <TooltipProvider>
       <div className="mb-8">
         <h1 className="text-3xl font-bold font-headline">Explorar Grupos Disponibles</h1>
         <p className="text-muted-foreground">Encuentra el plan perfecto que se adapte a tus sueños.</p>
@@ -99,6 +132,7 @@ export default function ExploreGroups() {
               <GroupCard 
                 key={group.id} 
                 group={group}
+                actionButton={renderActionButton(group)}
               />
             ))}
           </div>
@@ -108,7 +142,6 @@ export default function ExploreGroups() {
           </div>
         )}
       </section>
-    </>
+    </TooltipProvider>
   );
 }
-
