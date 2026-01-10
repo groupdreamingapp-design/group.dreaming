@@ -15,6 +15,7 @@ import { useState, useEffect } from "react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
 import { calculateTotalFinancialCost } from "@/lib/data";
 import Image from "next/image";
+import { useUser } from "@/firebase";
 
 type GroupCardProps = {
   group: Group;
@@ -46,6 +47,7 @@ const statusConfig = {
 };
 
 export function GroupCard({ group }: GroupCardProps) {
+  const { user } = useUser();
   const { icon: StatusIcon } = statusConfig[group.status];
   const formatCurrency = (amount: number) => new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(amount);
   const totalFinancialCost = calculateTotalFinancialCost(group.capital, group.plazo);
@@ -68,7 +70,14 @@ export function GroupCard({ group }: GroupCardProps) {
     ? `Validando (${group.totalMembers}/${group.totalMembers})`
     : 'Grupo finalizado';
     
-  const cardLink = group.userIsMember ? `/panel/group/${group.id}` : group.status === 'Abierto' ? `/panel/group-public/${group.id}` : `/explore/group/${group.id}`;
+  const getCardLink = () => {
+    if (user) {
+      return group.userIsMember ? `/panel/group/${group.id}` : `/panel/group-public/${group.id}`;
+    }
+    return `/explore/group/${group.id}`;
+  };
+
+  const cardLink = getCardLink();
 
 
   const renderAction = () => {
@@ -82,11 +91,19 @@ export function GroupCard({ group }: GroupCardProps) {
         );
     }
 
+     if (user) {
+        return (
+            <Button asChild size="sm" disabled={group.status !== 'Abierto'}>
+                <Link href={cardLink}>Unirme</Link>
+            </Button>
+        );
+    }
+
     return (
-       <Button asChild size="sm" disabled={group.status !== 'Abierto'}>
-          <Link href={cardLink}>Unirse</Link>
+        <Button asChild size="sm">
+            <Link href={cardLink}>Ver Detalles</Link>
         </Button>
-    );
+    )
   }
 
   const badgeClassName = cn(

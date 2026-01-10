@@ -2,8 +2,7 @@
 'use client';
 
 import { useParams, useRouter, usePathname } from 'next/navigation';
-import { useGroups } from '@/hooks/use-groups';
-import { generateExampleInstallments, initialGroups, calculateTotalFinancialCost } from '@/lib/data';
+import { initialGroups, generateExampleInstallments, calculateTotalFinancialCost } from '@/lib/data';
 import type { Installment } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -25,14 +24,23 @@ export default function GroupPublicDetail() {
   const params = useParams();
   const router = useRouter();
   const pathname = usePathname();
-  const { joinGroup } = useGroups();
   const { user, loading: userLoading } = useUser();
-  const { isVerified } = useUserNav();
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [hasReadContract, setHasReadContract] = useState(false);
   
   const groupId = typeof params.id === 'string' ? params.id : '';
   const group = useMemo(() => initialGroups.find(g => g.id === groupId), [groupId]);
+
+  useEffect(() => {
+    if (!userLoading && user) {
+        // If user is logged in, redirect them to the panel version of this page
+        router.replace(`/panel/group-public/${groupId}`);
+    }
+  }, [user, userLoading, router, groupId]);
+
+  if (userLoading || user) {
+    return <div className="flex items-center justify-center h-full">Cargando...</div>;
+  }
 
   if (!group) {
     return (
@@ -51,102 +59,12 @@ export default function GroupPublicDetail() {
   const totalFinancialCost = calculateTotalFinancialCost(group.capital, group.plazo);
   const formatCurrency = (amount: number) => new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'USD' }).format(amount);
   const formatCurrencyNoDecimals = (amount: number) => new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(amount);
-  
-  const handleJoinGroup = () => {
-    joinGroup(group.id);
-    router.push(`/panel/group/${group.id}`);
-  };
-
-  const resetDialog = () => {
-    setTermsAccepted(false);
-    setHasReadContract(false);
-  }
 
   const renderCTA = () => {
-    if (userLoading) {
-        return <div className="h-10 w-32 bg-muted rounded-md animate-pulse"></div>
-    }
-
-    if (user) {
-        return (
-            <Dialog onOpenChange={(open) => !open && resetDialog()}>
-                <DialogTrigger asChild>
-                    <Button size="lg">
-                        <CheckCircle className="mr-2" /> Unirme a este grupo
-                    </Button>
-                </DialogTrigger>
-                <DialogContent>
-                    <DialogHeader>
-                        <DialogTitle>Confirmar Unión al Grupo {group.id}</DialogTitle>
-                         <DialogDescription>Estás a punto de unirte a un plan de {formatCurrencyNoDecimals(group.capital)} en {group.plazo} meses.</DialogDescription>
-                    </DialogHeader>
-                    {isVerified ? (
-                        <div className="space-y-4">
-                            <p className="text-sm text-muted-foreground">
-                                Se generará el débito de la primera cuota en tu método de pago principal.
-                            </p>
-                            <Alert>
-                                <CheckCircle className="h-4 w-4" />
-                                <AlertTitle>¡Identidad Verificada!</AlertTitle>
-                                <AlertDescription>
-                                    Tu cuenta está verificada y lista para operar.
-                                </AlertDescription>
-                            </Alert>
-                             <div className="items-top flex space-x-2 pt-2">
-                                <Checkbox 
-                                  id="terms" 
-                                  checked={termsAccepted} 
-                                  onCheckedChange={(checked) => setTermsAccepted(!!checked)}
-                                  disabled={!hasReadContract}
-                                />
-                                <div className="grid gap-1.5 leading-none">
-                                  <Label 
-                                    htmlFor="terms" 
-                                    className={cn("text-sm font-medium leading-none", !hasReadContract && "text-muted-foreground cursor-not-allowed")}
-                                  >
-                                   He leído y acepto el <Button variant="link" className="p-0 h-auto" asChild><Link href="/panel/contract" target="_blank" onClick={() => setHasReadContract(true)}>Contrato de Adhesión</Link></Button>.
-                                  </Label>
-                                  {!hasReadContract && (
-                                    <p className="text-xs text-amber-600 font-semibold">
-                                      Debes hacer clic en 'Contrato de Adhesión' para poder aceptar los términos.
-                                    </p>
-                                  )}
-                                </div>
-                            </div>
-                        </div>
-                    ) : (
-                         <div>
-                            <p className="text-sm text-muted-foreground mb-4">
-                                Para continuar, primero debes completar el proceso de verificación de identidad. Es un requisito legal para garantizar la seguridad de todos los miembros.
-                            </p>
-                             <Alert variant="destructive">
-                                <ShieldAlert className="h-4 w-4" />
-                                <AlertTitle>Verificación de Identidad Requerida</AlertTitle>
-                                <AlertDescription>
-                                    Tu cuenta aún no ha sido verificada. Por favor, completa el formulario para poder unirte a un grupo.
-                                </AlertDescription>
-                            </Alert>
-                        </div>
-                    )}
-                    <DialogFooter>
-                        <DialogClose asChild><Button variant="ghost">Cancelar</Button></DialogClose>
-                        {isVerified ? (
-                            <Button onClick={handleJoinGroup} disabled={!termsAccepted}>Confirmar y Unirme</Button>
-                        ) : (
-                            <Button asChild>
-                                <Link href="/panel/verify">Ir a Verificar</Link>
-                            </Button>
-                        )}
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
-        )
-    }
-
     return (
         <div className='flex gap-2'>
             <Button variant="ghost" asChild>
-                <Link href={`/login?redirect=${pathname}`}>Ingresar</Link>
+                <Link href={`/login?redirect=${pathname}`}>Ingresar para Unirte</Link>
             </Button>
             <Button asChild>
                 <Link href={`/register?redirect=${pathname}`}>Comenzar Ahora</Link>
