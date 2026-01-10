@@ -48,31 +48,95 @@ export const calculateTotalFinancialCost = (capital: number, plazo: number): num
     return (costoTotal / capital) * 100;
 }
 
-const createGroupFromTemplate = (template: GroupTemplate): Group => {
-  const today = new Date();
-  const datePart = format(today, 'yyyyMMdd');
-  const newId = `ID-${template.purposeCode}-${datePart}-0001`;
+const viviendaTemplate = groupTemplates.find(t => t.purposeCode === '001')!;
+const emprendimientoTemplate = groupTemplates.find(t => t.purposeCode === '003')!;
+const gustitoTemplate = groupTemplates.find(t => t.purposeCode === '004')!;
 
-  return {
-    id: newId,
-    name: template.name,
-    capital: template.capital,
-    plazo: template.plazo,
-    imageUrl: template.imageUrl,
-    imageHint: template.imageHint,
-    cuotaPromedio: calculateCuotaPromedio(template.capital, template.plazo),
-    totalMembers: template.plazo * 2,
-    membersCount: 0,
+const today = startOfToday();
+
+// "Mi vivienda" group - Active and up to date
+const viviendaActivationDate = new Date('2024-05-04T00:00:00.000Z');
+const viviendaMonthsCompleted = differenceInMonths(today, viviendaActivationDate);
+
+// "Mi emprendimiento" group - Active with last installment overdue
+const emprendimientoActivationDate = new Date('2025-03-17T00:00:00.000Z');
+const emprendimientoMonthsDue = differenceInMonths(today, emprendimientoActivationDate);
+const emprendimientoMonthsCompleted = Math.max(0, emprendimientoMonthsDue - 1);
+
+
+export const initialGroups: Group[] = [
+  {
+    id: `ID-001-20260501-0001`,
+    name: viviendaTemplate.name,
+    capital: viviendaTemplate.capital,
+    plazo: viviendaTemplate.plazo,
+    imageUrl: viviendaTemplate.imageUrl,
+    imageHint: viviendaTemplate.imageHint,
+    cuotaPromedio: calculateCuotaPromedio(viviendaTemplate.capital, viviendaTemplate.plazo),
+    totalMembers: viviendaTemplate.plazo * 2,
+    membersCount: viviendaTemplate.plazo * 2,
+    status: 'Activo',
+    userIsMember: true,
+    userAwardStatus: "No Adjudicado",
+    monthsCompleted: 1, // Let's say 1 month has passed since activation
+    activationDate: '2026-05-04T00:00:00.000Z',
+    acquiredInAuction: false,
+    isImmediateActivation: false,
+  },
+  {
+    id: `ID-003-20250315-0001`,
+    name: emprendimientoTemplate.name,
+    capital: emprendimientoTemplate.capital,
+    plazo: emprendimientoTemplate.plazo,
+    imageUrl: emprendimientoTemplate.imageUrl,
+    imageHint: emprendimientoTemplate.imageHint,
+    cuotaPromedio: calculateCuotaPromedio(emprendimientoTemplate.capital, emprendimientoTemplate.plazo),
+    totalMembers: emprendimientoTemplate.plazo * 2,
+    membersCount: emprendimientoTemplate.plazo * 2,
+    status: 'Activo',
+    userIsMember: true,
+    userAwardStatus: "No Adjudicado",
+    monthsCompleted: 1, // Simulating that it's 2 months active but only 1 is paid
+    activationDate: '2025-03-17T00:00:00.000Z',
+    acquiredInAuction: false,
+    isImmediateActivation: false,
+  },
+  {
+    id: `ID-004-${format(today, 'yyyyMMdd')}-0001`,
+    name: gustitoTemplate.name,
+    capital: gustitoTemplate.capital,
+    plazo: gustitoTemplate.plazo,
+    imageUrl: gustitoTemplate.imageUrl,
+    imageHint: gustitoTemplate.imageHint,
+    cuotaPromedio: calculateCuotaPromedio(gustitoTemplate.capital, gustitoTemplate.plazo),
+    totalMembers: gustitoTemplate.plazo * 2,
+    membersCount: 15,
+    status: 'Abierto',
+    userIsMember: true,
+    userAwardStatus: "No Adjudicado",
+    monthsCompleted: 0,
+    acquiredInAuction: false,
+    isImmediateActivation: false,
+  },
+  // We can add a non-member group for exploration
+  {
+    id: `ID-002-${format(today, 'yyyyMMdd')}-0002`,
+    name: 'Mi Auto',
+    capital: 25000,
+    plazo: 84,
+    imageUrl: groupTemplates.find(t => t.purposeCode === '002')?.imageUrl || '',
+    imageHint: 'car keys',
+    cuotaPromedio: calculateCuotaPromedio(25000, 84),
+    totalMembers: 84 * 2,
+    membersCount: 5,
     status: 'Abierto',
     userIsMember: false,
     userAwardStatus: "No Adjudicado",
     monthsCompleted: 0,
     acquiredInAuction: false,
     isImmediateActivation: false,
-  };
-};
-
-export const initialGroups: Group[] = groupTemplates.map(createGroupFromTemplate);
+  }
+];
 
 
 export let auctions: Omit<Auction, 'precioBase'>[] = [];
