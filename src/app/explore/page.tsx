@@ -34,10 +34,11 @@ export default function ExploreGroups() {
   }, [user, userLoading, router]);
 
   const subscribedCapital = useMemo(() => {
+    if (!user) return 0; // If no user, subscribed capital is 0
     return allGroups
         .filter(g => g.userIsMember && (g.status === 'Activo' || g.status === 'Abierto'))
         .reduce((acc, g) => acc + g.capital, 0);
-  }, [allGroups]);
+  }, [allGroups, user]);
 
 
   const processedGroups = useMemo(() => {
@@ -69,13 +70,29 @@ export default function ExploreGroups() {
     return filteredGroups;
   }, [allGroups, groupsLoading, sortKey]);
   
-  if (userLoading || user) {
+  if (userLoading) {
     return <div className="flex justify-center items-center h-full">Cargando...</div>;
+  }
+  
+  if (user) {
+    // If user is logged in, they should be on the private version of this page.
+    // This also prevents a flash of the public content.
+    return <div className="flex justify-center items-center h-full">Redirigiendo...</div>;
   }
 
   const renderActionButton = (group: Group) => {
-    const exceedsCapital = (subscribedCapital + group.capital) > MAX_CAPITAL;
     const cardLink = `/explore/group/${group.id}`;
+
+    // If user is not logged in, always show "Ver Detalles"
+    if (!user) {
+         return (
+            <Button asChild size="sm">
+                <Link href={cardLink}>Ver Detalles</Link>
+            </Button>
+        );
+    }
+    
+    const exceedsCapital = (subscribedCapital + group.capital) > MAX_CAPITAL;
 
     if (exceedsCapital) {
       return (
