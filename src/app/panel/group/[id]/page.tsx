@@ -462,7 +462,7 @@ export default function GroupDetail() {
                             <ul className="text-sm space-y-2">
                                 <li className="flex items-center gap-2">
                                     <Check className="h-4 w-4 text-green-600" />
-                                    <span>Adjudicado por sorteo en el último 20% del plan (mes {awardMonth} de {group.plazo}).</span>
+                                    <span>Adjudicado por sorteo en el último 20% del plan (mes ${awardMonth} de ${group.plazo}).</span>
                                 </li>
                                 <li className="flex items-center gap-2">
                                     {hasNoOverduePayments ? <Check className="h-4 w-4 text-green-600" /> : <X className="h-4 w-4 text-red-600" />}
@@ -809,14 +809,12 @@ export default function GroupDetail() {
                             currentStatus = 'Pagado';
                           } else {
                             const dueDate = parseISO(inst.dueDate);
-                            if (isBefore(dueDate, today)) {
+                            if (isBefore(dueDate, today) && inst.number > cuotasPagadas) {
                               currentStatus = 'Vencido';
+                            } else if (index === pendingInstallmentIndex) {
+                                currentStatus = 'Pendiente';
                             } else {
-                                if (index === pendingInstallmentIndex) {
-                                    currentStatus = 'Pendiente';
-                                } else {
-                                    currentStatus = 'Futuro';
-                                }
+                                currentStatus = 'Futuro';
                             }
                           }
                       }
