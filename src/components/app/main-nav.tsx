@@ -4,7 +4,7 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
-import { Gavel, LayoutDashboard, Search, Users, PieChart, Shield, HelpCircle, Gift, Landmark, Bell, Waves } from "lucide-react"
+import { Gavel, LayoutDashboard, Search, Users, PieChart, Shield, HelpCircle, Gift, Landmark, Bell, Waves, TestTube2 } from "lucide-react"
 import { useUserNav } from "./user-nav";
 
 
@@ -64,6 +64,11 @@ export function MainNav({ isMobile = false }: MainNavProps) {
       href: "/panel/admin/collection-map",
       label: "Mapa de Cobranza",
       icon: Waves,
+    },
+    {
+        href: "/panel/admin/demo-users",
+        label: "Usuarios Demo",
+        icon: TestTube2,
     }
   ];
 
