@@ -32,19 +32,20 @@ export default function FinancialHealthPage() {
         return Array.from({ length: group.monthsCompleted }, (_, i) => {
             const cuotaNumber = i + 1;
             
-            // For the last completed month, use the real missedPayments value. For others, assume 0 for simplicity.
             const missedPaymentsThisMonth = (cuotaNumber === group.monthsCompleted) ? (group.missedPayments || 0) : 0;
             const membersWhoPaidThisMonth = group.totalMembers - missedPaymentsThisMonth;
 
             const monthlyAlicuotaPaid = alicuotaPura * membersWhoPaidThisMonth;
             
-            // Simula licitaciones y adelantos para la demo
-            const totalLicitaciones = (cuotaNumber > 1 && Math.random() > 0.6) ? alicuotaPura * (Math.floor(Math.random() * 5) + 5) : 0;
-            const totalAdelantos = (cuotaNumber > 2 && Math.random() > 0.8) ? alicuotaPura * (Math.floor(Math.random() * 3) + 2) : 0;
+            const totalLicitaciones = (cuotaNumber > 1 && Math.random() > 0.6) ? alicuotaPura * (Math.floor(Math.random() * 10) + 8) : 0;
+            const totalAdelantos = (cuotaNumber > 2 && Math.random() > 0.8) ? alicuotaPura * (Math.floor(Math.random() * 5) + 2) : 0;
             
             const impagos = alicuotaPura * missedPaymentsThisMonth;
+            
+            // Assume 2 adjudications per month after the first capitalization month
+            const adjudicadoDelMes = cuotaNumber > 1 ? group.capital * 2 : 0;
 
-            accumulated = accumulated + monthlyAlicuotaPaid + totalLicitaciones + totalAdelantos;
+            accumulated = accumulated + monthlyAlicuotaPaid + totalLicitaciones + totalAdelantos - adjudicadoDelMes;
 
             return {
                 cuotaNumber,
@@ -52,6 +53,7 @@ export default function FinancialHealthPage() {
                 totalLicitaciones,
                 totalAdelantos,
                 impagos,
+                adjudicadoDelMes,
                 acumulado: accumulated,
             };
         });
@@ -100,7 +102,7 @@ export default function FinancialHealthPage() {
             <Card>
                 <CardHeader>
                     <CardTitle>Tabla de Recaudación del Fondo General</CardTitle>
-                    <CardDescription>Detalle de la capitalización del grupo mes a mes.</CardDescription>
+                    <CardDescription>Detalle de la capitalización del grupo mes a mes, incluyendo ingresos por alícuotas, licitaciones, adelantos y egresos por adjudicaciones.</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <Table>
@@ -111,6 +113,7 @@ export default function FinancialHealthPage() {
                                 <TableHead className="text-right">Total Licitaciones</TableHead>
                                 <TableHead className="text-right">Total Adelantos</TableHead>
                                 <TableHead className="text-right">Impagos</TableHead>
+                                <TableHead className="text-right">Adjudicado</TableHead>
                                 <TableHead className="text-right">Acumulado</TableHead>
                             </TableRow>
                         </TableHeader>
@@ -118,11 +121,14 @@ export default function FinancialHealthPage() {
                             {collectionData.map((data) => (
                                 <TableRow key={data.cuotaNumber}>
                                     <TableCell>{data.cuotaNumber}</TableCell>
-                                    <TableCell className="text-right">{formatCurrency(data.totalAlicuota)}</TableCell>
-                                    <TableCell className="text-right">{formatCurrency(data.totalLicitaciones)}</TableCell>
-                                    <TableCell className="text-right">{formatCurrency(data.totalAdelantos)}</TableCell>
+                                    <TableCell className="text-right text-green-600">{formatCurrency(data.totalAlicuota)}</TableCell>
+                                    <TableCell className="text-right text-green-600">{formatCurrency(data.totalLicitaciones)}</TableCell>
+                                    <TableCell className="text-right text-green-600">{formatCurrency(data.totalAdelantos)}</TableCell>
                                     <TableCell className={`text-right font-medium ${data.impagos > 0 ? 'text-red-500' : 'text-muted-foreground'}`}>
                                         {formatCurrency(data.impagos)}
+                                    </TableCell>
+                                    <TableCell className="text-right text-red-500">
+                                        -{formatCurrency(data.adjudicadoDelMes)}
                                     </TableCell>
                                     <TableCell className="text-right font-bold">{formatCurrency(data.acumulado)}</TableCell>
                                 </TableRow>
