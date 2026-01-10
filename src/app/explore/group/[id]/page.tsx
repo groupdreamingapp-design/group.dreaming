@@ -12,14 +12,14 @@ import { ArrowLeft, Users, Clock, Scale, Users2, FileX2, CheckCircle, Ticket, Ha
 import Link from 'next/link';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
 import { useUser } from '@/firebase';
 import { Badge } from '@/components/ui/badge';
 import { useGroups } from '@/hooks/use-groups';
-import { GroupsProvider } from '@/components/app/providers';
+
 
 function GroupDetailContent() {
   const params = useParams();
@@ -176,8 +176,6 @@ function GroupDetailContent() {
 
 export default function GroupPublicDetail() {
   return (
-    <GroupsProvider>
-      <GroupDetailContent />
-    </GroupsProvider>
+    <GroupDetailContent />
   )
 }
