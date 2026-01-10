@@ -14,8 +14,8 @@ export const groupTemplates: GroupTemplate[] = [
     name: 'Mi Auto',
     capital: 25000,
     plazo: 84,
-    imageUrl: PlaceHolderImages.find(img => img.id === 'goal-car')?.imageUrl || '',
-    imageHint: 'new car',
+    imageUrl: PlaceHolderImages.find(img => img.id === 'collage-car-keys')?.imageUrl || '',
+    imageHint: 'car keys',
   },
   {
     name: 'Mi Emprendimiento',

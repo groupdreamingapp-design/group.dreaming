@@ -61,7 +61,7 @@ const createGroupFromTemplate = (template: GroupTemplate): Group => {
     imageUrl: template.imageUrl,
     imageHint: template.imageHint,
     cuotaPromedio: calculateCuotaPromedio(template.capital, template.plazo),
-    totalMembers: Math.ceil(template.plazo * 1.5),
+    totalMembers: template.plazo * 2,
     membersCount: 0,
     status: 'Abierto',
     userIsMember: false,
