@@ -9,15 +9,16 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from '@/components/ui/dialog';
-import { ArrowLeft, Users, Clock, Scale, Users2, FileX2, CheckCircle, Ticket, HandCoins, ShieldAlert, BadgePercent } from 'lucide-react';
+import { ArrowLeft, Users, Clock, Scale, Users2, FileX2, CheckCircle, Ticket, HandCoins, ShieldAlert, BadgePercent, Zap } from 'lucide-react';
 import Link from 'next/link';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useUserNav } from '@/components/app/user-nav';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
+import { Badge } from '@/components/ui/badge';
 
 export default function GroupPublicDetail() {
   const params = useParams();
@@ -28,7 +29,7 @@ export default function GroupPublicDetail() {
   const [hasReadContract, setHasReadContract] = useState(false);
   
   const groupId = typeof params.id === 'string' ? params.id : '';
-  const group = groups.find(g => g.id === groupId);
+  const group = useMemo(() => groups.find(g => g.id === groupId), [groups, groupId]);
 
   if (!group) {
     return (
@@ -187,7 +188,10 @@ export default function GroupPublicDetail() {
         <div className="lg:col-span-3">
           <Card>
             <CardHeader>
-              <CardTitle>Plan de Cuotas (Ejemplo)</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                Plan de Cuotas (Ejemplo)
+                {group.isImmediateActivation && <Badge variant="destructive"><Zap className="mr-1 h-3 w-3" />Activación Inmediata</Badge>}
+              </CardTitle>
               <CardDescription>Así se compone tu cuota mensual. Los valores son aproximados.</CardDescription>
             </CardHeader>
             <CardContent>

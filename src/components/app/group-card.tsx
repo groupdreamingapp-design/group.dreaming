@@ -68,7 +68,8 @@ export function GroupCard({ group }: GroupCardProps) {
     ? `Validando (${group.totalMembers}/${group.totalMembers})`
     : 'Grupo finalizado';
     
-  const cardLink = group.userIsMember ? `/panel/group/${group.id}` : `/panel/group-public/${group.id}`;
+  const cardLink = group.userIsMember ? `/panel/group/${group.id}` : group.status === 'Abierto' ? `/panel/group-public/${group.id}` : `/explore/group/${group.id}`;
+
 
   const renderAction = () => {
     if (group.userIsMember) {
