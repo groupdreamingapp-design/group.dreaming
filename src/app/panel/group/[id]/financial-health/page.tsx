@@ -42,17 +42,20 @@ export default function FinancialHealthPage() {
 
             const monthlyAlicuotaPaid = alicuotaPura * membersWhoPaidThisMonth;
             
-            // Check if there was a licitacion winner in this month (cuotaNumber - 1 for array index)
             const awardsThisMonth = groupAwards[cuotaNumber - 1] || [];
             const licitacionWinner = awardsThisMonth.find(a => a.type === 'licitacion');
             
-            const totalLicitaciones = licitacionWinner ? alicuotaPura * (Math.floor(Math.random() * 10) + 8) : 0; // Simulate bid of 8-18 cuotas
+            const totalLicitaciones = licitacionWinner ? alicuotaPura * (Math.floor(Math.random() * 10) + 8) : 0;
             
             const totalAdelantos = (cuotaNumber > 2 && Math.random() > 0.8) ? alicuotaPura * (Math.floor(Math.random() * 5) + 2) : 0;
             
             const impagos = alicuotaPura * missedPaymentsThisMonth;
             
-            const adjudicadoDelMes = cuotaNumber > 1 ? group.capital * 2 : 0;
+            let adjudicadoDelMes = 0;
+            if (cuotaNumber > 1) {
+                // If there was a licitacion winner, 2 capitals are awarded. Otherwise, only 1 (from sorteo).
+                adjudicadoDelMes = totalLicitaciones > 0 ? group.capital * 2 : group.capital;
+            }
 
             accumulated = accumulated + monthlyAlicuotaPaid + totalLicitaciones + totalAdelantos - adjudicadoDelMes;
 
