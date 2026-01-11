@@ -43,23 +43,27 @@ const contractClauses = [
         content: "Todos los valores, capitales, cuotas y transacciones expresados en la plataforma se denominan en Dólares Estadounidenses (USD). Cualquier pago, liquidación o transferencia que deba realizarse en Pesos Argentinos (ARS) se convertirá utilizando la cotización de 'Dólar MEP' (dólar bolsa) vendedora informada por una fuente de mercado de referencia al cierre del día hábil inmediato anterior a la fecha de la operación."
     },
     {
-        title: "DÉCIMA: LIMITACIÓN DE RESPONSABILIDAD Y CONTINGENCIA",
+        title: "DÉCIMA: GESTIÓN DE FONDOS TRANSITORIOS",
+        content: "Los fondos recaudados que se encuentren a la espera de ser adjudicados podrán ser colocados transitoriamente en activos de alta liquidez y bajo riesgo (Fondos Money Market) con el único fin de solventar gastos comunes del grupo, tales como primas de seguros de vida o gastos bancarios, optimizando la cuota final del suscriptor. Los rendimientos generados se aplicarán íntegramente a este concepto de compensación de gastos."
+    },
+    {
+        title: "UNDÉCIMA: LIMITACIÓN DE RESPONSABILIDAD Y CONTINGENCIA",
         content: "LA ADMINISTRADORA no será responsable por daños, perjuicios o pérdidas sufridas por EL SUSCRIPTOR causados por fallas en el sistema, en el servidor o en Internet, que sean ajenas a su control. Tampoco será responsable por cualquier virus que pudiera infectar el equipo de EL SUSCRIPTOR. En caso de una falla general del sistema confirmada por LA ADMINISTRADORA que afecte plazos críticos (ej. pago de subastas, aceptación de adjudicaciones), dichos plazos serán extendidos automáticamente por 24 horas a partir del restablecimiento del servicio, sin penalidad para el usuario."
     },
     {
-        title: "UNDÉCIMA: CONFIDENCIALIDAD Y USO DE LA CUENTA",
+        title: "DUODÉCIMA: CONFIDENCIALIDAD Y USO DE LA CUENTA",
         content: "EL SUSCRIPTOR es el único responsable de la confidencialidad de su contraseña y del uso de su cuenta, y exime de responsabilidad a LA ADMINISTRADORA por el acceso no autorizado o uso indebido de la misma por parte de terceros."
     },
     {
-        title: "DUODÉCIMA: JURISDICCIÓN",
+        title: "DECIMOTERCERA: JURISDICCIÓN",
         content: "Para cualquier controversia que pudiera surgir de la interpretación o ejecución del presente contrato, las partes se someten a la jurisdicción de los Tribunales Ordinarios de la Ciudad Autónoma de Buenos Aires, renunciando a cualquier otro fuero o jurisdicción."
     },
     {
-        title: "DECIMOTERCERA: ACEPTACIÓN",
+        title: "DECIMOCUARTA: ACEPTACIÓN",
         content: "EL SUSCRIPTOR, al hacer clic en el botón 'Confirmar y Unirme' o acción equivalente en la plataforma y habiendo tildado la casilla de aceptación, manifiesta su consentimiento y aceptación expresa, incondicional e irrevocable de todos y cada uno de los términos y condiciones establecidos en el presente Contrato de Adhesión, perfeccionándose el vínculo contractual entre las partes."
     },
     {
-        title: "DECIMOCUARTA: ANEXO DE BENEFICIOS",
+        title: "DECIMOQUINTA: ANEXO DE BENEFICIOS",
         content: "LA ADMINISTRADORA podrá ofrecer programas de beneficios y recompensas a los suscriptores. Los términos, condiciones, vigencia y funcionamiento de dichos programas se detallarán en la sección 'Beneficios' de la plataforma, la cual se considera un anexo al presente contrato. LA ADMINISTRADORA se reserva el derecho de modificar o discontinuar dichos programas, comunicándolo de forma fehaciente. La participación en los mismos es opcional y está sujeta al cumplimiento de las bases y condiciones específicas de cada uno."
     }
 ];

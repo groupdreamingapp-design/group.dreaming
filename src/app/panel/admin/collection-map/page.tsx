@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
-import { ArrowLeft, Banknote, CalendarClock, CheckCircle, Percent, Phone, RefreshCw, Shield, Wallet, Waves } from "lucide-react";
+import { ArrowLeft, Banknote, CalendarClock, CheckCircle, Percent, Phone, RefreshCw, Shield, TrendingUp, Wallet, Waves } from "lucide-react";
 import Link from "next/link";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
@@ -57,6 +57,7 @@ const kpiData = {
         reserva: { value: "$12,350.50", description: "Disponible para cubrir moras" },
         adjudicacion: { value: "Ver por grupo", description: "Seleccione un grupo para ver" },
         ingresos: { value: "$4,225", description: "Ingresos totales del mes" },
+        rendimientoFloat: { value: "$1,150", description: "Cubre 75% de seguros del mes" },
     },
     "ID-20250806-TEST": {
         recaudacion: { value: "$40,000 / $48,000", description: "83.3% del objetivo" },
@@ -64,6 +65,7 @@ const kpiData = {
         reserva: { value: "$6,500.00", description: "Fondo específico del grupo" },
         adjudicacion: { value: "25 de Julio, 2024", description: "Sorteo y Licitación G-001" },
         ingresos: { value: "$2,000", description: "Ingresos del grupo" },
+        rendimientoFloat: { value: "$550", description: "Cubre 78% de seguros del mes" },
     },
     "ID-20250501-AWRD": {
         recaudacion: { value: "$24,500 / $30,000", description: "81.6% del objetivo" },
@@ -71,6 +73,7 @@ const kpiData = {
         reserva: { value: "$3,850.50", description: "Fondo específico del grupo" },
         adjudicacion: { value: "26 de Julio, 2024", description: "Sorteo y Licitación G-002" },
         ingresos: { value: "$1,225", description: "Ingresos del grupo" },
+        rendimientoFloat: { value: "$350", description: "Cubre 72% de seguros del mes" },
     },
     "ID-20241101-ABCD": {
         recaudacion: { value: "$20,000 / $24,000", description: "83.3% del objetivo" },
@@ -78,6 +81,7 @@ const kpiData = {
         reserva: { value: "$2,000.00", description: "Fondo específico del grupo" },
         adjudicacion: { value: "27 de Julio, 2024", description: "Sorteo y Licitación G-003" },
         ingresos: { value: "$1,000", description: "Ingresos del grupo" },
+        rendimientoFloat: { value: "$250", description: "Cubre 70% de seguros del mes" },
     }
 };
 
@@ -137,7 +141,7 @@ export default function CollectionMap() {
                 </div>
             </div>
 
-             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5 mb-8">
+             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 mb-8">
                 <StatCard
                     title="Recaudación del Mes"
                     value={currentKpis.recaudacion.value}
@@ -149,6 +153,12 @@ export default function CollectionMap() {
                     value={currentKpis.cobrabilidad.value}
                     icon={Percent}
                     description={currentKpis.cobrabilidad.description}
+                />
+                 <StatCard
+                    title="Rendimiento de Float"
+                    value={currentKpis.rendimientoFloat.value}
+                    icon={TrendingUp}
+                    description={currentKpis.rendimientoFloat.description}
                 />
                 <StatCard
                     title="Fondo de Reserva"
