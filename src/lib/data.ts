@@ -270,7 +270,10 @@ export const generateInstallments = (capital: number, plazo: number, activationD
     const cuotaSuscripcion = mesesFinanciacionSuscripcion > 0 ? totalSuscripcion / mesesFinanciacionSuscripcion : 0;
     
     const startDate = parseISO(activationDate);
-    const activationDay = startDate.getUTCDate();
+
+    // The first installment is paid upon joining, so we generate from the second one.
+    // The second installment is due on the 10th of the month FOLLOWING the activation.
+    const firstDueDate = setDate(addMonths(startDate, 1), 10);
 
     return Array.from({ length: plazo }, (_, i) => {
         const saldoCapital = capital - (alicuotaPura * i);
@@ -278,14 +281,14 @@ export const generateInstallments = (capital: number, plazo: number, activationD
         const derechoSuscripcion = i < mesesFinanciacionSuscripcion ? cuotaSuscripcion : 0;
         const totalCuota = alicuotaPura + gastosAdm + seguroVida + derechoSuscripcion;
         
-        const futureDate = addMonths(startDate, i + 1);
-        const targetYear = futureDate.getUTCFullYear();
-        const targetMonth = futureDate.getUTCMonth();
-
-        const lastDayOfTargetMonth = new Date(Date.UTC(targetYear, targetMonth + 1, 0)).getUTCDate();
-        const dayToSet = Math.min(activationDay, lastDayOfTargetMonth);
-
-        const dueDate = new Date(Date.UTC(targetYear, targetMonth, dayToSet));
+        let dueDate: Date;
+        if (i === 0) {
+            // First installment is paid on activation day.
+            dueDate = startDate;
+        } else {
+            // Subsequent installments are on the 10th of each month.
+            dueDate = setDate(addMonths(startDate, i), 10);
+        }
 
         return {
             id: `cuota-${i + 1}`,
@@ -373,8 +376,8 @@ export const generateStaticAwards = (group: Group): Award[][] => {
         if (userIndex > -1) {
             potentialWinners.splice(userIndex, 1);
         }
-        // Force the award to be in month 2 (index 1) for simulation for this specific group
-        const awardMonthIndex = 1;
+        // Force the award to be in month 7 (index 6) for simulation for this specific group
+        const awardMonthIndex = 6;
         
         if (!awards[awardMonthIndex].some(a => a.orderNumber === userOrderNumber)) {
            awards[awardMonthIndex].push({ type: 'sorteo', orderNumber: userOrderNumber });

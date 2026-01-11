@@ -19,7 +19,7 @@ import { generateInstallments, generateExampleInstallments, user as mockUser, ge
 import { useMemo, useState, useEffect } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from '@/components/ui/separator';
-import { addDays, parseISO, format, isBefore, isToday, differenceInMonths } from 'date-fns';
+import { addDays, parseISO, format, isBefore, isToday, differenceInMonths, setDate } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -291,7 +291,7 @@ export default function GroupDetail() {
   const AwardStatusIconComponent = awardStatusIcon[group.userAwardStatus];
 
   const nextInstallment = installments[pendingInstallmentIndex];
-  const nextAdjudicationDate = nextInstallment ? addDays(parseISO(nextInstallment.dueDate), 5) : null;
+  const nextAdjudicationDate = nextInstallment ? setDate(parseISO(nextInstallment.dueDate), 15) : null;
 
 
   return (
@@ -753,7 +753,7 @@ export default function GroupDetail() {
                       }
                       
                       const awardsForReceipt = groupAwards[inst.number - 2] || [];
-                      const awardDateString = (isPlanActive || group.status === 'Cerrado') && awardsForReceipt.length > 0 && inst.dueDate && !inst.dueDate.startsWith('Mes') ? addDays(parseISO(inst.dueDate), 5).toISOString() : undefined;
+                      const awardDateString = (isPlanActive || group.status === 'Cerrado') && awardsForReceipt.length > 0 && inst.dueDate && !inst.dueDate.startsWith('Mes') ? setDate(parseISO(inst.dueDate), 15).toISOString() : undefined;
                       const showAdjudicationInfo = inst.number <= (group.monthsCompleted || 0) + 1 && (group.status === 'Activo' || group.status === 'Cerrado' || group.status === 'Subastado');
 
 

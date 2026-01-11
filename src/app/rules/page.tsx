@@ -26,8 +26,8 @@ const platformRules = [
         icon: CalendarPlus,
         points: [
             "Un grupo se 'Activa' cuando el último miembro se une y abona su primera cuota.",
-            "La segunda cuota de TODOS los miembros se genera con vencimiento a 30 días de la fecha de activación del grupo.",
-            "Las cuotas subsiguientes vencerán en la misma fecha de cada mes, asegurando un ciclo de pago ordenado para todos.",
+            "La segunda cuota de TODOS los miembros vencerá el día 10 del mes siguiente a la activación del grupo.",
+            "Las cuotas subsiguientes vencerán los días 10 de cada mes, y los actos de adjudicación se realizarán los días 15.",
         ]
     },
     {
