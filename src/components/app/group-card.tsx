@@ -147,12 +147,6 @@ export function GroupCard({ group, actionButton }: GroupCardProps) {
                   <Clock className="h-4 w-4 text-muted-foreground" />
                   <span>{group.plazo} Meses</span>
                 </div>
-                 {group.activationDate && (
-                  <div className="flex items-center gap-2">
-                    <CalendarCheck className="h-4 w-4 text-muted-foreground" />
-                    <span>Activo desde: <ClientFormattedDate dateString={group.activationDate} formatString="dd/MM/yy" /></span>
-                  </div>
-                )}
                 <div className="flex items-center gap-2">
                     <Percent className="h-4 w-4 text-muted-foreground" />
                     <Tooltip>

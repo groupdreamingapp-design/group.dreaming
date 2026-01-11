@@ -335,7 +335,7 @@ export default function GroupDetail() {
                 <div className="flex items-center gap-2"><Users2 className="h-4 w-4 text-primary" /><span>Adjudicaciones: <strong>2 por mes</strong></span></div>
             </CardContent>
           </Card>
-           {isPlanActive && nextAdjudicationDate && (
+           {isPlanActive && nextAdjudicationDate && isBefore(new Date(), nextAdjudicationDate) && (
             <Card className="flex-1 bg-blue-500/5 border-blue-500/20">
                 <CardHeader>
                     <CardTitle className="text-blue-800 dark:text-blue-300">Próximo Acto de Adjudicación</CardTitle>
@@ -789,7 +789,7 @@ export default function GroupDetail() {
                             >{currentStatus}</Badge>
                           </TableCell>
                            <TableCell className="text-xs text-muted-foreground">
-                              {showAdjudicationInfo && awardDateString && awardsForReceipt.length > 0 && (
+                              {showAdjudicationInfo && awardDateString && awardsForReceipt.length > 0 && isBefore(new Date(), parseISO(awardDateString)) && (
                                   <div className="flex items-center gap-2">
                                        <CalendarCheck className="h-4 w-4" />
                                        <span>{<ClientFormattedDate dateString={awardDateString} formatString="dd/MM/yyyy" />}</span>
