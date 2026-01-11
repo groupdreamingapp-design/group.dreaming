@@ -19,7 +19,7 @@ import { generateInstallments, generateExampleInstallments, user as mockUser, ge
 import { useMemo, useState, useEffect } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from '@/components/ui/separator';
-import { addDays, parseISO, format, isBefore, isToday, differenceInMonths, setDate } from 'date-fns';
+import { addDays, parseISO, format, isBefore, isToday, differenceInMonths, setDate, addMonths } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -72,6 +72,7 @@ export default function GroupDetail() {
 
   const [selectedInstallment, setSelectedInstallment] = useState<Installment | null>(null);
   const [selectedReceipt, setSelectedReceipt] = useState<Installment | null>(null);
+  const [nextAdjudicationInfo, setNextAdjudicationInfo] = useState<Date | null>(null);
 
 
   const group = useMemo(() => groups.find(g => g.id === groupId), [groups, groupId]);
@@ -101,6 +102,34 @@ export default function GroupDetail() {
     return (seed % group.totalMembers) + 1;
   }, [group]);
 
+  const installmentsIssued = group?.monthsCompleted || 0;
+  const installmentsPaid = installmentsIssued - (group?.missedPayments || 0);
+
+  useEffect(() => {
+    if (!installments.length || !installmentsPaid) {
+        setNextAdjudicationInfo(null);
+        return;
+    }
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const nextInstallment = installments.find(inst => inst.number > installmentsPaid && !isBefore(parseISO(inst.dueDate), today));
+    
+    if (!nextInstallment) {
+        setNextAdjudicationInfo(null);
+        return;
+    }
+
+    const nextInstallmentDate = parseISO(nextInstallment.dueDate);
+    let adjudicationDate = setDate(nextInstallmentDate, 15);
+    
+    if (isBefore(adjudicationDate, today)) {
+        const nextMonthDate = addMonths(nextInstallmentDate, 1);
+        adjudicationDate = setDate(nextMonthDate, 15);
+    }
+    setNextAdjudicationInfo(adjudicationDate);
+}, [installments, installmentsPaid]);
+
 
   if (!group) {
     return (
@@ -114,9 +143,6 @@ export default function GroupDetail() {
       </div>
     );
   }
-
-  const installmentsIssued = group.monthsCompleted || 0;
-  const installmentsPaid = installmentsIssued - (group.missedPayments || 0);
   
   const isMember = group.userIsMember;
   
@@ -290,31 +316,6 @@ export default function GroupDetail() {
   };
   const AwardStatusIconComponent = awardStatusIcon[group.userAwardStatus];
 
-  const nextAdjudicationInfo = useMemo(() => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    const nextInstallment = installments.find(inst => inst.number > installmentsPaid && !isBefore(parseISO(inst.dueDate), today));
-    
-    if (!nextInstallment) {
-        // If there are no future installments, there is no next adjudication.
-        // This can happen if the plan is fully paid.
-        return null;
-    }
-
-    const nextInstallmentDate = parseISO(nextInstallment.dueDate);
-    let adjudicationDate = setDate(nextInstallmentDate, 15);
-    
-    // If the 15th of the current installment's month has already passed,
-    // move to the next month's adjudication date.
-    if (isBefore(adjudicationDate, today)) {
-        const nextMonthDate = addMonths(nextInstallmentDate, 1);
-        adjudicationDate = setDate(nextMonthDate, 15);
-    }
-    
-    return adjudicationDate;
-}, [installments, installmentsPaid]);
-
 
   return (
     <TooltipProvider>
@@ -357,7 +358,7 @@ export default function GroupDetail() {
                 <div className="flex items-center gap-2"><Users2 className="h-4 w-4 text-primary" /><span>Adjudicaciones: <strong>2 por mes</strong></span></div>
             </CardContent>
           </Card>
-           {isPlanActive && nextAdjudicationInfo && (
+           {isPlanActive && (
             <Card className="flex-1 bg-blue-500/5 border-blue-500/20">
                 <CardHeader>
                     <CardTitle className="text-blue-800 dark:text-blue-300">Próximo Acto de Adjudicación</CardTitle>
@@ -368,7 +369,11 @@ export default function GroupDetail() {
                         <CalendarDays className="h-5 w-5 text-blue-600" />
                         <div>
                             <p className="font-semibold">Fecha del Acto</p>
-                            <p><ClientFormattedDate dateString={nextAdjudicationInfo.toISOString()} formatString="EEEE, dd 'de' MMMM" /></p>
+                            {nextAdjudicationInfo ? (
+                                <p><ClientFormattedDate dateString={nextAdjudicationInfo.toISOString()} formatString="EEEE, dd 'de' MMMM" /></p>
+                            ) : (
+                                <p>Calculando...</p>
+                            )}
                         </div>
                     </div>
                     <div className="flex items-center gap-3">
@@ -936,5 +941,3 @@ export default function GroupDetail() {
     </TooltipProvider>
   );
 }
-
-    
