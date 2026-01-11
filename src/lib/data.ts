@@ -58,6 +58,24 @@ const familiaYAmigosTemplate = groupTemplates.find(t => t.purposeCode === '005')
 
 export const initialGroups: Group[] = [
   // Grupos a los que el usuario ya pertenece
+   {
+    id: `ID-005-20250501-AWRD`,
+    name: familiaYAmigosTemplate.name,
+    capital: familiaYAmigosTemplate.capital,
+    plazo: familiaYAmigosTemplate.plazo,
+    imageUrl: familiaYAmigosTemplate.imageUrl,
+    imageHint: familiaYAmigosTemplate.imageHint,
+    cuotaPromedio: calculateCuotaPromedio(familiaYAmigosTemplate.capital, familiaYAmigosTemplate.plazo),
+    totalMembers: familiaYAmigosTemplate.plazo * 2,
+    membersCount: familiaYAmigosTemplate.plazo * 2,
+    status: 'Activo',
+    userIsMember: true,
+    userAwardStatus: "Adjudicado - Pendiente Aceptación",
+    activationDate: '2024-01-01T00:00:00.000Z',
+    monthsCompleted: 7,
+    acquiredInAuction: false,
+    missedPayments: 0,
+  },
   {
     id: `ID-001-20240501-0001`,
     name: viviendaTemplate.name,
@@ -202,6 +220,24 @@ export const initialGroups: Group[] = [
     auctionStartDate: new Date().toISOString(),
     acquiredInAuction: true,
   },
+  {
+    id: 'ID-20250806-TEST',
+    name: autoTemplate.name,
+    capital: 24000,
+    plazo: 48,
+    imageUrl: autoTemplate.imageUrl,
+    imageHint: autoTemplate.imageHint,
+    cuotaPromedio: calculateCuotaPromedio(24000, 48),
+    totalMembers: 96,
+    membersCount: 96,
+    status: 'Subastado',
+    userIsMember: false,
+    userAwardStatus: 'No Adjudicado',
+    activationDate: '2023-01-15T00:00:00.000Z',
+    monthsCompleted: 18,
+    auctionStartDate: new Date().toISOString(),
+    acquiredInAuction: false,
+  }
 ];
 
 
