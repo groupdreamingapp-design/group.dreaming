@@ -290,8 +290,29 @@ export default function GroupDetail() {
   };
   const AwardStatusIconComponent = awardStatusIcon[group.userAwardStatus];
 
-  const nextInstallment = installments[pendingInstallmentIndex];
-  const nextAdjudicationDate = nextInstallment ? setDate(parseISO(nextInstallment.dueDate), 15) : null;
+  const nextAdjudicationInfo = useMemo(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const nextInstallment = installments.find(inst => inst.number > installmentsPaid && !isBefore(parseISO(inst.dueDate), today));
+    if (!nextInstallment) return null;
+
+    const adjudicationDate = setDate(parseISO(nextInstallment.dueDate), 15);
+    
+    if (isBefore(today, adjudicationDate)) {
+      return adjudicationDate;
+    }
+
+    // If past the 15th, check the next month's installment
+    const nextMonthInstallmentIndex = installments.findIndex(inst => inst.number === nextInstallment.number + 1);
+    if(nextMonthInstallmentIndex > -1) {
+        const nextMonthInstallment = installments[nextMonthInstallmentIndex];
+        return setDate(parseISO(nextMonthInstallment.dueDate), 15);
+    }
+    
+    return null;
+
+  }, [installments, installmentsPaid]);
 
 
   return (
@@ -335,7 +356,7 @@ export default function GroupDetail() {
                 <div className="flex items-center gap-2"><Users2 className="h-4 w-4 text-primary" /><span>Adjudicaciones: <strong>2 por mes</strong></span></div>
             </CardContent>
           </Card>
-           {isPlanActive && nextAdjudicationDate && isBefore(new Date(), nextAdjudicationDate) && (
+           {isPlanActive && nextAdjudicationInfo && (
             <Card className="flex-1 bg-blue-500/5 border-blue-500/20">
                 <CardHeader>
                     <CardTitle className="text-blue-800 dark:text-blue-300">Próximo Acto de Adjudicación</CardTitle>
@@ -346,7 +367,7 @@ export default function GroupDetail() {
                         <CalendarDays className="h-5 w-5 text-blue-600" />
                         <div>
                             <p className="font-semibold">Fecha del Acto</p>
-                            <p><ClientFormattedDate dateString={nextAdjudicationDate.toISOString()} formatString="EEEE, dd 'de' MMMM" /></p>
+                            <p><ClientFormattedDate dateString={nextAdjudicationInfo.toISOString()} formatString="EEEE, dd 'de' MMMM" /></p>
                         </div>
                     </div>
                     <div className="flex items-center gap-3">
@@ -892,3 +913,4 @@ export default function GroupDetail() {
     </TooltipProvider>
   );
 }
+
