@@ -22,12 +22,16 @@ import type { Group, Auction } from "@/lib/types";
 
 
 function ClientCountdown({ endDate, isUrgent }: { endDate: string, isUrgent?: boolean }) {
-  const [timeLeft, setTimeLeft] = useState<string>('');
+  const [timeLeft, setTimeLeft] = useState<string>('Calculando...');
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
     setIsMounted(true);
-    
+  }, []);
+
+  useEffect(() => {
+    if (!isMounted) return;
+
     const calculateTimeLeft = () => {
       const end = new Date(endDate);
       const now = new Date();
@@ -51,7 +55,7 @@ function ClientCountdown({ endDate, isUrgent }: { endDate: string, isUrgent?: bo
     const timer = setInterval(calculateTimeLeft, 1000);
 
     return () => clearInterval(timer);
-  }, [endDate]);
+  }, [endDate, isMounted]);
 
   if (!isMounted) {
     return (
@@ -68,7 +72,7 @@ function ClientCountdown({ endDate, isUrgent }: { endDate: string, isUrgent?: bo
        isUrgent && "text-orange-600 font-semibold"
      )}>
       {isUrgent ? <AlertTriangle className="h-4 w-4" /> : <Clock className="h-4 w-4 text-muted-foreground" />}
-      <span>{isUrgent ? 'Cierre Urgente' : 'Termina en'} {timeLeft}</span>
+      <span>{isUrgent && timeLeft !== 'Finalizada' ? 'Cierre Urgente' : 'Termina en'} {timeLeft}</span>
     </div>
   );
 }
@@ -84,6 +88,23 @@ export default function Auctions() {
   const { toast } = useToast();
   const { isVerified } = useUserNav();
   const { groups } = useGroups();
+  const [openDialogs, setOpenDialogs] = useState<Record<string, boolean>>({});
+
+  const resetDialog = () => {
+    setOfferAmount('');
+    setTermsAccepted(false);
+    setAutoBidEnabled(false);
+    setMaxBid('');
+    setAutoIncrement('');
+    setHasReadRules(false);
+  };
+
+  const handleOpenChange = (auctionId: string, open: boolean) => {
+    setOpenDialogs(prev => ({ ...prev, [auctionId]: open }));
+    if (!open) {
+      resetDialog();
+    }
+  };
 
   const auctions = groups
     .filter(g => g.status === 'Subastado')
@@ -115,8 +136,6 @@ export default function Auctions() {
         } as Auction
     });
   
-  const [openDialogs, setOpenDialogs] = useState<Record<string, boolean>>({});
-
   const formatCurrency = (amount: number) => new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'USD' }).format(amount);
   const formatCurrencyNoDecimals = (amount: number) => new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(amount);
   
@@ -145,22 +164,6 @@ export default function Auctions() {
     handleOpenChange(auction.id, false);
   };
   
-  const resetDialog = () => {
-    setOfferAmount('');
-    setTermsAccepted(false);
-    setAutoBidEnabled(false);
-    setMaxBid('');
-    setAutoIncrement('');
-    setHasReadRules(false);
-  }
-
-  const handleOpenChange = (auctionId: string, open: boolean) => {
-    setOpenDialogs(prev => ({ ...prev, [auctionId]: open }));
-    if (!open) {
-      resetDialog();
-    }
-  }
-
   return (
     <>
       <div className="flex justify-between items-center mb-8">

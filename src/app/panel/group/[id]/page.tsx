@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import type { Group, Installment, Award, UserAwardStatus } from '@/lib/types';
@@ -31,15 +30,26 @@ import { InstallmentReceipt } from '@/components/app/receipt';
 // Component to safely format dates on the client side, avoiding hydration mismatch.
 function ClientFormattedDate({ dateString, formatString }: { dateString: string, formatString: string }) {
   const [formattedDate, setFormattedDate] = useState(dateString);
+  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
-    try {
-      const date = parseISO(dateString);
-      setFormattedDate(format(date, formatString, { locale: es }));
-    } catch (error) {
-      setFormattedDate(dateString);
+    setIsMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (isMounted) {
+        try {
+            const date = parseISO(dateString);
+            setFormattedDate(format(date, formatString, { locale: es }));
+        } catch (error) {
+            setFormattedDate(dateString);
+        }
     }
-  }, [dateString, formatString]);
+  }, [dateString, formatString, isMounted]);
+
+  if (!isMounted) {
+    return <>{dateString}</>; // Render initial server-side value
+  }
 
   return <>{formattedDate}</>;
 }
@@ -50,29 +60,51 @@ export default function GroupDetail() {
   const groupId = typeof params.id === 'string' ? params.id : '';
   const { groups, joinGroup, auctionGroup, acceptAward, approveAward, advanceInstallments, advancedInstallments } = useGroups();
   const { toast } = useToast();
+  
   const [cuotasToAdvance, setCuotasToAdvance] = useState<number>(0);
   const [termsAcceptedAdvance, setTermsAcceptedAdvance] = useState(false);
   
-  // Bidding states
   const [cuotasToBid, setCuotasToBid] = useState<number>(0);
   const [autoBidEnabledBid, setAutoBidEnabledBid] = useState(false);
   const [maxCuotasBid, setMaxCuotasBid] = useState<number>(0);
   const [autoIncrementBid, setAutoIncrementBid] = useState<number>(0);
   const [termsAcceptedBid, setTermsAcceptedBid] = useState(false);
 
-  // Auction states
   const [termsAcceptedAuction, setTermsAcceptedAuction] = useState(false);
-
-  // Baja states
   const [termsAcceptedBaja, setTermsAcceptedBaja] = useState(false);
 
-  // Award states
   const [awardTermsAccepted, setAwardTermsAccepted] = useState(false);
   const [hasReadAwardRules, setHasReadAwardRules] = useState(false);
 
   const [selectedInstallment, setSelectedInstallment] = useState<Installment | null>(null);
   const [selectedReceipt, setSelectedReceipt] = useState<Installment | null>(null);
   const [nextAdjudicationInfo, setNextAdjudicationInfo] = useState<Date | null>(null);
+
+  const resetBiddingDialog = () => {
+    setCuotasToBid(0);
+    setAutoBidEnabledBid(false);
+    setMaxCuotasBid(0);
+    setAutoIncrementBid(0);
+    setTermsAcceptedBid(false);
+  };
+
+  const resetAdvanceDialog = () => {
+    setCuotasToAdvance(0);
+    setTermsAcceptedAdvance(false);
+  };
+  
+  const resetAuctionDialog = () => {
+      setTermsAcceptedAuction(false);
+  };
+
+  const resetBajaDialog = () => {
+      setTermsAcceptedBaja(false);
+  };
+  
+  const resetAwardDialog = () => {
+      setAwardTermsAccepted(false);
+      setHasReadAwardRules(false);
+  };
 
 
   const group = useMemo(() => groups.find(g => g.id === groupId), [groups, groupId]);
@@ -112,7 +144,6 @@ export default function GroupDetail() {
         return;
     }
 
-    // This logic now runs only on the client, preventing hydration mismatch
     const calculateNextAdjudication = () => {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
@@ -163,22 +194,8 @@ export default function GroupDetail() {
     for (let i = 0; i < groupAwards.length; i++) {
         const monthAward = groupAwards[i].find(a => a.orderNumber === userOrderNumber);
         if (monthAward) {
-            // Special case for AWRD group to be month 7
-            if (group.id === 'ID-005-20250501-AWRD') {
-                 return { month: 7, type: monthAward.type };
-            }
-            if(group.id === 'ID-003-20240315-0001'){
-                return { month: 2, type: monthAward.type };
-            }
             return { month: i + 1, type: monthAward.type };
         }
-    }
-    // Specific logic for the awarded user in the example group
-    if (group.id === 'ID-005-20250501-AWRD' && group.userAwardStatus !== 'No Adjudicado') {
-        return { month: 7, type: 'sorteo' };
-    }
-     if (group.id === 'ID-003-20240315-0001' && group.userAwardStatus !== 'No Adjudicado') {
-        return { month: 2, type: 'sorteo' };
     }
     return undefined;
   }, [groupAwards, group, userOrderNumber]);
@@ -234,16 +251,17 @@ export default function GroupDetail() {
 
 
   const futureInstallmentsForCalculation = useMemo(() => {
-    if (!isPlanActive) return [];
+    if (!isPlanActive || !group.activationDate) return [];
     if (pendingInstallmentIndex === -1) return []; // No future installments to calculate
     return realInstallments.slice(pendingInstallmentIndex);
-  }, [isPlanActive, pendingInstallmentIndex, realInstallments]);
+  }, [isPlanActive, pendingInstallmentIndex, realInstallments, group.activationDate]);
   
   const isAdvanceInputValid = cuotasToAdvance > 0 && cuotasToAdvance <= cuotasFuturas;
   
   // Bidding logic
+  const canBid = isPlanActive && installmentsPaid >= 2;
   const isManualBidInvalid = cuotasToBid < 1 || cuotasToBid > cuotasFuturas;
-  const isMaxCuotasBidInvalid = maxCuotasBid <= cuotasToBid || maxCuotasBid > cuotasFuturas;
+  const isMaxCuotasBidInvalid = maxCuotasBid > 0 && (maxCuotasBid <= cuotasToBid || maxCuotasBid > cuotasFuturas);
   const isAutoIncrementBidInvalid = autoIncrementBid < 1;
 
   const isBidValid = autoBidEnabledBid
@@ -290,6 +308,11 @@ export default function GroupDetail() {
   const handleAdvanceInstallments = () => {
     if (!group || !isAdvanceInputValid) return;
     advanceInstallments(group.id, cuotasToAdvance);
+    toast({
+        title: "¡Adelanto Exitoso!",
+        description: `Has adelantado ${cuotasToAdvance} cuota(s) desde tu Wallet GD.`,
+        className: 'bg-green-100 border-green-500 text-green-700'
+    });
   }
   
   const handleConfirmBid = () => {
@@ -416,7 +439,7 @@ export default function GroupDetail() {
                    </Alert>
                  )}
                 {group.userAwardStatus === "Adjudicado - Pendiente Aceptación" && !hasOverduePayments && (
-                    <Dialog onOpenChange={(open) => !open && (setAwardTermsAccepted(false), setHasReadAwardRules(false))}>
+                    <Dialog onOpenChange={(open) => !open && resetAwardDialog()}>
                         <DialogTrigger asChild>
                             <Button size="sm" variant="default" className='bg-green-600 hover:bg-green-700'>
                                 <AwardIcon className="mr-2 h-4 w-4" /> Aceptar Adjudicación
@@ -519,7 +542,7 @@ export default function GroupDetail() {
                         </DialogContent>
                     </Dialog>
                 )}
-                 <Dialog onOpenChange={() => { setCuotasToAdvance(0); setTermsAcceptedAdvance(false); }}>
+                 <Dialog onOpenChange={(open) => !open && resetAdvanceDialog()}>
                    <DialogTrigger asChild><Button size="sm" variant="secondary" disabled={!isPlanActive}><TrendingUp className="mr-2 h-4 w-4" /> Adelantar</Button></DialogTrigger>
                    <DialogContent>
                      <DialogHeader><DialogTitle>Adelantar Cuotas</DialogTitle><DialogDescription>Paga cuotas futuras para acortar tu plan y obtén una bonificación.</DialogDescription></DialogHeader>
@@ -554,7 +577,7 @@ export default function GroupDetail() {
                            <Switch id="terms-advance" checked={termsAcceptedAdvance} onCheckedChange={setTermsAcceptedAdvance} disabled={!isAdvanceInputValid} />
                            <div className="grid gap-1.5 leading-none">
                             <Label htmlFor="terms-advance" className={cn("font-medium", !isAdvanceInputValid && "text-muted-foreground")}>
-                                Acepto que el débito se realizará desde mi Wallet y es irreversible.
+                                Acepto que el débito se realizará desde mi Wallet GD y es irreversible.
                             </Label>
                            </div>
                          </div>
@@ -574,9 +597,9 @@ export default function GroupDetail() {
  
                  {group.userAwardStatus === "No Adjudicado" && (
                    <>
-                     <Dialog onOpenChange={() => { setCuotasToBid(0); setAutoBidEnabledBid(false); setMaxCuotasBid(0); setAutoIncrementBid(0); setTermsAcceptedBid(false); }}>
+                     <Dialog onOpenChange={(open) => !open && resetBiddingDialog()}>
                        <DialogTrigger asChild>
-                         <Button size="sm" disabled={!isPlanActive || installmentsPaid < 2}>
+                         <Button size="sm" disabled={!canBid}>
                            <Gavel className="mr-2 h-4 w-4" /> Licitar
                          </Button>
                        </DialogTrigger>
@@ -675,7 +698,7 @@ export default function GroupDetail() {
                          </DialogFooter>
                        </DialogContent>
                      </Dialog>
-                     <Dialog onOpenChange={(open) => !open && setTermsAcceptedAuction(false)}>
+                     <Dialog onOpenChange={(open) => !open && resetAuctionDialog()}>
                        <DialogTrigger asChild>
                          <Button size="sm" variant="secondary" disabled={!isPlanActive || installmentsPaid < 3}>
                            <Hand className="mr-2 h-4 w-4" /> Subastar
@@ -717,7 +740,7 @@ export default function GroupDetail() {
                          </DialogFooter>
                        </DialogContent>
                      </Dialog>
-                     <Dialog onOpenChange={(open) => !open && setTermsAcceptedBaja(false)}>
+                     <Dialog onOpenChange={(open) => !open && resetBajaDialog()}>
                        <DialogTrigger asChild><Button size="sm" variant="destructive" disabled={!isPlanActive}><FileX2 className="mr-2 h-4 w-4" /> Dar de Baja</Button></DialogTrigger>
                        <DialogContent>
                          <DialogHeader><DialogTitle>Dar de Baja el Plan</DialogTitle><DialogDescription>Rescinde tu contrato. Aplica solo para planes no adjudicados.</DialogDescription></DialogHeader>
@@ -802,7 +825,9 @@ export default function GroupDetail() {
                       const isAdvanced = inst.number > group.plazo - advancedCount;
                       const paidInstallmentsCount = (group.monthsCompleted || 0) - (group.missedPayments || 0);
 
-                      if (isAdvanced) {
+                      if (group.userAwardStatus === 'Adjudicado - Aprobado' && inst.number > paidInstallmentsCount) {
+                          currentStatus = 'Pagado'; // All future installments are considered paid for an awarded user
+                      } else if (isAdvanced) {
                         currentStatus = 'Pagado';
                       } else if (group.status === 'Activo' || group.status === 'Subastado' || group.status === 'Cerrado') {
                           if (inst.number <= paidInstallmentsCount) {
@@ -825,8 +850,16 @@ export default function GroupDetail() {
 
 
                       const handleReceiptClick = () => {
-                        if (isAdvanced) {
-                            const advancedReceipt: Installment = {
+                        let receiptData = inst;
+
+                        if (group.userAwardStatus === 'Adjudicado - Aprobado' && inst.number > paidInstallmentsCount) {
+                            receiptData = { // Show a zeroed-out receipt
+                                ...inst,
+                                total: 0,
+                                breakdown: { alicuotaPura: 0, gastosAdm: 0, seguroVida: 0, derechoSuscripcion: 0 }
+                            };
+                        } else if (isAdvanced) {
+                           receiptData = {
                                 ...inst,
                                 total: inst.breakdown.alicuotaPura,
                                 breakdown: {
@@ -836,10 +869,8 @@ export default function GroupDetail() {
                                     derechoSuscripcion: 0
                                 }
                             };
-                            setSelectedReceipt(advancedReceipt);
-                        } else {
-                            setSelectedReceipt(inst);
                         }
+                        setSelectedReceipt(receiptData);
                       };
 
                       return (
@@ -949,7 +980,6 @@ export default function GroupDetail() {
                     <InstallmentReceipt 
                         installment={selectedReceipt}
                         group={group}
-                        user={mockUser}
                         awards={groupAwards[selectedReceipt.number - 2] || []}
                     />
                 </div>

@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Bell, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -12,6 +12,29 @@ import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import Link from 'next/link';
+
+function ClientFormattedDate({ dateString }: { dateString: string }) {
+    const [formattedDate, setFormattedDate] = useState('...');
+    const [isMounted, setIsMounted] = useState(false);
+
+    useEffect(() => {
+        setIsMounted(true);
+    }, []);
+
+    useEffect(() => {
+        if (isMounted) {
+            try {
+                const date = new Date(dateString);
+                setFormattedDate(formatDistanceToNow(date, { addSuffix: true, locale: es }));
+            } catch (error) {
+                setFormattedDate('Fecha inválida');
+            }
+        }
+    }, [dateString, isMounted]);
+
+    return <>{formattedDate}</>;
+}
+
 
 export function Notifications() {
     const [notifications, setNotifications] = useState<Notification[]>(initialNotifications);
@@ -59,7 +82,7 @@ export function Notifications() {
                                         <p className="font-semibold text-sm leading-tight">{notification.title}</p>
                                         <p className="text-xs text-muted-foreground">{notification.description}</p>
                                         <p className="text-xs text-muted-foreground mt-1">
-                                            {formatDistanceToNow(new Date(notification.date), { addSuffix: true, locale: es })}
+                                            <ClientFormattedDate dateString={notification.date} />
                                         </p>
                                     </div>
                                     {!notification.read && (

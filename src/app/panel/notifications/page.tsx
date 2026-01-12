@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { initialNotifications } from '@/lib/notifications';
 import type { Notification } from '@/lib/types';
 import { Button } from '@/components/ui/button';
@@ -11,6 +11,28 @@ import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
+
+function ClientFormattedDate({ dateString }: { dateString: string }) {
+    const [formattedDate, setFormattedDate] = useState('...');
+    const [isMounted, setIsMounted] = useState(false);
+
+    useEffect(() => {
+        setIsMounted(true);
+    }, []);
+
+    useEffect(() => {
+        if (isMounted) {
+            try {
+                const date = new Date(dateString);
+                setFormattedDate(formatDistanceToNow(date, { addSuffix: true, locale: es }));
+            } catch (error) {
+                setFormattedDate('Fecha inválida');
+            }
+        }
+    }, [dateString, isMounted]);
+
+    return <>{formattedDate}</>;
+}
 
 export default function NotificationsPage() {
     const [notifications, setNotifications] = useState<Notification[]>(initialNotifications);
@@ -75,7 +97,7 @@ export default function NotificationsPage() {
                                                 <p className="text-sm text-muted-foreground">{notification.description}</p>
                                             </div>
                                              <p className="text-xs text-muted-foreground whitespace-nowrap">
-                                                {formatDistanceToNow(new Date(notification.date), { addSuffix: true, locale: es })}
+                                                <ClientFormattedDate dateString={notification.date} />
                                             </p>
                                         </div>
                                     </div>

@@ -25,15 +25,26 @@ type GroupCardProps = {
 // Component to safely format dates on the client side, avoiding hydration mismatch.
 function ClientFormattedDate({ dateString, formatString }: { dateString: string, formatString: string }) {
   const [formattedDate, setFormattedDate] = useState(dateString);
+  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
-    try {
-      const date = parseISO(dateString);
-      setFormattedDate(format(date, formatString, { locale: es }));
-    } catch (error) {
-      setFormattedDate(dateString); // Fallback to original string on error
+    setIsMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if(isMounted) {
+        try {
+        const date = parseISO(dateString);
+        setFormattedDate(format(date, formatString, { locale: es }));
+        } catch (error) {
+        setFormattedDate(dateString); // Fallback to original string on error
+        }
     }
-  }, [dateString, formatString]);
+  }, [dateString, formatString, isMounted]);
+
+  if (!isMounted) {
+    return <>{dateString}</>; // Render initial server-side value
+  }
 
   return <>{formattedDate}</>;
 }
