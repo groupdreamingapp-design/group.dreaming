@@ -1,4 +1,5 @@
 
+
 import type { Group, User, Auction, Installment, GroupTemplate, Award } from './types';
 import { PlaceHolderImages } from './placeholder-images';
 import { format, addMonths, setDate, addDays, parseISO, lastDayOfMonth, differenceInMonths, startOfToday } from 'date-fns';
@@ -269,10 +270,6 @@ export const generateInstallments = (capital: number, plazo: number, activationD
     const cuotaSuscripcion = mesesFinanciacionSuscripcion > 0 ? totalSuscripcion / mesesFinanciacionSuscripcion : 0;
     
     const startDate = parseISO(activationDate);
-
-    // The first installment is paid upon joining, so we generate from the second one.
-    // The second installment is due on the 10th of the month FOLLOWING the activation.
-    const firstDueDate = setDate(addMonths(startDate, 1), 10);
 
     return Array.from({ length: plazo }, (_, i) => {
         const saldoCapital = capital - (alicuotaPura * i);
