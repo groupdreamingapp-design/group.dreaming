@@ -76,7 +76,7 @@ export default function CompliancePage() {
                     ))}
                      <div className="pt-6 border-t mt-6">
                         <p className="font-semibold">Atentamente,</p>
-                        <p>Romina González</p>
+                        <p>W. Orlando Correa</p>
                         <p className="text-sm text-muted-foreground">Administrador Titular</p>
                         <p className="text-sm text-muted-foreground">Group Dreaming S.A.S.</p>
                     </div>
