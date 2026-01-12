@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { Group, GroupStatus } from "@/lib/types";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Loader2 } from "lucide-react";
 
 export default function MyGroups() {
   const { groups } = useGroups();
@@ -25,12 +25,13 @@ export default function MyGroups() {
   const tabs: (GroupStatus | "Todos")[] = ["Todos", "Activo", "Subastado", "Abierto", "Cerrado"];
 
   const tabCounts = useMemo(() => {
+    if (!isClient) return {}; // Don't compute counts on the server
     const counts: Record<string, number> = {};
     for (const tab of tabs) {
       counts[tab] = tab === "Todos" ? myGroups.length : myGroups.filter(g => g.status === tab).length;
     }
     return counts;
-  }, [myGroups, tabs]);
+  }, [myGroups, tabs, isClient]);
 
 
   const filteredGroups = useMemo(() => {
@@ -67,10 +68,16 @@ export default function MyGroups() {
           <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as GroupStatus | "Todos")} className="pt-4">
             <TabsList>
               {tabs.map(tab => {
-                const count = isClient ? tabCounts[tab] : '...';
+                const count = tabCounts[tab];
+                const isLoading = !isClient || count === undefined;
                 return (
-                  <TabsTrigger key={tab} value={tab} disabled={!isClient || count === 0}>
-                    {tab} ({count})
+                  <TabsTrigger key={tab} value={tab} disabled={isLoading || count === 0}>
+                    {tab}{' '}
+                    {isLoading ? (
+                      <Loader2 className="ml-2 h-4 w-4 animate-spin" />
+                    ) : (
+                      `(${count})`
+                    )}
                   </TabsTrigger>
                 );
               })}

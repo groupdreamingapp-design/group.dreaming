@@ -5,19 +5,20 @@
 import { Logo } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHeader, TableRow, TableHead, TableFooter } from "@/components/ui/table";
-import type { Installment, Group, User, Award } from "@/lib/types";
+import type { Installment, Group, Award } from "@/lib/types";
 import { format, parseISO } from "date-fns";
 import { Printer, Ticket, HandCoins, Gift } from "lucide-react";
 import { useRef } from "react";
+import { useUser } from "@/firebase";
 
 interface ReceiptProps {
     installment: Installment;
     group: Group;
-    user: User;
     awards: Award[];
 }
 
-export function InstallmentReceipt({ installment, group, user, awards }: ReceiptProps) {
+export function InstallmentReceipt({ installment, group, awards }: ReceiptProps) {
+    const { user, loading } = useUser();
     const receiptRef = useRef<HTMLDivElement>(null);
     const formatCurrency = (amount: number) => new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'USD' }).format(amount);
 
@@ -80,9 +81,12 @@ export function InstallmentReceipt({ installment, group, user, awards }: Receipt
                 <section className="grid grid-cols-2 gap-8 my-6">
                     <div>
                         <h3 className="text-sm font-semibold mb-2">Recibimos de:</h3>
-                        <p>{user.name}</p>
-                        <p className="text-sm text-muted-foreground">DNI: {user.dni}</p>
-                        <p className="text-sm text-muted-foreground">CUIT: {user.cuit}</p>
+                        {!loading && user && (
+                          <>
+                            <p>{user.displayName || 'N/A'}</p>
+                            <p className="text-sm text-muted-foreground">Email: {user.email || 'N/A'}</p>
+                          </>
+                        )}
                     </div>
                      <div className="text-right">
                         <h3 className="text-sm font-semibold mb-2">Por el siguiente concepto:</h3>
