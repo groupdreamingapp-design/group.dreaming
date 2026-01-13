@@ -40,7 +40,8 @@ const platformRules = [
         title: "Propuestas de Licitación",
         icon: Gavel,
         points: [
-            "Puedes licitar para acelerar tu adjudicación ofreciendo adelantar cuotas. La oferta mínima es de 1 cuota y la máxima es el total de cuotas futuras pendientes.",
+            "Puedes licitar con 'Licitación Común' (fondos propios) o 'Licitación Plus' (retención de capital).",
+            "La 'Licitación Plus' tiene un costo de retención del 5% + IVA sobre el monto ofertado si ganas.",
             "La oferta se realiza con el valor de la 'alícuota pura', ahorrando en gastos administrativos.",
             "En caso de ganar, debes integrar el capital ofertado en el plazo estipulado. De lo contrario, se aplican penalidades.",
         ]

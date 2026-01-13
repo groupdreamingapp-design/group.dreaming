@@ -335,6 +335,7 @@ export const generateExampleInstallments = (capital: number, plazo: number): Ins
  * Simulates the awarding process for a group.
  * NOTE: For prototyping purposes, this uses a deterministic algorithm based on the group ID.
  * The real implementation would use an external, auditable source like a public lottery draw.
+ * It now considers two types of bidding: normal and "plus" (retained from capital).
  */
 export const generateStaticAwards = (group: Group): Award[][] => {
     // Initialize a pseudo-random generator based on the group ID for consistency
