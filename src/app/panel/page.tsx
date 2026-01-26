@@ -1,8 +1,6 @@
-
-
 'use client';
 
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect, Suspense } from "react";
 import { useUser } from "@/firebase";
 import { useGroups } from "@/hooks/use-groups";
 import { Repeat, Wallet, PieChart, Info, Loader2 } from "lucide-react"
@@ -19,7 +17,7 @@ import { useToast } from "@/hooks/use-toast";
 
 const MAX_CAPITAL = 100000;
 
-export default function Dashboard() {
+function DashboardContent() {
   const { user } = useUser();
   const { joinGroup, groups } = useGroups();
   const [isClient, setIsClient] = useState(false);
@@ -211,5 +209,13 @@ export default function Dashboard() {
         </Card>
       </div>
     </>
+  );
+}
+
+export default function Dashboard() {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center p-8"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /></div>}>
+      <DashboardContent />
+    </Suspense>
   );
 }
