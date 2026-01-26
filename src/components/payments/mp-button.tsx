@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Loader2, CreditCard } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { crearPreferencia } from '@/actions/pagar';
 
 interface MPButtonProps {
     title: string;
@@ -25,36 +26,25 @@ export function MPButton({ title, price, description, className, onBeforePayment
                 await onBeforePayment();
             }
 
-            const response = await fetch('/api/payments/mp', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    title: title,
-                    price: price,
-                    quantity: 1,
-                    groupId: groupId
-                })
+            // Using Server Action
+            await crearPreferencia({
+                title: title,
+                price: price,
+                quantity: 1,
+                groupId: groupId
             });
 
-            const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(data.error || 'Error al conectar con MercadoPago');
-            }
-
-            if (data.sandbox_init_point) {
-                window.location.href = data.sandbox_init_point;
-            } else if (data.init_point) {
-                window.location.href = data.init_point;
-            } else {
-                throw new Error("No se recibió link de pago (init_point)");
-            }
+            // The server action handles redirect. 
+            // If we are here, it might be waiting for redirect or finished.
 
         } catch (error: any) {
             console.error("Payment Error:", error);
+            // Ignore digest errors usually related to redirects if any
+            if (error.message && error.message.includes('NEXT_REDIRECT')) return;
+
             toast({
                 title: "Error de Pago",
-                description: error.message,
+                description: error.message || "No se pudo procesar el pago.",
                 variant: "destructive"
             });
             setIsLoading(false);
