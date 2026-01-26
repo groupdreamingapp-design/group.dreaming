@@ -22,26 +22,34 @@ export async function crearPreferencia({ title, price, quantity = 1, groupId }: 
     console.log("Creating preference via Server Action for:", title);
 
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    console.log("Using Base URL:", baseUrl);
+
+    const preferenceBody = {
+        items: [
+            {
+                id: `item-${Date.now()}`,
+                title: title,
+                quantity: Number(quantity),
+                unit_price: Number(price),
+                currency_id: 'USD',
+            }
+        ],
+        payer: {
+            email: `test_user_${Date.now()}@testuser.com` // Email dummy para evitar error de auto-compra en Sandbox
+        },
+        back_urls: {
+            success: `${baseUrl}/panel?payment=success&groupId=${groupId || ''}`,
+            failure: `${baseUrl}/panel?payment=failure&groupId=${groupId || ''}`,
+            pending: `${baseUrl}/panel?payment=pending&groupId=${groupId || ''}`,
+        },
+        // auto_return: 'approved', // Comentado por error de HTTPS en local
+    };
+
+    console.log("Preference Body:", JSON.stringify(preferenceBody, null, 2));
 
     try {
         const response = await preference.create({
-            body: {
-                items: [
-                    {
-                        id: `item-${Date.now()}`,
-                        title: title,
-                        quantity: Number(quantity),
-                        unit_price: Number(price),
-                        currency_id: 'ARS',
-                    }
-                ],
-                back_urls: {
-                    success: `${baseUrl}/panel?payment=success&groupId=${groupId || ''}`,
-                    failure: `${baseUrl}/panel?payment=failure&groupId=${groupId || ''}`,
-                    pending: `${baseUrl}/panel?payment=pending&groupId=${groupId || ''}`,
-                },
-                auto_return: 'approved',
-            }
+            body: preferenceBody
         });
 
         if (response.init_point) {

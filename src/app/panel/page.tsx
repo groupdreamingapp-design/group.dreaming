@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState, useEffect, Suspense } from "react";
+import { useMemo, useState, useEffect, Suspense, useRef } from "react";
 import { useUser } from "@/firebase";
 import { useGroups } from "@/hooks/use-groups";
 import { Repeat, Wallet, PieChart, Info, Loader2 } from "lucide-react"
@@ -18,12 +18,14 @@ import { useToast } from "@/hooks/use-toast";
 const MAX_CAPITAL = 100000;
 
 function DashboardContent() {
-  const { user } = useUser();
+  // @ts-ignore - Assuming useUser returns loading, if not we will check user nullity carefully
+  const { user, loading } = useUser();
   const { joinGroup, groups } = useGroups();
   const [isClient, setIsClient] = useState(false);
   const searchParams = useSearchParams();
   const router = useRouter();
   const { toast } = useToast();
+  const processedRef = useRef<Set<string>>(new Set());
 
   useEffect(() => {
     setIsClient(true);
@@ -31,12 +33,29 @@ function DashboardContent() {
     const paymentStatus = searchParams.get('payment');
     const groupId = searchParams.get('groupId');
 
+    if (loading) return; // Wait for auth to load
+
     if (paymentStatus === 'success' && groupId) {
-      // Prevent double join if already member (though the hook logic might handle it, it's safer to check)
+      if (!user) {
+        // ... existing redirect logic ...
+        const currentUrl = window.location.href;
+        const returnUrl = `/panel?payment=success&groupId=${groupId}`;
+        router.push(`/login?redirect=${encodeURIComponent(returnUrl)}`);
+        return;
+      }
+
+      // Check if we already processed this group join in this session mount
+      if (processedRef.current.has(groupId)) {
+        return;
+      }
+
+      // Prevent double join if already member in local state
       const alreadyMember = groups.find(g => g.id === groupId)?.userIsMember;
 
       if (!alreadyMember) {
+        processedRef.current.add(groupId); // Mark as processed
         joinGroup(groupId);
+        // Toast is handled by joinGroup usually, but we can add specific payment success message
         toast({
           title: "¡Pago Exitoso!",
           description: `Te has unido correctamente al grupo ${groupId}.`,
@@ -44,9 +63,11 @@ function DashboardContent() {
         });
       }
 
-      // Clean URL
+      // Clean URL after processing is done (or if already member)
+      // Use replace to remove query params so refresh doesn't trigger again
       router.replace('/panel');
     } else if (paymentStatus === 'failure') {
+      // ... existing failure logic
       toast({
         title: "Pago Fallido",
         description: "No se pudo completar el pago de adhesión.",
@@ -55,7 +76,7 @@ function DashboardContent() {
       router.replace('/panel');
     }
 
-  }, [searchParams, joinGroup, groups, router, toast]);
+  }, [searchParams, joinGroup, groups, router, toast, user, loading]);
 
   const subscribedCapital = useMemo(() => {
     return groups

@@ -22,6 +22,9 @@ import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Input } from '@/components/ui/input';
 import { MPButton } from '@/components/payments/mp-button';
+import { useGroupPreferences } from '@/hooks/use-group-preferences';
+import { generateMotivationalDescription, summarizeGoal } from '@/lib/ai-generator';
+import { Wand2, Sparkles, Image as ImageIcon } from 'lucide-react';
 
 const MAX_CAPITAL = 100000;
 
@@ -33,8 +36,58 @@ export default function GroupPublicDetail() {
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [hasReadContract, setHasReadContract] = useState(false);
 
+  // Personalization State
+  const [customGoal, setCustomGoal] = useState('');
+  const [customImage, setCustomImage] = useState('');
+  const [predictedCategory, setPredictedCategory] = useState('');
+  const [motivationalDescription, setMotivationalDescription] = useState('');
+
   const groupId = typeof params.id === 'string' ? params.id : '';
+  const { savePreferences } = useGroupPreferences(groupId);
+
   const group = useMemo(() => groups.find(g => g.id === groupId), [groups, groupId]);
+
+  const handleGoalBlur = () => {
+    if (customGoal.trim()) {
+      const category = summarizeGoal(customGoal);
+      const motivation = generateMotivationalDescription(customGoal);
+      setPredictedCategory(category);
+      setMotivationalDescription(motivation);
+
+      // Auto-save preferences so they persist if payment succeeds
+      const prefs: any = {
+        customName: category, // Always use the AI summarized short name
+        motivationalDescription: motivation
+      };
+      if (customImage) {
+        prefs.customImageUrl = customImage;
+      }
+      savePreferences(prefs);
+    }
+  };
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 1024 * 1024) return; // 1MB limit
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const result = reader.result as string;
+        setCustomImage(result);
+        if (customGoal) { // Save everything if goal is already there
+          savePreferences({
+            customName: predictedCategory || customGoal,
+            motivationalDescription: motivationalDescription,
+            customImageUrl: result
+          });
+        } else { // Just save image for now
+          savePreferences({ customImageUrl: result });
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
 
   const subscribedCapital = useMemo(() => {
     return groups
@@ -110,37 +163,105 @@ export default function GroupPublicDetail() {
           </DialogHeader>
 
           {isVerified ? (
-            <div className="space-y-4">
-              <Alert variant="default">
-                <ShieldAlert className="h-4 w-4" />
-                <AlertTitle>Paso Final: Pago de Adhesión</AlertTitle>
-                <AlertDescription>
-                  Al confirmar, serás redirigido a MercadoPago para abonar la primera cuota y asegurar tu lugar de inmediato.
-                </AlertDescription>
-              </Alert>
+            <div className="space-y-6">
+              {/* Personalization Section */}
+              <div className="bg-slate-50 p-4 rounded-lg border space-y-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <Sparkles className="h-4 w-4 text-purple-600" />
+                  <h3 className="font-semibold text-sm text-purple-900">Personaliza tu Propósito</h3>
+                </div>
+
+                <div className="space-y-3">
+                  <div className="space-y-1">
+                    <Label htmlFor="goal-input" className="text-xs">¿Cuál es el objetivo de este capital?</Label>
+                    <div className="flex gap-2">
+                      <Input
+                        id="goal-input"
+                        placeholder="Ej: Comprar mi primera moto 0km"
+                        value={customGoal}
+                        onChange={(e) => setCustomGoal(e.target.value)}
+                        onBlur={handleGoalBlur}
+                      />
+                      {customGoal && (
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <div className="flex items-center justify-center p-2 bg-purple-100 rounded-md">
+                                <Wand2 className="h-4 w-4 text-purple-600" />
+                              </div>
+                            </TooltipTrigger>
+                            <TooltipContent side="left">
+                              <p className="max-w-xs">{motivationalDescription}</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      )}
+                    </div>
+                    {predictedCategory && <p className="text-[10px] text-muted-foreground">Categoría detectada: <span className="font-medium text-purple-700">{predictedCategory}</span></p>}
+                  </div>
+
+                  <div className="space-y-1">
+                    <Label className="text-xs">Imagen de Portada (Opcional)</Label>
+                    <div className="flex items-center gap-3">
+                      {customImage ? (
+                        <div className="relative h-12 w-20 rounded overflow-hidden border">
+                          <img src={customImage} alt="Preview" className="h-full w-full object-cover" />
+                          <button
+                            className="absolute top-0 right-0 bg-black/50 text-white p-0.5 h-full w-full flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity text-xs"
+                            onClick={() => setCustomImage('')}
+                          >Cambiar</button>
+                        </div>
+                      ) : (
+                        <Button variant="outline" size="sm" className="w-full relative dashed border-dashed text-xs h-9">
+                          <ImageIcon className="mr-2 h-3 w-3" />
+                          Subir Foto
+                          <input
+                            type="file"
+                            className="absolute inset-0 opacity-0 cursor-pointer"
+                            accept="image/*"
+                            onChange={handleImageUpload}
+                          />
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               <div className="space-y-2">
                 <Label htmlFor="coupon-code">Código de Cupón (Opcional)</Label>
                 <Input id="coupon-code" placeholder="Ingresa tu cupón de beneficio" />
               </div>
-              <div className="items-top flex space-x-2 pt-2">
-                <Checkbox
-                  id="terms"
-                  checked={termsAccepted}
-                  onCheckedChange={(checked) => setTermsAccepted(!!checked)}
-                  disabled={!hasReadContract}
-                />
-                <div className="grid gap-1.5 leading-none">
-                  <Label
-                    htmlFor="terms"
-                    className={cn("text-sm font-medium leading-none", !hasReadContract && "text-muted-foreground cursor-not-allowed")}
-                  >
-                    He leído y acepto el <Button variant="link" className="p-0 h-auto" asChild><Link href="/panel/contract" target="_blank" onClick={() => setHasReadContract(true)}>Contrato de Adhesión</Link></Button>.
-                  </Label>
-                  {!hasReadContract && (
-                    <p className="text-xs text-amber-600 font-semibold">
-                      Debes hacer clic en 'Contrato de Adhesión' para poder aceptar los términos.
-                    </p>
-                  )}
+
+              <div className="space-y-4 pt-2 border-t">
+                <Alert variant="default" className="bg-blue-50 border-blue-200">
+                  <ShieldAlert className="h-4 w-4 text-blue-600" />
+                  <AlertTitle className="text-blue-800">Paso Final: Pago de Adhesión</AlertTitle>
+                  <AlertDescription className="text-blue-700">
+                    Al confirmar, serás redirigido a MercadoPago para abonar la primera cuota y asegurar tu lugar.
+                  </AlertDescription>
+                </Alert>
+
+                <div className="items-top flex space-x-2">
+                  <Checkbox
+                    id="terms"
+                    checked={termsAccepted}
+                    onCheckedChange={(checked) => setTermsAccepted(!!checked)}
+                    disabled={!hasReadContract}
+                  />
+                  <div className="grid gap-1.5 leading-none">
+                    <Label
+                      htmlFor="terms"
+                      className={cn("text-sm font-medium leading-none", !hasReadContract && "text-muted-foreground cursor-not-allowed")}
+                    >
+                      He leído y acepto el <Button variant="link" className="p-0 h-auto" asChild><Link href="/panel/contract" target="_blank" onClick={() => setHasReadContract(true)}>Contrato de Adhesión</Link></Button>.
+                    </Label>
+                    {!hasReadContract && (
+                      <p className="text-xs text-amber-600 font-semibold">
+                        Debes hacer clic en 'Contrato de Adhesión' para poder aceptar los términos.
+                      </p>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
@@ -169,6 +290,7 @@ export default function GroupPublicDetail() {
                   description="Pagar Adhesión y Confirmar"
                   groupId={group.id}
                   className="w-full sm:w-auto"
+                  disabled={!termsAccepted}
                 />
               </div>
             ) : (
@@ -221,8 +343,8 @@ export default function GroupPublicDetail() {
                 <Users2 className="h-4 w-4 text-primary" />
                 <span>Adjudicaciones:</span>
                 <strong className="flex items-center gap-1.5">
-                  <span>1</span><Ticket className="h-4 w-4 text-blue-500" title="Sorteo" />
-                  <span>+ 1</span><HandCoins className="h-4 w-4 text-orange-500" title="Licitación" />
+                  <span>1</span><Ticket className="h-4 w-4 text-blue-500" />
+                  <span>+ 1</span><HandCoins className="h-4 w-4 text-orange-500" />
                 </strong>
               </div>
             </CardContent>
@@ -247,7 +369,6 @@ export default function GroupPublicDetail() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 Plan de Cuotas (Ejemplo)
-                {group.isImmediateActivation && <Badge variant="destructive"><Zap className="mr-1 h-3 w-3" />Activación Inmediata</Badge>}
               </CardTitle>
               <CardDescription>Así se compone tu cuota mensual. Los valores son aproximados.</CardDescription>
             </CardHeader>

@@ -25,9 +25,13 @@ import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useParams, useRouter } from 'next/navigation';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { useGroupPreferences } from '@/hooks/use-group-preferences';
 import { InstallmentReceipt } from '@/components/app/receipt';
 import { MPButton } from '@/components/payments/mp-button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { doc, onSnapshot, setDoc, getDoc } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
+import { useUserNav } from '@/components/app/user-nav';
 
 
 // Component to safely format dates on the client side, avoiding hydration mismatch.
@@ -108,7 +112,53 @@ export default function GroupDetail() {
   };
 
 
+  const { user } = useUserNav();
+  const [memberData, setMemberData] = useState<any>(null);
+
   const group = useMemo(() => groups.find(g => g.id === groupId), [groups, groupId]);
+
+  useEffect(() => {
+    if (!user || !groupId) return;
+    const memberRef = doc(db, 'groups', groupId, 'members', user.uid);
+    const groupRef = doc(db, 'groups', groupId); // Ref to group
+
+    const unsubscribe = onSnapshot(memberRef, async (docSnap) => {
+      if (docSnap.exists()) {
+        setMemberData(docSnap.data());
+      } else {
+        // Document missing. Let's try to fix it or at least display correct data.
+
+        // Fetch group doc freshly to be sure about members list
+        try {
+          const groupSnap = await getDoc(groupRef);
+          if (groupSnap.exists()) {
+            const gData = groupSnap.data();
+            const membersList = gData.members || [];
+            const idx = membersList.indexOf(user.uid);
+
+            if (idx !== -1) {
+              const retroactiveOrder = idx + 1;
+
+              // Create the missing sub-document
+              const newMemberData = {
+                orderNumber: retroactiveOrder,
+                joinedAt: new Date().toISOString(),
+                status: 'Activo',
+                subscriptionPaid: true,
+                installmentsPaid: 1
+              };
+
+              await setDoc(memberRef, newMemberData);
+              setMemberData(newMemberData); // Update local state immediately
+            }
+          }
+        } catch (e) {
+          console.error("Auto-fix failed", e);
+        }
+      }
+    });
+    return () => unsubscribe();
+  }, [user, groupId]);
 
   const groupAwards = useMemo(() => {
     if (!group) return [];
@@ -126,21 +176,25 @@ export default function GroupDetail() {
     return [];
   }, [group]);
 
-  const userOrderNumber = useMemo(() => {
-    if (!group) return 0;
-    let seed = 0;
-    for (let i = 0; i < group.id.length; i++) {
-      seed += group.id.charCodeAt(i);
-    }
-    return (seed % group.totalMembers) + 1;
-  }, [group]);
+  const calculatedOrder = useMemo(() => {
+    if (!group || !user) return null;
+    const list = group.members || [];
+    const idx = list.indexOf(user.uid);
+    if (idx !== -1) return idx + 1;
+    if (group.userIsMember) return group.membersCount || 1;
+    return null;
+  }, [group, user]);
+
+  const userOrderNumber = memberData?.orderNumber ?? calculatedOrder ?? (group?.userIsMember ? (group?.membersCount || 1) : "-");
 
   const installmentsIssued = group?.monthsCompleted || 0;
-  const installmentsPaid = installmentsIssued - (group?.missedPayments || 0);
-  const hasOverduePayments = (group?.missedPayments || 0) > 0;
+  const installmentsPaidCount = memberData?.installmentsPaid ?? (group?.userIsMember ? 1 : 0);
+
+  // Ensure consistency for existing logic
+  const installmentsPaid = installmentsPaidCount;
 
   useEffect(() => {
-    if (!installments.length || !installmentsPaid) {
+    if (!installments.length) { // Removed !installmentsPaid check to avoid issues if 0
       setNextAdjudicationInfo(null);
       return;
     }
@@ -333,15 +387,60 @@ export default function GroupDetail() {
   };
   const AwardStatusIconComponent = awardStatusIcon[group.userAwardStatus];
 
+  const { preferences } = useGroupPreferences(group?.id);
+
+  const dynamicMotivation = useMemo(() => {
+    // Cast group to any to avoid strict type checks on status strings if they mismatch
+    const g = group as any;
+    if (g?.status === 'Subastado') return "Tu plan está en el mercado secundario. Pronto recibirás noticias de tu inversión.";
+    if (g?.userAwardStatus && g.userAwardStatus.startsWith('Adjudicado')) return "¡El momento ha llegado! Tu sueño está más cerca que nunca.";
+    if (!isPlanActive && g?.status !== 'Abierto' && g?.status !== 'Pendiente') return "Gracias por ser parte de Group Dreaming.";
+
+    // Default to personalized motivation or generic
+    return preferences?.motivationalDescription || "Mantén tu objetivo en mente. Cada cuota te acerca a tu sueño.";
+  }, [group, preferences, isPlanActive]);
+
+  const heroImage = preferences?.customImageUrl || '/images/default-dream.jpg'; // We need a default fallback if no image
+  const displayTitle = preferences?.customName || `Grupo ${group?.id}`;
 
   return (
     <TooltipProvider>
-      <div className="mb-4">
-        <Link href="/panel/my-groups" className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary mb-2">
+      <div className="mb-6 space-y-4">
+        <Link href="/panel/my-groups" className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary">
           <ArrowLeft className="h-4 w-4" /> Volver a Mis Grupos
         </Link>
-        <h1 className="text-3xl font-bold font-headline">{formatCurrencyNoDecimals(group.capital)}</h1>
-        <p className="text-muted-foreground">en {group.plazo} meses (Grupo {group.id})</p>
+
+        {/* HERO CARD */}
+        <div className="relative w-full h-48 md:h-64 rounded-xl overflow-hidden shadow-lg group">
+          {preferences?.customImageUrl ? (
+            <img src={preferences.customImageUrl} alt="Dream" className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+          ) : (
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-indigo-700" />
+          )}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/10" />
+
+          <div className="absolute bottom-0 left-0 p-6 md:p-8 w-full">
+            <div className="flex justify-between items-end">
+              <div>
+                <h1 className="text-3xl md:text-4xl font-bold text-white mb-2 font-headline tracking-tight">{displayTitle}</h1>
+                <p className="text-white/90 text-sm md:text-lg max-w-2xl font-light italic opacity-90">"{dynamicMotivation}"</p>
+              </div>
+              <div className="text-right hidden md:block">
+                <p className="text-white/80 text-sm font-semibold tracking-wider font-mono mb-2">{group?.id}</p>
+                <p className="text-white/60 text-xs uppercase tracking-widest font-semibold mb-1">Capital del Plan</p>
+                <p className="text-white text-2xl font-bold">{formatCurrencyNoDecimals(group?.capital || 0)}</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Status Badge overlay */}
+          <div className="absolute top-4 right-4">
+            <Badge variant={isPlanActive ? "default" : "secondary"} className="text-xs px-3 py-1 uppercase tracking-wide bg-white/20 hover:bg-white/30 backdrop-blur-md border-0 text-white shadow-sm">
+              {group?.status}
+            </Badge>
+          </div>
+        </div>
+        {/* End Hero Card */}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

@@ -18,7 +18,7 @@ interface ReceiptProps {
 }
 
 export function InstallmentReceipt({ installment, group, awards }: ReceiptProps) {
-    const { user, loading } = useUser();
+    const { user, isUserLoading: loading } = useUser();
     const receiptRef = useRef<HTMLDivElement>(null);
     const formatCurrency = (amount: number) => new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'USD' }).format(amount);
 
@@ -50,13 +50,13 @@ export function InstallmentReceipt({ installment, group, awards }: ReceiptProps)
             }
         }
     };
-    
+
     const companyData = {
         name: "GROUP DREAMING S.A.S.",
         cuit: "30-71888999-1",
         address: "Av. Rivadavia 5920, Caballito, CABA",
     }
-    
+
     const receiptId = `R${installment.number.toString().padStart(4, '0')}-${group.id.split('-')[1]}`;
     const paymentDate = new Date(); // Simulate payment date as today
     const isSpecialPayment = installment.total > 0 && (installment.breakdown.gastosAdm === 0 && installment.breakdown.seguroVida === 0);
@@ -64,7 +64,7 @@ export function InstallmentReceipt({ installment, group, awards }: ReceiptProps)
 
     return (
         <div className="bg-background text-foreground p-4 md:p-8">
-             <div ref={receiptRef} className="max-w-2xl mx-auto border bg-background text-foreground rounded-lg p-8 shadow-lg">
+            <div ref={receiptRef} className="max-w-2xl mx-auto border bg-background text-foreground rounded-lg p-8 shadow-lg">
                 <header className="flex justify-between items-start pb-4 border-b">
                     <div>
                         <h2 className="text-lg font-bold">{companyData.name}</h2>
@@ -82,13 +82,13 @@ export function InstallmentReceipt({ installment, group, awards }: ReceiptProps)
                     <div>
                         <h3 className="text-sm font-semibold mb-2">Recibimos de:</h3>
                         {!loading && user && (
-                          <>
-                            <p>{user.displayName || 'N/A'}</p>
-                            <p className="text-sm text-muted-foreground">Email: {user.email || 'N/A'}</p>
-                          </>
+                            <>
+                                <p>{user.displayName || 'N/A'}</p>
+                                <p className="text-sm text-muted-foreground">Email: {user.email || 'N/A'}</p>
+                            </>
                         )}
                     </div>
-                     <div className="text-right">
+                    <div className="text-right">
                         <h3 className="text-sm font-semibold mb-2">Por el siguiente concepto:</h3>
                         <p>Pago de Cuota N° {installment.number} / {group.plazo}</p>
                         <p className="text-sm text-muted-foreground">Grupo: {group.id}</p>
@@ -111,7 +111,7 @@ export function InstallmentReceipt({ installment, group, awards }: ReceiptProps)
                                     <TableCell className="text-right">{formatCurrency(installment.breakdown.alicuotaPura)}</TableCell>
                                 </TableRow>
                             ) : isAwardedZeroPayment ? (
-                                 <TableRow>
+                                <TableRow>
                                     <TableCell>Cuota bonificada por Adjudicación</TableCell>
                                     <TableCell className="text-right">{formatCurrency(0)}</TableCell>
                                 </TableRow>
@@ -146,20 +146,20 @@ export function InstallmentReceipt({ installment, group, awards }: ReceiptProps)
                         </TableFooter>
                     </Table>
                 </section>
-                
+
                 <section className="mt-6 text-sm">
                     <div className="flex justify-between items-center">
                         <div>
-                             <h3 className="text-sm font-semibold mb-2">Forma de Pago:</h3>
-                             <p>{isSpecialPayment ? "Adelanto de Saldo" : isAwardedZeroPayment ? "Bonificado" : "Débito de Wallet GD"}</p>
+                            <h3 className="text-sm font-semibold mb-2">Forma de Pago:</h3>
+                            <p>{isSpecialPayment ? "Adelanto de Saldo" : isAwardedZeroPayment ? "Bonificado" : "Débito de Wallet GD"}</p>
                         </div>
                         <div className="text-right">
-                           <h3 className="text-sm font-semibold mb-2">Vencimiento Original:</h3>
-                           <p>{format(parseISO(installment.dueDate), 'dd/MM/yyyy')}</p>
+                            <h3 className="text-sm font-semibold mb-2">Vencimiento Original:</h3>
+                            <p>{installment.dueDate.startsWith('Mes') ? installment.dueDate : format(parseISO(installment.dueDate), 'dd/MM/yyyy')}</p>
                         </div>
                     </div>
                 </section>
-                
+
                 <section className="mt-6 pt-4 border-t">
                     {installment.number > 1 && awards.length > 0 && !isSpecialPayment ? (
                         <div>
@@ -187,7 +187,7 @@ export function InstallmentReceipt({ installment, group, awards }: ReceiptProps)
                         </div>
                     ) : (
                         <p className="text-xs text-muted-foreground text-center">
-                           {installment.number === 1 ? "El primer acto de adjudicación se reflejará en su próximo recibo." : "No hubo adjudicaciones para informar del mes anterior."}
+                            {installment.number === 1 ? "El primer acto de adjudicación se reflejará en su próximo recibo." : "No hubo adjudicaciones para informar del mes anterior."}
                         </p>
                     )}
                 </section>
@@ -196,7 +196,7 @@ export function InstallmentReceipt({ installment, group, awards }: ReceiptProps)
                     <p>Este es un comprobante de pago no fiscal. Válido para uso interno.</p>
                 </footer>
             </div>
-             <div className="flex justify-end mt-4">
+            <div className="flex justify-end mt-4">
                 <Button onClick={handlePrint}>
                     <Printer className="mr-2 h-4 w-4" />
                     Imprimir Recibo

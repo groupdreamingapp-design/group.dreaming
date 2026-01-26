@@ -13,9 +13,10 @@ interface MPButtonProps {
     className?: string;
     onBeforePayment?: () => Promise<void> | void;
     groupId?: string;
+    disabled?: boolean;
 }
 
-export function MPButton({ title, price, description, className, onBeforePayment, groupId }: MPButtonProps) {
+export function MPButton({ title, price, description, className, onBeforePayment, groupId, disabled }: MPButtonProps) {
     const [isLoading, setIsLoading] = useState(false);
     const { toast } = useToast();
 
@@ -52,7 +53,7 @@ export function MPButton({ title, price, description, className, onBeforePayment
     };
 
     return (
-        <Button onClick={handlePayment} disabled={isLoading} className={className}>
+        <Button onClick={handlePayment} disabled={isLoading || disabled} className={className}>
             {isLoading ? (
                 <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />

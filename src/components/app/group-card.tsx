@@ -6,7 +6,7 @@ import type { Group } from "@/lib/types";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { Users, Clock, CheckCircle2, Lock, Hourglass, ArrowRight, Trophy, Gavel, CalendarCheck, Zap, Percent, AlertCircle, Sparkles } from "lucide-react";
+import { Users, Clock, CheckCircle2, Lock, Hourglass, ArrowRight, Trophy, Gavel, CalendarCheck, Zap, Percent, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { format, parseISO } from 'date-fns';
@@ -15,6 +15,9 @@ import { useState, useEffect, useMemo } from "react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
 import { calculateTotalFinancialCost } from "@/lib/data";
 import Image from "next/image";
+import { useGroupPreferences } from "@/hooks/use-group-preferences";
+import { PersonalizeGroupDialog } from "./personalize-group-dialog";
+import { Sparkles, Info } from 'lucide-react';
 
 
 type GroupCardProps = {
@@ -57,24 +60,30 @@ export function GroupCard({ group, actionButton }: GroupCardProps) {
   const formatCurrency = (amount: number) => new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(amount);
   const totalFinancialCost = calculateTotalFinancialCost(group.capital, group.plazo);
 
+  const { preferences } = useGroupPreferences(group.userIsMember ? group.id : "");
+
+  const displayName = preferences?.customName || group.name;
+  const displayImage = preferences?.customImageUrl || group.imageUrl;
+  const motivation = preferences?.motivationalDescription;
+
   const progressValue = group.status === 'Abierto'
     ? (group.membersCount / group.totalMembers) * 100
     : group.status === 'Activo' || group.status === 'Subastado'
-    ? ((group.monthsCompleted || 0) / group.plazo) * 100
-    : group.status === 'Cerrado'
-    ? 100 : 0;
-  
+      ? ((group.monthsCompleted || 0) / group.plazo) * 100
+      : group.status === 'Cerrado'
+        ? 100 : 0;
+
   const membersMissing = group.totalMembers - group.membersCount;
   const isOpportunity = group.status === 'Abierto' && membersMissing > 0 && (membersMissing / group.totalMembers) <= 0.1;
 
   const progressText = group.status === 'Abierto'
     ? `${group.membersCount} de ${group.totalMembers} miembros`
     : (group.status === 'Activo' || group.status === 'Subastado')
-    ? `${group.monthsCompleted} de ${group.plazo} meses`
-    : 'Grupo finalizado';
-    
-  const cardLink = group.userIsMember 
-    ? `/panel/group/${group.id}` 
+      ? `${group.monthsCompleted} de ${group.plazo} meses`
+      : 'Grupo finalizado';
+
+  const cardLink = group.userIsMember
+    ? `/panel/group/${group.id}`
     : (group.status === 'Abierto' ? `/panel/group-public/${group.id}` : `/explore/group/${group.id}`);
 
 
@@ -89,44 +98,64 @@ export function GroupCard({ group, actionButton }: GroupCardProps) {
         <Link href={cardLink} className="flex flex-col flex-grow">
           <CardHeader className="p-0 relative">
             <div className="relative h-32 w-full">
-              <Image 
-                src={group.imageUrl}
-                alt={group.name}
+              <Image
+                src={displayImage}
+                alt={displayName}
                 fill
-                className="object-cover rounded-t-lg"
+                className="object-cover rounded-t-lg transition-transform hover:scale-105 duration-500"
                 data-ai-hint={group.imageHint}
                 sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
-              <div className="absolute bottom-2 left-4 text-white">
-                <CardTitle className="text-xl [text-shadow:1px_1px_2px_rgba(0,0,0,0.8)]">{group.name}</CardTitle>
-                <CardDescription className="text-white/90 [text-shadow:1px_1px_2px_rgba(0,0,0,0.8)]">{formatCurrency(group.capital)}</CardDescription>
+              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent"></div>
+              <div className="absolute bottom-2 left-4 text-white pr-12">
+                <CardTitle className="text-xl [text-shadow:1px_1px_2px_rgba(0,0,0,0.8)] leading-tight">{displayName}</CardTitle>
+                <div className="flex items-center gap-1">
+                  <CardDescription className="text-white/90 [text-shadow:1px_1px_2px_rgba(0,0,0,0.8)] font-mono">{formatCurrency(group.capital)}</CardDescription>
+                  {motivation && (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Info className="h-3 w-3 text-purple-300 cursor-help" />
+                      </TooltipTrigger>
+                      <TooltipContent className="max-w-[250px] bg-purple-900 border-purple-700 text-purple-100">
+                        <div className="text-xs italic">"{motivation}"</div>
+                      </TooltipContent>
+                    </Tooltip>
+                  )}
+                </div>
               </div>
             </div>
-             <div className="absolute top-2 right-2 flex flex-col items-end gap-2">
-                <Badge className={badgeClassName}>
-                    <StatusIcon className="mr-1 h-3 w-3" />
-                    {group.status}
-                </Badge>
-                {isOpportunity && (
-                   <Tooltip>
-                    <TooltipTrigger asChild>
-                       <Badge variant="destructive" className="animate-pulse">
-                        <Sparkles className="mr-1 h-3 w-3" />
-                        ¡Oportunidad!
-                      </Badge>
-                    </TooltipTrigger>
-                     <TooltipContent>
-                      <p>¡Faltan solo {membersMissing} miembro{membersMissing > 1 ? 's' : ''}!</p>
-                    </TooltipContent>
-                  </Tooltip>
-                )}
-                {group.userAwardStatus === 'Adjudicado - Aprobado' && (
-                    <div className="absolute -top-1 -right-1 animate-bounce">
-                        <Trophy className="h-6 w-6 text-yellow-500 fill-yellow-400" />
-                    </div>
-                )}
+            <div className="absolute top-2 right-2 flex flex-col items-end gap-2">
+              <Badge className={badgeClassName}>
+                <StatusIcon className="mr-1 h-3 w-3" />
+                {group.status}
+              </Badge>
+              {isOpportunity && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Badge variant="destructive" className="animate-pulse">
+                      <Sparkles className="mr-1 h-3 w-3" />
+                      ¡Oportunidad!
+                    </Badge>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>¡Faltan solo {membersMissing} miembro{membersMissing > 1 ? 's' : ''}!</p>
+                  </TooltipContent>
+                </Tooltip>
+              )}
+              {group.userAwardStatus === 'Adjudicado - Aprobado' && (
+                <div className="absolute -top-1 -right-1 animate-bounce">
+                  <Trophy className="h-6 w-6 text-yellow-500 fill-yellow-400" />
+                </div>
+              )}
+            </div>
+            {group.userIsMember && (
+              <div className="absolute top-2 left-2 z-20" onClick={(e) => e.preventDefault()}>
+                <PersonalizeGroupDialog
+                  groupId={group.id}
+                  defaultName={group.name}
+                />
               </div>
+            )}
           </CardHeader>
           <CardContent className="flex-grow p-4">
             <div className="space-y-4">
@@ -139,7 +168,7 @@ export function GroupCard({ group, actionButton }: GroupCardProps) {
                   <Progress value={progressValue} aria-label={`Progreso del grupo ${progressValue.toFixed(0)}%`} className={cn(group.status === 'Abierto' && membersMissing > 0 && "bg-primary/20")} />
                   {isOpportunity && (
                     <div className="absolute inset-0 flex items-center justify-center">
-                       <span className="text-xs font-bold text-neutral-800">¡Faltan {membersMissing}!</span>
+                      <span className="text-xs font-bold text-neutral-800">¡Faltan {membersMissing}!</span>
                     </div>
                   )}
                 </div>
@@ -154,15 +183,15 @@ export function GroupCard({ group, actionButton }: GroupCardProps) {
                   <span>{group.plazo} Meses</span>
                 </div>
                 <div className="flex items-center gap-2">
-                    <Percent className="h-4 w-4 text-muted-foreground" />
-                    <Tooltip>
-                        <TooltipTrigger asChild>
-                            <span className="cursor-help">CFT Promedio: <strong>{totalFinancialCost.toFixed(2)}%</strong></span>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                            <p>Costo Financiero Total promedio del plan.</p>
-                        </TooltipContent>
-                    </Tooltip>
+                  <Percent className="h-4 w-4 text-muted-foreground" />
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <span className="cursor-help">CFT Promedio: <strong>{totalFinancialCost.toFixed(2)}%</strong></span>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Costo Financiero Total promedio del plan.</p>
+                    </TooltipContent>
+                  </Tooltip>
                 </div>
               </div>
             </div>
@@ -170,8 +199,8 @@ export function GroupCard({ group, actionButton }: GroupCardProps) {
         </Link>
         <CardFooter className="flex justify-between items-center bg-muted/50 p-3 mt-auto">
           <div className="text-center">
-              <p className="text-xs text-muted-foreground">Cuota Promedio</p>
-              <p className="font-bold text-base">{formatCurrency(group.cuotaPromedio)}</p>
+            <p className="text-xs text-muted-foreground">Cuota Promedio</p>
+            <p className="font-bold text-base">{formatCurrency(group.cuotaPromedio)}</p>
           </div>
           {actionButton}
         </CardFooter>

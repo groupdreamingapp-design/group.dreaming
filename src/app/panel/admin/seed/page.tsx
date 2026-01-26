@@ -12,9 +12,10 @@ import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from '@/hooks/use-toast';
 import { db } from '@/lib/firebase';
-import { collection, addDoc, getDocs, deleteDoc, doc, onSnapshot } from 'firebase/firestore';
+import { collection, addDoc, getDocs, deleteDoc, doc, onSnapshot, setDoc, query, where, documentId } from 'firebase/firestore';
 import { calculateCuotaPromedio } from '@/lib/data';
 import { Loader2, Database, Trash2, PlusCircle, Settings2 } from 'lucide-react';
+import { format } from 'date-fns';
 
 // Schema update to include new breakdown
 const formSchema = z.object({
@@ -158,7 +159,51 @@ export default function SeedPage() {
                 createdAt: new Date().toISOString()
             };
 
-            await addDoc(collection(db, 'groups'), groupData);
+            // Check for existing open group with same configuration
+            const duplicatesQuery = query(collection(db, 'groups'),
+                where('status', '==', 'Abierto'),
+                where('capital', '==', Number(data.capital)),
+                where('plazo', '==', Number(data.plazo)),
+                where('raffleAdjudications', '==', Number(data.raffleAdjudications)),
+                where('auctionAdjudications', '==', Number(data.auctionAdjudications))
+            );
+
+            const duplicatesSnapshot = await getDocs(duplicatesQuery);
+            if (!duplicatesSnapshot.empty) {
+                throw new Error("Ya existe un grupo ABIERTO con esta configuración (Capital, Plazo y Adjudicaciones). No se permiten duplicados.");
+            }
+
+            // Custom ID Generation Logic: ID-YYYYMMDD-XXXX
+            const today = new Date();
+            const datePart = format(today, 'yyyyMMdd');
+            const startId = `ID-${datePart}-0000`; // Start range
+            const endId = `ID-${datePart}-9999`;   // End range
+
+            // Query existing groups for today to find the first available hole
+            const q = query(collection(db, 'groups'),
+                where(documentId(), '>=', startId),
+                where(documentId(), '<=', endId)
+            );
+
+            const snapshot = await getDocs(q);
+            const existingIds = snapshot.docs.map(doc => doc.id);
+
+            let sequence = 1;
+            while (sequence <= 9999) {
+                const candidatePart = String(sequence).padStart(4, '0');
+                const candidateId = `ID-${datePart}-${candidatePart}`;
+                if (!existingIds.includes(candidateId)) {
+                    // Found a hole or the next sequential number
+                    const newRef = doc(db, 'groups', candidateId);
+                    await setDoc(newRef, { ...groupData, id: candidateId });
+                    break;
+                }
+                sequence++;
+            }
+
+            if (sequence > 9999) {
+                throw new Error("Límite diario de grupos alcanzado (9999).");
+            }
 
             toast({
                 title: "Grupo Creado Exitosamente",

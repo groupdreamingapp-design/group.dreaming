@@ -11,7 +11,7 @@ import { format, differenceInMonths, parseISO, addHours, isBefore } from 'date-f
 import { useUser } from '@/firebase';
 import { useCollection } from '@/firebase/firestore/use-collection';
 import { db } from '@/lib/firebase';
-import { doc, updateDoc, increment, setDoc, arrayUnion, arrayRemove } from 'firebase/firestore';
+import { doc, updateDoc, increment, setDoc, arrayUnion, arrayRemove, runTransaction } from 'firebase/firestore';
 import { useMemo } from 'react';
 
 let groupSequence: Record<string, number> = {};
@@ -20,11 +20,17 @@ function generateNewGroup(template: GroupTemplate): Group {
   const today = new Date();
   const datePart = format(today, 'yyyyMMdd');
 
-  const sequenceKey = `${template.purposeCode}-${datePart}`;
+  const sequenceKey = `global-${datePart}`;
+  // Reset sequence logic is handled by the key change: new key = new counter starting at 1.
   groupSequence[sequenceKey] = (groupSequence[sequenceKey] || 0) + 1;
+
+  if (groupSequence[sequenceKey] > 9999) {
+    throw new Error("Daily global group limit reached.");
+  }
+
   const sequencePart = String(groupSequence[sequenceKey]).padStart(4, '0');
 
-  const newId = `ID-${template.purposeCode}-${datePart}-${sequencePart}`;
+  const newId = `ID-${datePart}-${sequencePart}`;
 
   return {
     id: newId,
@@ -91,16 +97,44 @@ export function GroupsProvider({ children }: { children: ReactNode }) {
     }
 
     try {
-      const groupRef = doc(db, 'groups', groupId);
-      await updateDoc(groupRef, {
-        membersCount: increment(1),
-        members: arrayUnion(user.uid)
+      await runTransaction(db, async (transaction) => {
+        const groupRef = doc(db, 'groups', groupId);
+        const groupDoc = await transaction.get(groupRef);
+
+        if (!groupDoc.exists()) {
+          throw "El grupo no existe.";
+        }
+
+        const data = groupDoc.data();
+        const currentMembers = data.members || [];
+
+        if (currentMembers.includes(user.uid)) {
+          return; // Already member
+        }
+
+        const newCount = (data.membersCount || 0) + 1;
+
+        // 1. Update Group Main Doc
+        transaction.update(groupRef, {
+          membersCount: newCount,
+          members: arrayUnion(user.uid)
+        });
+
+        // 2. Create Member Sub-document with Order Number and initial payment status
+        const memberRef = doc(db, 'groups', groupId, 'members', user.uid);
+        transaction.set(memberRef, {
+          orderNumber: newCount,
+          joinedAt: new Date().toISOString(),
+          status: 'Activo',
+          subscriptionPaid: true, // Mark subscription as paid
+          installmentsPaid: 1 // Assuming adhesion pays quota #1
+        });
       });
 
       if (!silent) {
         toast({
-          title: "Solicitud enviada",
-          description: `Te has unido al grupo ${groupId}.`,
+          title: "¡Bienvenido al Grupo!",
+          description: `Te has unido exitosamente. Tu N° de Orden es el asignado.`,
         });
       }
 
