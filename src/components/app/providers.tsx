@@ -9,193 +9,211 @@ import { useToast } from '@/hooks/use-toast';
 import { groupTemplates } from '@/lib/group-templates';
 import { format, differenceInMonths, parseISO, addHours, isBefore } from 'date-fns';
 import { useUser } from '@/firebase';
+import { useCollection } from '@/firebase/firestore/use-collection';
+import { db } from '@/lib/firebase';
+import { doc, updateDoc, increment, setDoc, arrayUnion, arrayRemove } from 'firebase/firestore';
+import { useMemo } from 'react';
 
 let groupSequence: Record<string, number> = {};
 
 function generateNewGroup(template: GroupTemplate): Group {
-    const today = new Date();
-    const datePart = format(today, 'yyyyMMdd');
+  const today = new Date();
+  const datePart = format(today, 'yyyyMMdd');
 
-    const sequenceKey = `${template.purposeCode}-${datePart}`;
-    groupSequence[sequenceKey] = (groupSequence[sequenceKey] || 0) + 1;
-    const sequencePart = String(groupSequence[sequenceKey]).padStart(4, '0');
+  const sequenceKey = `${template.purposeCode}-${datePart}`;
+  groupSequence[sequenceKey] = (groupSequence[sequenceKey] || 0) + 1;
+  const sequencePart = String(groupSequence[sequenceKey]).padStart(4, '0');
 
-    const newId = `ID-${template.purposeCode}-${datePart}-${sequencePart}`;
-    
-    return {
-      id: newId,
-      name: template.name,
-      capital: template.capital,
-      plazo: template.plazo,
-      imageUrl: template.imageUrl,
-      imageHint: template.imageHint,
-      cuotaPromedio: calculateCuotaPromedio(template.capital, template.plazo),
-      totalMembers: template.plazo * 2,
-      membersCount: 0,
-      status: 'Abierto',
-      userIsMember: false,
-      userAwardStatus: "No Adjudicado",
-      monthsCompleted: 0,
-      acquiredInAuction: false,
-    };
+  const newId = `ID-${template.purposeCode}-${datePart}-${sequencePart}`;
+
+  return {
+    id: newId,
+    name: template.name,
+    capital: template.capital,
+    plazo: template.plazo,
+    imageUrl: template.imageUrl,
+    imageHint: template.imageHint,
+    cuotaPromedio: calculateCuotaPromedio(template.capital, template.plazo),
+    totalMembers: template.plazo * 2,
+    membersCount: 0,
+    status: 'Abierto',
+    userIsMember: false,
+    userAwardStatus: "No Adjudicado",
+    monthsCompleted: 0,
+    acquiredInAuction: false,
+  };
 }
 
 export function GroupsProvider({ children }: { children: ReactNode }) {
-  const [groups, setGroups] = useState<Group[]>(initialGroups);
-  const [loading, setLoading] = useState(true);
+  const { user } = useUser();
+  // Use Firestore collection
+  const { data: groupsData, isLoading: loading } = useCollection<Group>('groups');
+
+  // Map raw data to include userIsMember based on the 'members' array in Firestore
+  const groups = useMemo(() => {
+    if (!groupsData) return [];
+    return groupsData.map((g: any) => ({
+      ...g,
+      userIsMember: user && g.members ? g.members.includes(user.uid) : false,
+    }));
+  }, [groupsData, user]);
+
   const [advancedInstallments, setAdvancedInstallments] = useState<Record<string, number>>({});
   const { toast } = useToast();
-  const { user } = useUser();
 
+  // Temporary: Auto-promote specific user to admin
   useEffect(() => {
-    // This effect runs only on the client-side after hydration.
-    // It now also depends on the user's UID. When the user changes, this will re-run.
-    const today = new Date();
-    
-    // Create a fresh deep copy of the initialGroups to avoid mutation across sessions
-    const freshInitialGroups = JSON.parse(JSON.stringify(initialGroups));
+    if (user?.uid === 'GcGwSGkvwQZG6m2HK8dZw6uNKU52') {
+      const promoteToAdmin = async () => {
+        try {
+          const adminRef = doc(db, 'roles_admin', user.uid);
+          await setDoc(adminRef, {
+            createdAt: new Date().toISOString(),
+            createdBy: 'system_bootstrap'
+          });
+          console.log("User promoted to admin automatically");
+        } catch (e) {
+          console.error("Error promoting user:", e);
+        }
+      };
+      promoteToAdmin();
+    }
+  }, [user]);
 
-    const updatedGroups = freshInitialGroups.map((group: Group) => {
-      if (group.status === 'Activo' && group.activationDate) {
-        const activationDate = parseISO(group.activationDate);
-        let monthsPassed = differenceInMonths(today, activationDate);
-        
-        const installments = generateInstallments(group.capital, group.plazo, group.activationDate);
-        
-        const paidInstallments = monthsPassed - (group.missedPayments || 0);
+  const joinGroup = useCallback(async (groupId: string, silent: boolean = false) => {
+    if (!user) {
+      toast({
+        title: "Error",
+        description: "Debes iniciar sesión para unirte a un grupo.",
+        variant: "destructive"
+      });
+      return;
+    }
 
-        const overdueInstallments = installments.filter(inst => {
-            const dueDate = parseISO(inst.dueDate);
-            return isBefore(dueDate, today) && inst.number > paidInstallments;
+    try {
+      const groupRef = doc(db, 'groups', groupId);
+      await updateDoc(groupRef, {
+        membersCount: increment(1),
+        members: arrayUnion(user.uid)
+      });
+
+      if (!silent) {
+        toast({
+          title: "Solicitud enviada",
+          description: `Te has unido al grupo ${groupId}.`,
         });
-
-        // Forced auction logic based on non-payment for more than 72 hours on the second overdue installment
-        if (overdueInstallments.length >= 2 && !group.acquiredInAuction) {
-            const secondOverdueDate = parseISO(overdueInstallments[1].dueDate);
-            const seventyTwoHoursAgo = addHours(today, -72);
-            if (isBefore(secondOverdueDate, seventyTwoHoursAgo)) {
-                 return { 
-                    ...group, 
-                    status: 'Subastado' as GroupStatus, 
-                    auctionStartDate: new Date().toISOString(), 
-                    monthsCompleted: monthsPassed 
-                };
-            }
-        }
-        
-        return { ...group, monthsCompleted: monthsPassed };
       }
-      return group;
-    });
-    setGroups(updatedGroups);
-    setAdvancedInstallments({}); // Reset advanced installments on user change
-    setLoading(false);
-  }, [user?.uid]); // Dependency on user.uid ensures state is reset on user change.
 
-  const joinGroup = useCallback((groupId: string) => {
-    let joinedGroup: Group | null = null;
-    let newGroupWasCreated = false;
+    } catch (error) {
+      console.error("Error joining group:", error);
+      toast({
+        title: "Error",
+        description: "No se pudo unir al grupo.",
+        variant: "destructive"
+      });
+    }
+  }, [toast, user]);
 
-    setGroups(currentGroups => {
-        const groupIndex = currentGroups.findIndex(g => g.id === groupId);
-        if (groupIndex === -1) return currentGroups;
+  const leaveGroup = useCallback(async (groupId: string) => {
+    if (!user) return;
+    try {
+      const groupRef = doc(db, 'groups', groupId);
+      await updateDoc(groupRef, {
+        membersCount: increment(-1),
+        members: arrayRemove(user.uid)
+      });
+      toast({
+        title: "Baja Exitosa",
+        description: `Te has dado de baja del grupo ${groupId}.`,
+      });
+    } catch (error) {
+      console.error("Error leaving group:", error);
+      toast({
+        title: "Error",
+        description: "No se pudo dar de baja.",
+        variant: "destructive"
+      });
+    }
+  }, [toast, user]);
 
-        const groupToJoin = currentGroups[groupIndex];
-        if (groupToJoin.status !== 'Abierto' || groupToJoin.userIsMember) return currentGroups;
-
-        const updatedGroup = { ...groupToJoin, membersCount: groupToJoin.membersCount + 1, userIsMember: true };
-        joinedGroup = updatedGroup;
-
-        const newGroups = [...currentGroups];
-        newGroups[groupIndex] = updatedGroup;
-        
-        if (updatedGroup.membersCount === updatedGroup.totalMembers) {
-            updatedGroup.status = 'Activo';
-            updatedGroup.activationDate = new Date().toISOString();
-            
-            const template = groupTemplates.find(t => t.name === updatedGroup.name);
-            if (template) {
-                const newGroup = generateNewGroup(template);
-                newGroups.push(newGroup);
-                newGroupWasCreated = true;
-            }
-        }
-        
-        return newGroups;
-    });
-
-    setTimeout(() => {
-        if (joinedGroup) {
-            if (newGroupWasCreated) {
-                toast({
-                    title: "¡Grupo Completo y Activado!",
-                    description: `¡Te has unido y el grupo ${joinedGroup.id} se ha activado! Tu primera cuota ha sido debitada.`,
-                    className: 'bg-green-100 border-green-500 text-green-700'
-                });
-            } else {
-                toast({
-                    title: "¡Felicitaciones!",
-                    description: `Te has unido al grupo ${joinedGroup.id}.`,
-                });
-            }
-        }
-    }, 0);
+  const resetGroupMembers = useCallback(async (groupId: string) => {
+    try {
+      const groupRef = doc(db, 'groups', groupId);
+      await updateDoc(groupRef, {
+        membersCount: 0,
+        members: [] // Clean the array
+      });
+      toast({
+        title: "Grupo Reseteado",
+        description: `Se han eliminado todos los miembros del grupo ${groupId}.`,
+      });
+    } catch (error) {
+      console.error("Error resetting group:", error);
+      toast({
+        title: "Error",
+        description: "No se pudo resetear el grupo.",
+        variant: "destructive"
+      });
+    }
   }, [toast]);
-  
-  const auctionGroup = useCallback((groupId: string) => {
-    setGroups(currentGroups => {
-      return currentGroups.map(g => 
-        g.id === groupId ? { ...g, status: 'Subastado', auctionStartDate: new Date().toISOString() } : g
-      );
-    });
+
+
+  const auctionGroup = useCallback(async (groupId: string) => {
+    try {
+      const groupRef = doc(db, 'groups', groupId);
+      await updateDoc(groupRef, {
+        status: 'Subastado',
+        auctionStartDate: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error("Error updating group:", error);
+    }
   }, []);
 
-  const acceptAward = useCallback((groupId: string) => {
-    setGroups(currentGroups => {
-      return currentGroups.map(g => 
-        (g.id === groupId && g.userAwardStatus === 'Adjudicado - Pendiente Aceptación') 
-          ? { ...g, userAwardStatus: 'Adjudicado - Pendiente Garantías' } 
-          : g
-      );
-    });
-    toast({
+  const acceptAward = useCallback(async (groupId: string) => {
+    try {
+      const groupRef = doc(db, 'groups', groupId);
+      await updateDoc(groupRef, { userAwardStatus: 'Adjudicado - Pendiente Garantías' });
+      toast({
         title: "¡Adjudicación Aceptada!",
         description: `Por favor, procede a presentar las garantías requeridas.`,
         className: 'bg-green-100 border-green-500 text-green-700'
-    });
+      });
+    } catch (error) {
+      console.error("Error accepting award:", error);
+    }
   }, [toast]);
 
-  const approveAward = useCallback((groupId: string) => {
-    setGroups(currentGroups => {
-      return currentGroups.map(g => 
-        (g.id === groupId && g.userAwardStatus === 'Adjudicado - Pendiente Garantías') 
-          ? { ...g, userAwardStatus: 'Adjudicado - Aprobado' } 
-          : g
-      );
-    });
-    toast({
+  const approveAward = useCallback(async (groupId: string) => {
+    try {
+      const groupRef = doc(db, 'groups', groupId);
+      await updateDoc(groupRef, { userAwardStatus: 'Adjudicado - Aprobado' });
+      toast({
         title: "¡Adjudicación Aprobada!",
         description: `Felicitaciones, el capital ha sido adjudicado a tu cuenta.`,
         className: 'bg-green-100 border-green-500 text-green-700'
-    });
+      });
+    } catch (error) {
+      console.error("Error approving award:", error);
+    }
   }, [toast]);
 
   const advanceInstallments = useCallback((groupId: string, cuotasCount: number) => {
     setAdvancedInstallments(prev => ({
-        ...prev,
-        [groupId]: (prev[groupId] || 0) + cuotasCount
+      ...prev,
+      [groupId]: (prev[groupId] || 0) + cuotasCount
     }));
 
     toast({
-        title: "¡Adelanto Exitoso!",
-        description: `Has adelantado ${cuotasCount} cuota(s) en el grupo ${groupId}.`,
-        className: 'bg-green-100 border-green-500 text-green-700'
+      title: "¡Adelanto Exitoso!",
+      description: `Has adelantado ${cuotasCount} cuota(s) en el grupo ${groupId}.`,
+      className: 'bg-green-100 border-green-500 text-green-700'
     });
   }, [toast]);
 
 
   return (
-    <GroupsContext.Provider value={{ groups, loading, joinGroup, auctionGroup, acceptAward, approveAward, advanceInstallments, advancedInstallments }}>
+    <GroupsContext.Provider value={{ groups, loading, joinGroup, leaveGroup, resetGroupMembers, auctionGroup, acceptAward, approveAward, advanceInstallments, advancedInstallments }}>
       {children}
     </GroupsContext.Provider>
   );

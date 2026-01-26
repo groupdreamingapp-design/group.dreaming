@@ -14,17 +14,50 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import type { Group } from "@/lib/types";
+import { useSearchParams, useRouter } from "next/navigation";
+import { useToast } from "@/hooks/use-toast";
 
 const MAX_CAPITAL = 100000;
 
 export default function Dashboard() {
   const { user } = useUser();
-  const { groups } = useGroups();
+  const { joinGroup, groups } = useGroups();
   const [isClient, setIsClient] = useState(false);
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const { toast } = useToast();
 
   useEffect(() => {
     setIsClient(true);
-  }, []);
+
+    const paymentStatus = searchParams.get('payment');
+    const groupId = searchParams.get('groupId');
+
+    if (paymentStatus === 'success' && groupId) {
+      // Prevent double join if already member (though the hook logic might handle it, it's safer to check)
+      const alreadyMember = groups.find(g => g.id === groupId)?.userIsMember;
+
+      if (!alreadyMember) {
+        joinGroup(groupId);
+        toast({
+          title: "¡Pago Exitoso!",
+          description: `Te has unido correctamente al grupo ${groupId}.`,
+          className: "bg-green-100 border-green-500 text-green-700"
+        });
+      }
+
+      // Clean URL
+      router.replace('/panel');
+    } else if (paymentStatus === 'failure') {
+      toast({
+        title: "Pago Fallido",
+        description: "No se pudo completar el pago de adhesión.",
+        variant: "destructive"
+      });
+      router.replace('/panel');
+    }
+
+  }, [searchParams, joinGroup, groups, router, toast]);
 
   const subscribedCapital = useMemo(() => {
     return groups
@@ -51,7 +84,7 @@ export default function Dashboard() {
     if (group.status === 'Abierto') {
       return (group.membersCount / group.totalMembers) * 100;
     }
-     if (group.status === 'Subastado' && group.monthsCompleted) {
+    if (group.status === 'Subastado' && group.monthsCompleted) {
       return (group.monthsCompleted / group.plazo) * 100;
     }
     if (group.status === 'Cerrado') {
@@ -59,7 +92,7 @@ export default function Dashboard() {
     }
     return 0;
   }
-  
+
   const getProgressText = (group: Group) => {
     if (group.status === 'Activo' && group.monthsCompleted) {
       return `${group.monthsCompleted} de ${group.plazo} meses`;
@@ -68,7 +101,7 @@ export default function Dashboard() {
       return `${group.membersCount} de ${group.totalMembers} miembros`;
     }
     if (group.status === 'Subastado' && group.monthsCompleted) {
-        return `${group.monthsCompleted} de ${group.plazo} cuotas completadas`;
+      return `${group.monthsCompleted} de ${group.plazo} cuotas completadas`;
     }
     return `Finalizado`;
   }
@@ -86,29 +119,29 @@ export default function Dashboard() {
   return (
     <>
       <h1 className="text-3xl font-bold font-headline">Hola, {user?.displayName?.split(' ')[0] || 'Usuario'}!</h1>
-      
-       <div className="grid gap-4 md:grid-cols-2">
-         <Card>
-           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Cupo Máximo de Capital a Suscribir</CardTitle>
-              <PieChart className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              {!isClient ? (
-                <div className="flex items-center justify-center h-16">
-                  <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+
+      <div className="grid gap-4 md:grid-cols-2">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Cupo Máximo de Capital a Suscribir</CardTitle>
+            <PieChart className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            {!isClient ? (
+              <div className="flex items-center justify-center h-16">
+                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <Progress value={usedCapitalPercentage} />
+                <div className="grid grid-cols-3 text-xs">
+                  <div><span className="font-semibold">Utilizado:</span> {formatCurrency(subscribedCapital)}</div>
+                  <div className="text-center"><span className="font-semibold">Disponible:</span> {formatCurrency(availableToSubscribe)}</div>
+                  <div className="text-right"><span className="font-semibold">Total:</span> {formatCurrency(MAX_CAPITAL)}</div>
                 </div>
-              ) : (
-                <div className="space-y-2">
-                     <Progress value={usedCapitalPercentage} />
-                     <div className="grid grid-cols-3 text-xs">
-                        <div><span className="font-semibold">Utilizado:</span> {formatCurrency(subscribedCapital)}</div>
-                        <div className="text-center"><span className="font-semibold">Disponible:</span> {formatCurrency(availableToSubscribe)}</div>
-                        <div className="text-right"><span className="font-semibold">Total:</span> {formatCurrency(MAX_CAPITAL)}</div>
-                     </div>
-                </div>
-              )}
-            </CardContent>
+              </div>
+            )}
+          </CardContent>
         </Card>
       </div>
 
@@ -120,59 +153,59 @@ export default function Dashboard() {
           </CardHeader>
           <CardContent>
             {myGroups.length > 0 ? (
-                 <Table>
-                    <TableHeader>
-                        <TableRow>
-                        <TableHead>Grupo</TableHead>
-                        <TableHead>Capital</TableHead>
-                        <TableHead>Plazo</TableHead>
-                        <TableHead>Progreso</TableHead>
-                        <TableHead>Estado</TableHead>
-                        <TableHead className="text-right">Acción</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {myGroups.map(group => (
-                            <TableRow key={group.id}>
-                                <TableCell className="font-medium">{group.id}</TableCell>
-                                <TableCell>{formatCurrency(group.capital)}</TableCell>
-                                <TableCell>{group.plazo} meses</TableCell>
-                                <TableCell>
-                                    <div className="flex flex-col gap-1">
-                                        <Progress value={getProgress(group)} className="h-2" />
-                                        <span className="text-xs text-muted-foreground">{getProgressText(group)}</span>
-                                    </div>
-                                </TableCell>
-                                <TableCell>
-                                    <Badge 
-                                      variant="outline"
-                                      className={cn(
-                                        "border-transparent text-white",
-                                        group.status === 'Activo' && 'bg-green-600',
-                                        group.status === 'Abierto' && 'bg-blue-600',
-                                        group.status === 'Subastado' && 'bg-orange-600',
-                                        group.status === 'Cerrado' && 'bg-gray-600'
-                                    )}
-                                    >{group.status}</Badge>
-                                </TableCell>
-                                <TableCell className="text-right">
-                                    <Button asChild variant="outline" size="sm">
-                                        <Link href={`/panel/group/${group.id}`}>Ver Detalles</Link>
-                                    </Button>
-                                </TableCell>
-                            </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Grupo</TableHead>
+                    <TableHead>Capital</TableHead>
+                    <TableHead>Plazo</TableHead>
+                    <TableHead>Progreso</TableHead>
+                    <TableHead>Estado</TableHead>
+                    <TableHead className="text-right">Acción</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {myGroups.map(group => (
+                    <TableRow key={group.id}>
+                      <TableCell className="font-medium">{group.id}</TableCell>
+                      <TableCell>{formatCurrency(group.capital)}</TableCell>
+                      <TableCell>{group.plazo} meses</TableCell>
+                      <TableCell>
+                        <div className="flex flex-col gap-1">
+                          <Progress value={getProgress(group)} className="h-2" />
+                          <span className="text-xs text-muted-foreground">{getProgressText(group)}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          variant="outline"
+                          className={cn(
+                            "border-transparent text-white",
+                            group.status === 'Activo' && 'bg-green-600',
+                            group.status === 'Abierto' && 'bg-blue-600',
+                            group.status === 'Subastado' && 'bg-orange-600',
+                            group.status === 'Cerrado' && 'bg-gray-600'
+                          )}
+                        >{group.status}</Badge>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Button asChild variant="outline" size="sm">
+                          <Link href={`/panel/group/${group.id}`}>Ver Detalles</Link>
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
             ) : (
-                <div className="text-center py-16 text-muted-foreground flex flex-col items-center gap-4">
-                    <p>Aún no te has unido a ningún grupo.</p>
-                    <Button asChild>
-                    <Link href="/panel/explore">
-                        ¡Explora los grupos disponibles y empieza a cumplir tus sueños!
-                    </Link>
-                    </Button>
-                </div>
+              <div className="text-center py-16 text-muted-foreground flex flex-col items-center gap-4">
+                <p>Aún no te has unido a ningún grupo.</p>
+                <Button asChild>
+                  <Link href="/panel/explore">
+                    ¡Explora los grupos disponibles y empieza a cumplir tus sueños!
+                  </Link>
+                </Button>
+              </div>
             )}
           </CardContent>
         </Card>

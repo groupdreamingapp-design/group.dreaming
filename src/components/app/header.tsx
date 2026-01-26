@@ -1,3 +1,4 @@
+'use client';
 
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { MainNav } from "./main-nav"
@@ -8,7 +9,10 @@ import { UserNav } from "./user-nav"
 import { Button } from "../ui/button"
 import { Notifications } from "./notifications"
 
+import { useUser } from "@/firebase";
+
 export function Header() {
+  const { user, loading } = useUser(); // Using loading state if available from useUser, otherwise just user check
   const infoLinks = [
     { href: "/panel/comparisons", label: "Comparativas", icon: PieChart },
     { href: "/panel/benefits", label: "Beneficios", icon: Gift },
@@ -41,7 +45,18 @@ export function Header() {
       <div className="flex-1" />
       <div className="flex items-center gap-2">
         <Notifications />
-        <UserNav />
+        {user ? (
+          <UserNav />
+        ) : (
+          <div className="flex gap-2">
+            <Button asChild variant="ghost" size="sm">
+              <Link href="/login">Ingresar</Link>
+            </Button>
+            <Button asChild size="sm">
+              <Link href="/register">Registrarse</Link>
+            </Button>
+          </div>
+        )}
       </div>
     </header>
   )

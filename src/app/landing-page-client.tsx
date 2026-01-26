@@ -11,49 +11,49 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { useUser } from '@/firebase';
 
 const collageImages = [
-    PlaceHolderImages.find(img => img.id === 'collage-travel'),
-    PlaceHolderImages.find(img => img.id === 'collage-house-keys'),
-    PlaceHolderImages.find(img => img.id === 'collage-car-keys'),
-    PlaceHolderImages.find(img => img.id === 'collage-cafe'),
+  PlaceHolderImages.find(img => img.id === 'collage-travel'),
+  PlaceHolderImages.find(img => img.id === 'collage-house-keys'),
+  PlaceHolderImages.find(img => img.id === 'collage-car-keys'),
+  PlaceHolderImages.find(img => img.id === 'collage-cafe'),
 ].filter(Boolean) as any[];
 
 const sections = [
-    {
-        title: "Explorar Grupos",
-        description: "Encuentra el plan de ahorro perfecto que se adapte a tus metas y presupuesto.",
-        href: "/explore",
-        icon: Search
-    },
-     {
-        title: "Cómo Funciona",
-        description: "Entiende en detalle cómo nuestro sistema híbrido te ayuda a alcanzar tus metas.",
-        href: "/how-it-works",
-        icon: BookText
-    },
-    {
-        title: "Comparativas",
-        description: "Analiza las ventajas clave de Group Dreaming frente a los sistemas tradicionales.",
-        href: "/comparisons",
-        icon: FileText
-    },
-    {
-        title: "Programa de Beneficios",
-        description: "Descubre las recompensas e incentivos que tenemos por tu fidelidad y compromiso.",
-        href: "/benefits",
-        icon: Gift
-    },
-    {
-        title: "Reglamento",
-        description: "Conoce las reglas claras que hacen de nuestro sistema una comunidad de confianza.",
-        href: "/rules",
-        icon: Landmark
-    },
-    {
-        title: "Transparencia",
-        description: "Entiende en detalle el destino de tu cuota y el ciclo de vida de cada grupo.",
-        href: "/transparency",
-        icon: PieChart
-    },
+  {
+    title: "Explorar Grupos",
+    description: "Encuentra el plan de ahorro perfecto que se adapte a tus metas y presupuesto.",
+    href: "/explore",
+    icon: Search
+  },
+  {
+    title: "Cómo Funciona",
+    description: "Entiende en detalle cómo nuestro sistema híbrido te ayuda a alcanzar tus metas.",
+    href: "/how-it-works",
+    icon: BookText
+  },
+  {
+    title: "Comparativas",
+    description: "Analiza las ventajas clave de Group Dreaming frente a los sistemas tradicionales.",
+    href: "/comparisons",
+    icon: FileText
+  },
+  {
+    title: "Programa de Beneficios",
+    description: "Descubre las recompensas e incentivos que tenemos por tu fidelidad y compromiso.",
+    href: "/benefits",
+    icon: Gift
+  },
+  {
+    title: "Reglamento",
+    description: "Conoce las reglas claras que hacen de nuestro sistema una comunidad de confianza.",
+    href: "/rules",
+    icon: Landmark
+  },
+  {
+    title: "Transparencia",
+    description: "Entiende en detalle el destino de tu cuota y el ciclo de vida de cada grupo.",
+    href: "/transparency",
+    icon: PieChart
+  },
 ];
 
 export default function LandingPageClient() {
@@ -107,24 +107,24 @@ export default function LandingPageClient() {
       <main className="flex-1">
         <section className="relative w-full pt-24 pb-12 md:pt-32 md:pb-24 lg:pt-40 lg:pb-28 overflow-hidden bg-background">
           <div className="absolute inset-0 z-0">
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/40 to-transparent z-10"></div>
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 h-full">
-                  {collageImages.map((image, index) => (
-                      <div key={image.id} className="relative w-full h-full">
-                          <Image
-                              src={image.imageUrl}
-                              alt={image.description}
-                              fill
-                              className="object-cover"
-                              data-ai-hint={image.imageHint}
-                              sizes="(max-width: 768px) 50vw, (max-width: 1024px) 25vw, 25vw"
-                              priority={index < 4}
-                          />
-                      </div>
-                  ))}
-              </div>
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/40 to-transparent z-10"></div>
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 h-full">
+              {collageImages.map((image, index) => (
+                <div key={image.id} className="relative w-full h-full">
+                  <Image
+                    src={image.imageUrl}
+                    alt={image.description}
+                    fill
+                    className="object-cover"
+                    data-ai-hint={image.imageHint}
+                    sizes="(max-width: 768px) 50vw, (max-width: 1024px) 25vw, 25vw"
+                    priority={index < 4}
+                  />
+                </div>
+              ))}
+            </div>
           </div>
-           <div className="container px-4 md:px-6 z-20 relative">
+          <div className="container px-4 md:px-6 z-20 relative">
             <div className="flex flex-col items-center space-y-4 text-center">
               <div className="space-y-4">
                 <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl/none text-white [text-shadow:2px_2px_4px_rgba(0,0,0,0.7)]">
@@ -134,37 +134,37 @@ export default function LandingPageClient() {
             </div>
           </div>
         </section>
-        
+
         <section className="w-full py-12 md:py-16 lg:py-20 bg-background">
-            <div className="container px-4 md:px-6">
-                <p className="mx-auto max-w-[700px] text-center text-foreground md:text-xl mb-12">
-                  Group Dreaming es una plataforma de ahorro colectivo basada en la confianza y la ayuda mutua. Representamos la alternativa solidaria a los sistemas financieros tradicionales, brindando una solución transparente y accesible para que puedas alcanzar tus metas económicas, desde tu primer auto hasta tu propia casa, impulsado por la fuerza del grupo.
-                </p>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
-                    {sections.map((section, index) => (
-                         <Card key={index} className="flex flex-col group hover:border-primary transition-all">
-                            <CardHeader>
-                                <div className="flex items-center gap-4">
-                                     <div className="bg-primary/10 p-3 rounded-lg group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
-                                        <section.icon className="h-6 w-6 text-primary group-hover:text-primary-foreground transition-colors" />
-                                    </div>
-                                    <CardTitle>{section.title}</CardTitle>
-                                </div>
-                            </CardHeader>
-                            <CardContent className="flex-grow">
-                                <CardDescription>{section.description}</CardDescription>
-                            </CardContent>
-                            <CardFooter>
-                                <Button variant="ghost" asChild className="-ml-4">
-                                    <Link href={section.href}>
-                                        Ver más <ArrowRight className="ml-2 h-4 w-4" />
-                                    </Link>
-                                </Button>
-                            </CardFooter>
-                        </Card>
-                    ))}
-                </div>
+          <div className="container px-4 md:px-6">
+            <p className="mx-auto max-w-[700px] text-center text-foreground md:text-xl mb-12">
+              Group Dreaming es una plataforma de ahorro colectivo basada en la confianza y la ayuda mutua. Representamos la alternativa solidaria a los sistemas financieros tradicionales, brindando una solución transparente y accesible para que puedas alcanzar tus metas económicas, desde tu primer auto hasta tu propia casa, impulsado por la fuerza del grupo.
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
+              {sections.map((section, index) => (
+                <Card key={index} className="flex flex-col group hover:border-primary transition-all">
+                  <CardHeader>
+                    <div className="flex items-center gap-4">
+                      <div className="bg-primary/10 p-3 rounded-lg group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
+                        <section.icon className="h-6 w-6 text-primary group-hover:text-primary-foreground transition-colors" />
+                      </div>
+                      <CardTitle>{section.title}</CardTitle>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="flex-grow">
+                    <CardDescription>{section.description}</CardDescription>
+                  </CardContent>
+                  <CardFooter>
+                    <Button variant="ghost" asChild className="-ml-4">
+                      <Link href={section.href}>
+                        Ver más <ArrowRight className="ml-2 h-4 w-4" />
+                      </Link>
+                    </Button>
+                  </CardFooter>
+                </Card>
+              ))}
             </div>
+          </div>
         </section>
 
       </main>

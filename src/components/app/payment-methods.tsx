@@ -13,6 +13,7 @@ import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
 import { useState } from 'react';
+import { MercadoPagoButton } from './mercadopago-button';
 
 const cbuSchema = z.object({
     cbu: z.string().length(22, "El CBU debe tener 22 dígitos."),
@@ -26,7 +27,7 @@ type CbuFormValues = z.infer<typeof cbuSchema>;
 export function PaymentMethods() {
     const { toast } = useToast();
     const [isLoading, setIsLoading] = useState(false);
-    
+
     const form = useForm<CbuFormValues>({
         resolver: zodResolver(cbuSchema),
         defaultValues: {
@@ -38,7 +39,7 @@ export function PaymentMethods() {
     const onSubmit = (data: CbuFormValues) => {
         setIsLoading(true);
         console.log("CBU Guardado:", data.cbu);
-        
+
         // Simulate API call
         setTimeout(() => {
             setIsLoading(false);
@@ -58,7 +59,7 @@ export function PaymentMethods() {
                     Para garantizar la solidez y el correcto funcionamiento del sistema, el pago de tu cuota se debita automáticamente en la fecha de vencimiento desde tu CBU principal.
                 </AlertDescription>
             </Alert>
-            
+
             <Card>
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2">
@@ -111,6 +112,27 @@ export function PaymentMethods() {
                             </Button>
                         </form>
                     </Form>
+                </CardContent>
+            </Card>
+
+            <Card className="mt-6">
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                        <Banknote className="h-5 w-5" />
+                        Pagar con MercadoPago
+                    </CardTitle>
+                    <CardDescription>Prueba de integración de pago único o suscripción.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <MercadoPagoButton
+                        items={[
+                            {
+                                title: "Cuota Plan Ahorro",
+                                quantity: 1,
+                                unit_price: 1000
+                            }
+                        ]}
+                    />
                 </CardContent>
             </Card>
         </div>

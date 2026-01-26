@@ -10,7 +10,9 @@ import type { Group } from '@/lib/types';
 interface GroupsContextType {
   groups: Group[];
   loading: boolean;
-  joinGroup: (groupId: string) => void;
+  joinGroup: (groupId: string, silent?: boolean) => void;
+  leaveGroup: (groupId: string) => void;
+  resetGroupMembers: (groupId: string) => void;
   auctionGroup: (groupId: string) => void;
   acceptAward: (groupId: string) => void;
   approveAward: (groupId: string) => void;

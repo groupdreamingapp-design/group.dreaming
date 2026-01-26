@@ -27,6 +27,7 @@ type UserNavContextType = {
   isVerified: boolean;
   setIsVerified: (isVerified: boolean) => void;
   isAdmin: boolean;
+  isAdminLoading: boolean;
 };
 
 const UserNavContext = createContext<UserNavContextType | undefined>(undefined);
@@ -43,15 +44,20 @@ export function UserNavProvider({ children }: { children: ReactNode }) {
     return null;
   }, [user, firestore]);
 
-  const { data: adminDoc } = useDoc(adminDocRef);
+  const { data: adminDoc, loading: adminLoading } = useDoc(adminDocRef);
 
   const isAdmin = useMemo(() => !!adminDoc, [adminDoc]);
-  
+
   const setIsVerified = useCallback((verified: boolean) => {
     setIsVerifiedState(verified);
   }, []);
 
-  const contextValue = useMemo(() => ({ isVerified, setIsVerified, isAdmin }), [isVerified, setIsVerified, isAdmin]);
+  const contextValue = useMemo(() => ({
+    isVerified,
+    setIsVerified,
+    isAdmin,
+    isAdminLoading: user ? adminLoading : false
+  }), [isVerified, setIsVerified, isAdmin, adminLoading, user]);
 
   return (
     <UserNavContext.Provider value={contextValue}>
@@ -73,7 +79,7 @@ export function UserNav() {
   const { isVerified } = useUserNav();
   const router = useRouter();
   const auth = useAuth();
-  
+
   const userInitials = user?.displayName?.split(' ').map(n => n[0]).join('') || user?.email?.charAt(0).toUpperCase() || 'U';
 
   const handleLogout = async () => {
@@ -96,10 +102,10 @@ export function UserNav() {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-9 w-9 rounded-full">
-            <Avatar className="h-9 w-9">
-                {user.photoURL && <AvatarImage src={user.photoURL} alt={user.displayName || user.email || 'User'} />}
-                <AvatarFallback>{userInitials}</AvatarFallback>
-            </Avatar>
+          <Avatar className="h-9 w-9">
+            {user.photoURL && <AvatarImage src={user.photoURL} alt={user.displayName || user.email || 'User'} />}
+            <AvatarFallback>{userInitials}</AvatarFallback>
+          </Avatar>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56" align="end" forceMount>
@@ -115,14 +121,14 @@ export function UserNav() {
         <DropdownMenuGroup>
           <DropdownMenuItem asChild>
             <Link href="/panel/profile">
-                <User className="mr-2 h-4 w-4" />
-                <span>Perfil</span>
+              <User className="mr-2 h-4 w-4" />
+              <span>Perfil</span>
             </Link>
           </DropdownMenuItem>
-           <DropdownMenuItem asChild>
+          <DropdownMenuItem asChild>
             <Link href="/panel/verify">
-                {isVerified ? <CheckCircle className="mr-2 h-4 w-4 text-green-500" /> : <Shield className="mr-2 h-4 w-4" />}
-                <span>Verificación</span>
+              {isVerified ? <CheckCircle className="mr-2 h-4 w-4 text-green-500" /> : <Shield className="mr-2 h-4 w-4" />}
+              <span>Verificación</span>
             </Link>
           </DropdownMenuItem>
         </DropdownMenuGroup>

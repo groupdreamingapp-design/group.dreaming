@@ -21,24 +21,25 @@ import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Input } from '@/components/ui/input';
+import { MPButton } from '@/components/payments/mp-button';
 
 const MAX_CAPITAL = 100000;
 
 export default function GroupPublicDetail() {
   const params = useParams();
   const router = useRouter();
-  const { groups, joinGroup } = useGroups();
+  const { groups, joinGroup, resetGroupMembers } = useGroups();
   const { isVerified } = useUserNav();
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [hasReadContract, setHasReadContract] = useState(false);
-  
+
   const groupId = typeof params.id === 'string' ? params.id : '';
   const group = useMemo(() => groups.find(g => g.id === groupId), [groups, groupId]);
 
   const subscribedCapital = useMemo(() => {
     return groups
-        .filter(g => g.userIsMember && (g.status === 'Activo' || g.status === 'Abierto' || g.status === 'Pendiente'))
-        .reduce((acc, g) => acc + g.capital, 0);
+      .filter(g => g.userIsMember && (g.status === 'Activo' || g.status === 'Abierto' || g.status === 'Pendiente'))
+      .reduce((acc, g) => acc + g.capital, 0);
   }, [groups]);
 
   const exceedsCapital = useMemo(() => {
@@ -64,7 +65,7 @@ export default function GroupPublicDetail() {
 
   const formatCurrency = (amount: number) => new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'USD' }).format(amount);
   const formatCurrencyNoDecimals = (amount: number) => new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(amount);
-  
+
   const handleJoinGroup = () => {
     joinGroup(group.id);
     router.push(`/panel/group/${group.id}`);
@@ -98,76 +99,91 @@ export default function GroupPublicDetail() {
     return (
       <Dialog onOpenChange={(open) => !open && resetDialog()}>
         <DialogTrigger asChild>
-            <Button size="lg">
-                <CheckCircle className="mr-2" /> Unirme a este grupo
-            </Button>
+          <Button size="lg">
+            <CheckCircle className="mr-2" /> Unirme a este grupo
+          </Button>
         </DialogTrigger>
         <DialogContent>
-            <DialogHeader>
-                <DialogTitle>Confirmar Adhesión al Grupo {group.id}</DialogTitle>
-                  <DialogDescription>Estás a punto de unirte a un plan de {formatCurrencyNoDecimals(group.capital)} en {group.plazo} meses.</DialogDescription>
-            </DialogHeader>
+          <DialogHeader>
+            <DialogTitle>Confirmar Adhesión al Grupo {group.id}</DialogTitle>
+            <DialogDescription>Estás a punto de unirte a un plan de {formatCurrencyNoDecimals(group.capital)} en {group.plazo} meses.</DialogDescription>
+          </DialogHeader>
 
-            {isVerified ? (
-                <div className="space-y-4">
-                    <Alert variant="default">
-                        <ShieldAlert className="h-4 w-4" />
-                        <AlertTitle>Paso Final: Pago de Adhesión</AlertTitle>
-                        <AlertDescription>
-                           Al confirmar, se generará un Volante Electrónico de Pago (VEP) a través de SIRO para que abones la primera cuota y asegures tu lugar.
-                        </AlertDescription>
-                    </Alert>
-                    <div className="space-y-2">
-                        <Label htmlFor="coupon-code">Código de Cupón (Opcional)</Label>
-                        <Input id="coupon-code" placeholder="Ingresa tu cupón de beneficio" />
-                    </div>
-                      <div className="items-top flex space-x-2 pt-2">
-                        <Checkbox 
-                          id="terms" 
-                          checked={termsAccepted} 
-                          onCheckedChange={(checked) => setTermsAccepted(!!checked)}
-                          disabled={!hasReadContract}
-                        />
-                        <div className="grid gap-1.5 leading-none">
-                          <Label 
-                            htmlFor="terms" 
-                            className={cn("text-sm font-medium leading-none", !hasReadContract && "text-muted-foreground cursor-not-allowed")}
-                          >
-                            He leído y acepto el <Button variant="link" className="p-0 h-auto" asChild><Link href="/panel/contract" target="_blank" onClick={() => setHasReadContract(true)}>Contrato de Adhesión</Link></Button>.
-                          </Label>
-                          {!hasReadContract && (
-                            <p className="text-xs text-amber-600 font-semibold">
-                              Debes hacer clic en 'Contrato de Adhesión' para poder aceptar los términos.
-                            </p>
-                          )}
-                        </div>
-                    </div>
-                </div>
-            ) : (
-                  <div>
-                    <p className="text-sm text-muted-foreground mb-4">
-                        Para continuar, primero debes completar el proceso de verificación de identidad. Es un requisito legal para garantizar la seguridad de todos los miembros.
+          {isVerified ? (
+            <div className="space-y-4">
+              <Alert variant="default">
+                <ShieldAlert className="h-4 w-4" />
+                <AlertTitle>Paso Final: Pago de Adhesión</AlertTitle>
+                <AlertDescription>
+                  Al confirmar, serás redirigido a MercadoPago para abonar la primera cuota y asegurar tu lugar de inmediato.
+                </AlertDescription>
+              </Alert>
+              <div className="space-y-2">
+                <Label htmlFor="coupon-code">Código de Cupón (Opcional)</Label>
+                <Input id="coupon-code" placeholder="Ingresa tu cupón de beneficio" />
+              </div>
+              <div className="items-top flex space-x-2 pt-2">
+                <Checkbox
+                  id="terms"
+                  checked={termsAccepted}
+                  onCheckedChange={(checked) => setTermsAccepted(!!checked)}
+                  disabled={!hasReadContract}
+                />
+                <div className="grid gap-1.5 leading-none">
+                  <Label
+                    htmlFor="terms"
+                    className={cn("text-sm font-medium leading-none", !hasReadContract && "text-muted-foreground cursor-not-allowed")}
+                  >
+                    He leído y acepto el <Button variant="link" className="p-0 h-auto" asChild><Link href="/panel/contract" target="_blank" onClick={() => setHasReadContract(true)}>Contrato de Adhesión</Link></Button>.
+                  </Label>
+                  {!hasReadContract && (
+                    <p className="text-xs text-amber-600 font-semibold">
+                      Debes hacer clic en 'Contrato de Adhesión' para poder aceptar los términos.
                     </p>
-                      <Alert variant="destructive">
-                        <ShieldAlert className="h-4 w-4" />
-                        <AlertTitle>Verificación de Identidad Requerida</AlertTitle>
-                        <AlertDescription>
-                            Tu cuenta aún no ha sido verificada. Por favor, completa el formulario para poder unirte a un grupo.
-                        </AlertDescription>
-                    </Alert>
+                  )}
                 </div>
+              </div>
+            </div>
+          ) : (
+            <div>
+              <p className="text-sm text-muted-foreground mb-4">
+                Para continuar, primero debes completar el proceso de verificación de identidad. Es un requisito legal para garantizar la seguridad de todos los miembros.
+              </p>
+              <Alert variant="destructive">
+                <ShieldAlert className="h-4 w-4" />
+                <AlertTitle>Verificación de Identidad Requerida</AlertTitle>
+                <AlertDescription>
+                  Tu cuenta aún no ha sido verificada. Por favor, completa el formulario para poder unirte a un grupo.
+                </AlertDescription>
+              </Alert>
+            </div>
+          )}
+
+          <DialogFooter>
+            <DialogClose asChild><Button variant="ghost">Cancelar</Button></DialogClose>
+            {isVerified ? (
+              <div className="w-full sm:w-auto">
+                <MPButton
+                  title={`Adhesión Grupo ${group.id}`}
+                  price={exampleInstallments[0].total}
+                  description="Pagar Adhesión y Confirmar"
+                  groupId={group.id}
+                  className="w-full sm:w-auto"
+                />
+              </div>
+            ) : (
+              <Button asChild>
+                <Link href="/panel/verify">Ir a Verificar</Link>
+              </Button>
             )}
-            
-            <DialogFooter>
-                <DialogClose asChild><Button variant="ghost">Cancelar</Button></DialogClose>
-                {isVerified ? (
-                    <Button onClick={handleJoinGroup} disabled={!termsAccepted}>Confirmar y Pagar Adhesión</Button>
-                ) : (
-                    <Button asChild>
-                        <Link href="/panel/verify">Ir a Verificar</Link>
-                    </Button>
-                )}
-            </DialogFooter>
+          </DialogFooter>
+
+          {/* Admin Hack: Reset Button */}
+          <div className="mt-4 pt-4 border-t flex justify-center">
+            <Button variant="ghost" size="sm" className="text-xs text-muted-foreground hover:text-destructive" onClick={() => resetGroupMembers(group.id)}>
+              Resetear Miembros (Admin)
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
     );
@@ -180,50 +196,50 @@ export default function GroupPublicDetail() {
           <ArrowLeft className="h-4 w-4" /> Volver a Explorar
         </Link>
         <div className="flex justify-between items-start">
-            <div>
-                <h1 className="text-3xl font-bold font-headline">{formatCurrencyNoDecimals(group.capital)}</h1>
-                <p className="text-muted-foreground">en {group.plazo} meses (Grupo {group.id})</p>
-            </div>
-            
-            {renderJoinButton()}
+          <div>
+            <h1 className="text-3xl font-bold font-headline">{formatCurrencyNoDecimals(group.capital)}</h1>
+            <p className="text-muted-foreground">en {group.plazo} meses (Grupo {group.id})</p>
+          </div>
+
+          {renderJoinButton()}
 
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
-             <Card>
-                <CardHeader>
-                  <CardTitle>Información General</CardTitle>
-                  <CardDescription>Datos clave sobre este plan de ahorro.</CardDescription>
-                </CardHeader>
-                <CardContent className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
-                    <div className="flex items-center gap-2"><Users className="h-4 w-4 text-primary" /><span>Miembros: <strong>{group.membersCount}/{group.totalMembers}</strong></span></div>
-                    <div className="flex items-center gap-2"><Clock className="h-4 w-4 text-primary" /><span>Plazo: <strong>{group.plazo} meses</strong></span></div>
-                    <div className="flex items-center gap-2"><Scale className="h-4 w-4 text-primary" /><span>Cuota Promedio: <strong>{formatCurrency(group.cuotaPromedio)}</strong></span></div>
-                    <div className="flex items-center gap-2">
-                      <Users2 className="h-4 w-4 text-primary" />
-                      <span>Adjudicaciones:</span>
-                      <strong className="flex items-center gap-1.5">
-                        <span>1</span><Ticket className="h-4 w-4 text-blue-500" title="Sorteo" />
-                        <span>+ 1</span><HandCoins className="h-4 w-4 text-orange-500" title="Licitación" />
-                      </strong>
-                    </div>
-                </CardContent>
-            </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle>Información General</CardTitle>
+              <CardDescription>Datos clave sobre este plan de ahorro.</CardDescription>
+            </CardHeader>
+            <CardContent className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+              <div className="flex items-center gap-2"><Users className="h-4 w-4 text-primary" /><span>Miembros: <strong>{group.membersCount}/{group.totalMembers}</strong></span></div>
+              <div className="flex items-center gap-2"><Clock className="h-4 w-4 text-primary" /><span>Plazo: <strong>{group.plazo} meses</strong></span></div>
+              <div className="flex items-center gap-2"><Scale className="h-4 w-4 text-primary" /><span>Cuota Promedio: <strong>{formatCurrency(group.cuotaPromedio)}</strong></span></div>
+              <div className="flex items-center gap-2">
+                <Users2 className="h-4 w-4 text-primary" />
+                <span>Adjudicaciones:</span>
+                <strong className="flex items-center gap-1.5">
+                  <span>1</span><Ticket className="h-4 w-4 text-blue-500" title="Sorteo" />
+                  <span>+ 1</span><HandCoins className="h-4 w-4 text-orange-500" title="Licitación" />
+                </strong>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         <Card className="lg:col-span-1">
-            <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-base">
-                    <BadgePercent className="h-5 w-5 text-primary" />
-                    Costo Financiero Total (CFT) Promedio
-                </CardTitle>
-            </CardHeader>
-            <CardContent>
-                <p className="text-2xl font-bold text-primary">{totalFinancialCost.toFixed(2)}%</p>
-                <p className="text-xs text-muted-foreground mt-1">Este es el costo total aproximado sobre el capital por gastos administrativos y seguros. Este porcentaje puede reducirse significativamente al licitar, adelantar cuotas u obtener beneficios.</p>
-            </CardContent>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <BadgePercent className="h-5 w-5 text-primary" />
+              Costo Financiero Total (CFT) Promedio
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-2xl font-bold text-primary">{totalFinancialCost.toFixed(2)}%</p>
+            <p className="text-xs text-muted-foreground mt-1">Este es el costo total aproximado sobre el capital por gastos administrativos y seguros. Este porcentaje puede reducirse significativamente al licitar, adelantar cuotas u obtener beneficios.</p>
+          </CardContent>
         </Card>
 
         <div className="lg:col-span-3">
@@ -262,15 +278,15 @@ export default function GroupPublicDetail() {
                                 <DialogTitle>Desglose de la Cuota #{inst.number}</DialogTitle>
                               </DialogHeader>
                               <div className="grid gap-2 text-sm">
-                                  <div className="flex justify-between"><span>Alícuota Pura:</span><strong>{formatCurrency(inst.breakdown.alicuotaPura)}</strong></div>
-                                  <div className="flex justify-between"><span>Gastos Adm (IVA incl.):</span><strong>{formatCurrency(inst.breakdown.gastosAdm)}</strong></div>
-                                  {inst.breakdown.derechoSuscripcion && inst.breakdown.derechoSuscripcion > 0 ? (
-                                    <div className="flex justify-between"><span>Derecho Suscripción (IVA incl.):</span><strong>{formatCurrency(inst.breakdown.derechoSuscripcion)}</strong></div>
-                                  ) : (
-                                      <div className="flex justify-between text-muted-foreground"><span>Derecho Suscripción:</span><strong>-</strong></div>
-                                  )}
-                                  <div className="flex justify-between"><span>Seguro de Vida:</span><strong>{formatCurrency(inst.breakdown.seguroVida)}</strong></div>
-                                  <div className="flex justify-between font-bold text-base border-t pt-2 mt-2"><span>Total Estimado:</span><span>{formatCurrency(inst.total)}</span></div>
+                                <div className="flex justify-between"><span>Alícuota Pura:</span><strong>{formatCurrency(inst.breakdown.alicuotaPura)}</strong></div>
+                                <div className="flex justify-between"><span>Gastos Adm (IVA incl.):</span><strong>{formatCurrency(inst.breakdown.gastosAdm)}</strong></div>
+                                {inst.breakdown.derechoSuscripcion && inst.breakdown.derechoSuscripcion > 0 ? (
+                                  <div className="flex justify-between"><span>Derecho Suscripción (IVA incl.):</span><strong>{formatCurrency(inst.breakdown.derechoSuscripcion)}</strong></div>
+                                ) : (
+                                  <div className="flex justify-between text-muted-foreground"><span>Derecho Suscripción:</span><strong>-</strong></div>
+                                )}
+                                <div className="flex justify-between"><span>Seguro de Vida:</span><strong>{formatCurrency(inst.breakdown.seguroVida)}</strong></div>
+                                <div className="flex justify-between font-bold text-base border-t pt-2 mt-2"><span>Total Estimado:</span><span>{formatCurrency(inst.total)}</span></div>
                               </div>
                             </DialogContent>
                           </Dialog>

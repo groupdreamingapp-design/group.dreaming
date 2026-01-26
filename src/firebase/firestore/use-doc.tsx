@@ -1,5 +1,5 @@
 'use client';
-    
+
 import { useState, useEffect } from 'react';
 import {
   DocumentReference,
@@ -44,7 +44,8 @@ export function useDoc<T = any>(
   type StateDataType = WithId<T> | null;
 
   const [data, setData] = useState<StateDataType>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  // Initialize loading to true if we have a ref to fetch, to avoid "flash of not found"
+  const [isLoading, setIsLoading] = useState<boolean>(!!memoizedDocRef);
   const [error, setError] = useState<FirestoreError | Error | null>(null);
 
   useEffect(() => {

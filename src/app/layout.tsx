@@ -6,6 +6,7 @@ import { GroupsProvider } from '@/components/app/providers';
 import { UserNavProvider } from '@/components/app/user-nav';
 import { FirebaseClientProvider } from '@/firebase/client-provider';
 import { WhatsAppButton } from '@/components/app/whatsapp-button';
+import { Chatbot } from '@/components/Chatbot';
 
 export const metadata: Metadata = {
   title: 'Group Dreaming',
@@ -37,6 +38,7 @@ export default function RootLayout({
           </UserNavProvider>
         </FirebaseClientProvider>
         <Toaster />
+        <Chatbot />
         <WhatsAppButton phoneNumber="5491112345678" />
       </body>
     </html>

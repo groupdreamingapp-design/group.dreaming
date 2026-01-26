@@ -27,7 +27,7 @@ export function WhatsAppButton({ phoneNumber, message }: WhatsAppButtonProps) {
   return (
     <Button
       asChild
-      className="fixed bottom-6 right-6 h-16 w-16 rounded-full bg-green-500 hover:bg-green-600 text-white shadow-2xl z-50 animate-bounce"
+      className="fixed bottom-24 right-4 h-16 w-16 rounded-full bg-green-500 hover:bg-green-600 text-white shadow-2xl z-50 animate-bounce"
       aria-label="Contactar por WhatsApp"
     >
       <Link href={whatsappUrl} target="_blank" rel="noopener noreferrer">

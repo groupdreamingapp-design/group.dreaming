@@ -47,7 +47,7 @@ export function MainNav({ isMobile = false }: MainNavProps) {
       label: "Mi Perfil",
       icon: Shield,
     },
-     {
+    {
       href: "/panel/comparisons",
       label: "Comparativas",
       icon: PieChart,
@@ -65,18 +65,18 @@ export function MainNav({ isMobile = false }: MainNavProps) {
   const adminRoutes = [
     {
       href: "/panel/admin",
-      label: "Crear Admin",
+      label: "Administración",
       icon: Shield,
     },
-     {
+    {
       href: "/panel/admin/collection-map",
       label: "Mapa de Cobranza",
       icon: Waves,
     },
     {
-        href: "/panel/admin/demo-users",
-        label: "Usuarios Demo",
-        icon: TestTube2,
+      href: "/panel/admin/demo-users",
+      label: "Usuarios Demo",
+      icon: TestTube2,
     }
   ];
 
@@ -116,19 +116,19 @@ export function MainNav({ isMobile = false }: MainNavProps) {
       ))}
       {isAdmin && (
         <>
-            <div className="px-3 py-2 mt-4">
-                <span className="text-xs font-semibold text-muted-foreground">Admin</span>
-            </div>
-            {adminRoutes.map((route) => (
-                <Link
-                key={route.href}
-                href={route.href}
-                className={linkClass(route.href)}
-                >
-                <route.icon className="h-4 w-4" />
-                {route.label}
-                </Link>
-            ))}
+          <div className="px-3 py-2 mt-4">
+            <span className="text-xs font-semibold text-muted-foreground">Admin</span>
+          </div>
+          {adminRoutes.map((route) => (
+            <Link
+              key={route.href}
+              href={route.href}
+              className={linkClass(route.href)}
+            >
+              <route.icon className="h-4 w-4" />
+              {route.label}
+            </Link>
+          ))}
         </>
       )}
     </>

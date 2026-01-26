@@ -1,5 +1,5 @@
-import {genkit} from 'genkit';
-import {googleAI} from '@genkit-ai/google-genai';
+import { genkit } from 'genkit';
+import { googleAI } from '@genkit-ai/google-genai';
 
 const plugins = [];
 // In production, the googleAI plugin is only added if the GEMINI_API_KEY is set.
