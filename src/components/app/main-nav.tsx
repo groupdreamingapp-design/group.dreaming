@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { Gavel, LayoutDashboard, Search, Users, PieChart, Shield, HelpCircle, Gift, Landmark, Bell, Waves, TestTube2, BookText } from "lucide-react"
 import { useUserNav } from "./user-nav";
+import { useLanguage } from "./language-provider";
 
 
 type MainNavProps = {
@@ -15,67 +16,68 @@ type MainNavProps = {
 export function MainNav({ isMobile = false }: MainNavProps) {
   const pathname = usePathname();
   const { isAdmin } = useUserNav();
+  const { t } = useLanguage();
 
   const commonRoutes = [
     {
       href: "/panel",
-      label: "Mi Panel",
+      label: t('nav.my_dashboard'),
       icon: LayoutDashboard,
     },
     {
       href: "/panel/my-groups",
-      label: "Mis Grupos",
+      label: t('nav.my_groups'),
       icon: Users,
     },
     {
       href: "/panel/notifications",
-      label: "Notificaciones",
+      label: t('nav.notifications'),
       icon: Bell,
     },
     {
       href: "/panel/explore",
-      label: "Explorar Grupos",
+      label: t('nav.explore_groups'),
       icon: Search,
     },
     {
       href: "/panel/auctions",
-      label: "Subastas",
+      label: t('nav.auctions'),
       icon: Gavel,
     },
     {
       href: "/panel/profile",
-      label: "Mi Perfil",
+      label: t('nav.my_profile'),
       icon: Shield,
     },
     {
       href: "/panel/comparisons",
-      label: "Comparativas",
+      label: t('nav.comparisons'),
       icon: PieChart,
     },
   ];
 
   const infoRoutes = [
-    { href: "/panel/how-it-works", label: "Cómo Funciona", icon: BookText },
-    { href: "/panel/benefits", label: "Beneficios", icon: Gift },
-    { href: "/panel/rules", label: "Reglamento", icon: Landmark },
-    { href: "/panel/compliance", label: "Marco Legal", icon: Landmark },
-    { href: "/panel/faq", label: "Preguntas Frecuentes", icon: HelpCircle },
+    { href: "/panel/how-it-works", label: t('nav.how_it_works'), icon: BookText },
+    { href: "/panel/benefits", label: t('nav.benefits'), icon: Gift },
+    { href: "/panel/rules", label: t('nav.rules'), icon: Landmark },
+    { href: "/panel/compliance", label: t('nav.compliance'), icon: Landmark },
+    { href: "/panel/faq", label: t('nav.faq'), icon: HelpCircle },
   ]
 
   const adminRoutes = [
     {
       href: "/panel/admin",
-      label: "Administración",
+      label: t('nav.administration'),
       icon: Shield,
     },
     {
       href: "/panel/admin/collection-map",
-      label: "Mapa de Cobranza",
+      label: t('nav.collection_map'),
       icon: Waves,
     },
     {
       href: "/panel/admin/demo-users",
-      label: "Usuarios Demo",
+      label: t('nav.demo_users'),
       icon: TestTube2,
     }
   ];

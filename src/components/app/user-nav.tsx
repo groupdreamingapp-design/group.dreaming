@@ -13,15 +13,22 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  DropdownMenuPortal,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
 } from "@/components/ui/dropdown-menu"
 import { useUser, useDoc, useMemoFirebase } from "@/firebase";
 import Link from "next/link";
-import { CheckCircle, Shield, User } from "lucide-react";
+import { CheckCircle, Shield, User, Languages } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/firebase/provider";
 import { signOut } from "firebase/auth";
 import { doc } from "firebase/firestore";
 import { useFirestore } from "@/firebase";
+import { useLanguage } from "./language-provider";
 
 type UserNavContextType = {
   isVerified: boolean;
@@ -79,6 +86,7 @@ export function UserNav() {
   const { isVerified } = useUserNav();
   const router = useRouter();
   const auth = useAuth();
+  const { language, setLanguage, t } = useLanguage();
 
   const userInitials = user?.displayName?.split(' ').map(n => n[0]).join('') || user?.email?.charAt(0).toUpperCase() || 'U';
 
@@ -122,19 +130,36 @@ export function UserNav() {
           <DropdownMenuItem asChild>
             <Link href="/panel/profile">
               <User className="mr-2 h-4 w-4" />
-              <span>Perfil</span>
+              <span>{t('common.profile')}</span>
             </Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
             <Link href="/panel/verify">
               {isVerified ? <CheckCircle className="mr-2 h-4 w-4 text-green-500" /> : <Shield className="mr-2 h-4 w-4" />}
-              <span>Verificación</span>
+              <span>{t('common.verification')}</span>
             </Link>
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
+        <DropdownMenuGroup>
+          <DropdownMenuSub>
+            <DropdownMenuSubTrigger>
+              <Languages className="mr-2 h-4 w-4" />
+              <span>{t('common.language')}</span>
+            </DropdownMenuSubTrigger>
+            <DropdownMenuPortal>
+              <DropdownMenuSubContent>
+                <DropdownMenuRadioGroup value={language} onValueChange={(val) => setLanguage(val as any)}>
+                  <DropdownMenuRadioItem value="es">Español</DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value="en">English</DropdownMenuRadioItem>
+                </DropdownMenuRadioGroup>
+              </DropdownMenuSubContent>
+            </DropdownMenuPortal>
+          </DropdownMenuSub>
+        </DropdownMenuGroup>
+        <DropdownMenuSeparator />
         <DropdownMenuItem onSelect={(e) => { e.preventDefault(); handleLogout(); }}>
-          Cerrar sesión
+          {t('common.logout')}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

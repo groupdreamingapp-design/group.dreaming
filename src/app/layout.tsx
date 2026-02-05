@@ -3,6 +3,7 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 import { cn } from '@/lib/utils';
 import { GroupsProvider } from '@/components/app/providers';
+import { LanguageProvider } from '@/components/app/language-provider';
 import { UserNavProvider } from '@/components/app/user-nav';
 import { FirebaseClientProvider } from '@/firebase/client-provider';
 import { WhatsAppButton } from '@/components/app/whatsapp-button';
@@ -32,12 +33,14 @@ export default function RootLayout({
         )}
       >
         <FirebaseClientProvider>
-          <UserNavProvider>
-            <GroupsProvider>
-              <SessionTimeout />
-              {children}
-            </GroupsProvider>
-          </UserNavProvider>
+          <LanguageProvider>
+            <UserNavProvider>
+              <GroupsProvider>
+                <SessionTimeout />
+                {children}
+              </GroupsProvider>
+            </UserNavProvider>
+          </LanguageProvider>
         </FirebaseClientProvider>
         <Toaster />
         <Chatbot />
