@@ -7,6 +7,7 @@ import { UserNavProvider } from '@/components/app/user-nav';
 import { FirebaseClientProvider } from '@/firebase/client-provider';
 import { WhatsAppButton } from '@/components/app/whatsapp-button';
 import { Chatbot } from '@/components/Chatbot';
+import { SessionTimeout } from '@/components/auth/session-timeout';
 
 export const metadata: Metadata = {
   title: 'Group Dreaming',
@@ -33,6 +34,7 @@ export default function RootLayout({
         <FirebaseClientProvider>
           <UserNavProvider>
             <GroupsProvider>
+              <SessionTimeout />
               {children}
             </GroupsProvider>
           </UserNavProvider>

@@ -16,9 +16,14 @@ interface MPButtonProps {
     disabled?: boolean;
 }
 
+import { useUser } from '@/firebase';
+
+// ...
+
 export function MPButton({ title, price, description, className, onBeforePayment, groupId, disabled }: MPButtonProps) {
     const [isLoading, setIsLoading] = useState(false);
     const { toast } = useToast();
+    const { user } = useUser();
 
     const handlePayment = async () => {
         setIsLoading(true);
@@ -32,7 +37,9 @@ export function MPButton({ title, price, description, className, onBeforePayment
                 title: title,
                 price: price,
                 quantity: 1,
-                groupId: groupId
+                groupId: groupId,
+                userId: user?.uid,
+                userEmail: user?.email || undefined
             });
 
             // The server action handles redirect. 

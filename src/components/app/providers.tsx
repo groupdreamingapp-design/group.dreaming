@@ -51,9 +51,12 @@ function generateNewGroup(template: GroupTemplate): Group {
 }
 
 export function GroupsProvider({ children }: { children: ReactNode }) {
-  const { user } = useUser();
-  // Use Firestore collection
-  const { data: groupsData, isLoading: loading } = useCollection<Group>('groups');
+  const { user, isUserLoading } = useUser();
+  // Use Firestore collection - wait for auth to load to ensure permissions are correct
+  const { data: groupsData, isLoading: loadingItems } = useCollection<Group>(isUserLoading ? null : 'groups');
+
+  // Combine loading states? Actually purely data loading is what we care for list
+  const loading = isUserLoading || loadingItems;
 
   // Map raw data to include userIsMember based on the 'members' array in Firestore
   const groups = useMemo(() => {

@@ -42,3 +42,8 @@ next-env.d.ts
 
 # firebase
 firebase-debug.log
+
+# google cloud credentials
+group-dreaming-prod-firebase-adminsdk-fbsvc-6cdaac5937.json
+
+group-dreaming-prod-firebase-adminsdk-fbsvc-6cdaac5937.json

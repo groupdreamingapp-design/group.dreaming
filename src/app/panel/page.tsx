@@ -18,8 +18,7 @@ import { useToast } from "@/hooks/use-toast";
 const MAX_CAPITAL = 100000;
 
 function DashboardContent() {
-  // @ts-ignore - Assuming useUser returns loading, if not we will check user nullity carefully
-  const { user, loading } = useUser();
+  const { user, isUserLoading: loading } = useUser();
   const { joinGroup, groups } = useGroups();
   const [isClient, setIsClient] = useState(false);
   const searchParams = useSearchParams();
